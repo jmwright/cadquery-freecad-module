@@ -98,7 +98,7 @@ class CadQueryWorkbench (Workbench):
                 #Only hide the widget if it isn't already hidden
                 if not widget.isHidden():
                     widget.setVisible(False)
-                    FreeCAD.Console.PrintMessage(widget.objectName())
+                    #FreeCAD.Console.PrintMessage(widget.objectName())
                     self.closedWidgets.append(widget)
             else:
                 widget.setVisible(True)
@@ -126,9 +126,9 @@ class CadQueryWorkbench (Workbench):
         ExportCQ.save()
 
         #TODO: This won't work for now because the views are destroyed when they are hidden
-        for widget in self.closedWidgets:
-            FreeCAD.Console.PrintMessage(widget.objectName())
-            #widget.setVisible(True)
+        # for widget in self.closedWidgets:
+        #     FreeCAD.Console.PrintMessage(widget.objectName())
+        #     widget.setVisible(True)
 
 FreeCADGui.addCommand('CadQueryOpenScript', CadQueryOpenScript())
 FreeCADGui.addCommand('CadQuerySaveScript', CadQuerySaveScript())
