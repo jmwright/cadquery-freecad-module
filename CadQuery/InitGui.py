@@ -15,7 +15,11 @@ class CadQueryWorkbench (Workbench):
 
     def Initialize(self):
         import os
+
         os.environ['QT_API'] = 'pyside'
+
+        #sys.path.append('./Libs/cadquery.zip')
+        #sys.path.append('./Libs/pyqode.zip')
 
         #If we need a CQ menu, this would be the way to add it
         commands = ['CadQueryOpenScript', 'CadQuerySaveScript', 'CadQuerySaveAsScript', 'CadQueryExecuteScript',
@@ -57,20 +61,31 @@ class CadQueryWorkbench (Workbench):
                 QtGui.QApplication.UnicodeUTF8)
             FreeCAD.Console.PrintError(msg)
 
-        try:
-            from pyqode.qt import QtWidgets
-            from pyqode.python.backend import server
-            from pyqode.python.widgets import PyCodeEdit
-            from pyqode.python.widgets import code_edit
+        #try:
+        # import os, sys, inspect
+        # cmd_subfolder = os.path.realpath(os.path.abspath(os.path.join(os.path.split(inspect.getfile( inspect.currentframe() ))[0], "Libs/")))
+        # if cmd_subfolder not in sys.path:
+        #     sys.path.append(cmd_subfolder)
+        import sys
+        sys.path.insert(0, '/home/jwright/Documents/Projects/CadQuery/cadquery-freecad-module/CadQuery/Libs/pyqode.zip')
+        sys.path.insert(0, '/home/jwright/Documents/Projects/CadQuery/cadquery-freecad-module/CadQuery/Libs/cadquery.zip')
+        sys.path.append('/home/jwright/Documents/Projects/CadQuery/cadquery-freecad-module/CadQuery/Libs/pyqode.zip')
+        sys.path.append('/home/jwright/Documents/Projects/CadQuery/cadquery-freecad-module/CadQuery/Libs/cadquery.zip')
+        #sys.path.insert(0, '/home/jwright/Documents/Projects/CadQuery/cadquery-freecad-module/CadQuery/Libs')
 
-        except ImportError:
-            msg = QtGui.QApplication.translate(
-                "cqCodeWidget",
-                "The pyQode library is not installed, please install it before using this workbench.\r\n"
-                "Linux and MacOS Users: 'pip install --upgrade pyqode.core pyqode.qt pyqode.python'\r\n",
-                None,
-                QtGui.QApplication.UnicodeUTF8)
-            FreeCAD.Console.PrintError(msg)
+        from pyqode.qt import QtWidgets
+        from pyqode.python.backend import server
+        from pyqode.python.widgets import PyCodeEdit
+        from pyqode.python.widgets import code_edit
+
+        # except ImportError:
+        #     msg = QtGui.QApplication.translate(
+        #         "cqCodeWidget",
+        #         "The pyQode library is not installed, please install it before using this workbench.\r\n"
+        #         "Linux and MacOS Users: 'pip install --upgrade pyqode.core pyqode.qt pyqode.python'\r\n",
+        #         None,
+        #         QtGui.QApplication.UnicodeUTF8)
+        #     FreeCAD.Console.PrintError(msg)
 
         #Make sure that we enforce a specific version (2.7) of the Python interpreter
         ver = hex(sys.hexversion)
@@ -109,7 +124,7 @@ class CadQueryWorkbench (Workbench):
         mw.addDockWidget(QtCore.Qt.LeftDockWidgetArea, cqCodeWidget)
 
         #Set up the text area for our CQ code
-        codePane = PyCodeEdit(server_script=server.__file__, interpreter=interpreter)
+        codePane = PyCodeEdit(server_script=server.__file__, interpreter=interpreter, args=['-S', '/home/jwright/Documents/Projects/CadQuery/cadquery-freecad-module/CadQuery/Libs/pyqode.zip'])
         codePane.setObjectName("cqCodePane")
 
         #Add the text area to our dock widget
