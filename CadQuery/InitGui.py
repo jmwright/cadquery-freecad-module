@@ -23,8 +23,8 @@ class CadQueryWorkbench (Workbench):
 
         #Turn off logging for now
         #import logging
-        #logging.basicConfig(filename='C:\Users\Jeremy\Documents\log.txt', level=logging.DEBUG)
-
+        #logging.basicConfig(filename='/home/jwright/Documents/log.txt', level=logging.DEBUG)
+        
         #We have our own CQ menu that's added when the user chooses our workbench
         commands = ['CadQueryOpenScript', 'CadQuerySaveScript', 'CadQuerySaveAsScript', 'CadQueryExecuteScript',
                     'CadQueryCloseScript']
