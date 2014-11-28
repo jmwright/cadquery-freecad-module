@@ -1,3 +1,6 @@
+"""Adds all of the commands that are used for the menus of the CadQuery module"""
+# (c) 2014 Jeremy Wright LGPL v3
+
 import tempfile
 import FreeCAD, FreeCADGui
 from PySide import QtGui
@@ -34,8 +37,8 @@ class CadQueryCloseScript:
         #We need this so we can load the file into it
         cqCodePane = mw.findChild(QtGui.QPlainTextEdit, "cqCodePane")
 
-        reply = QtGui.QMessageBox.question(cqCodePane, "QMessageBox.question()", "Save script before closing?", QtGui.QMessageBox.Yes |
-                                           QtGui.QMessageBox.No | QtGui.QMessageBox.Cancel)
+        reply = QtGui.QMessageBox.question(cqCodePane, "QMessageBox.question()", "Save script before closing?",
+                                           QtGui.QMessageBox.Yes | QtGui.QMessageBox.No | QtGui.QMessageBox.Cancel)
 
         if reply == QtGui.QMessageBox.Cancel:
             return

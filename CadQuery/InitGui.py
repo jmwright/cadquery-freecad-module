@@ -1,11 +1,13 @@
-# CadQuery gui init module
-# (c) 2001 Juergen Riegel LGPL
+"""CadQuery GUI init module for FreeCAD
+   This adds a workbench with a scripting editor to FreeCAD's GUI."""
+# (c) 2014 Jeremy Wright LGPL v3
+
 import FreeCAD
 import FreeCADGui
 from Gui.Command import *
 
 class CadQueryWorkbench (Workbench):
-    """CadQuery workbench object"""
+    """CadQuery workbench for FreeCAD"""
     MenuText = "CadQuery"
     ToolTip = "CadQuery workbench"
     Icon = ":/icons/CQ_Logo.svg"
@@ -16,21 +18,31 @@ class CadQueryWorkbench (Workbench):
     def Initialize(self):
         import os
 
+        #Need to set this for PyQode
         os.environ['QT_API'] = 'pyside'
-        import logging
-        logging.basicConfig(filename='/home/jwright/Downloads/log.txt', level=logging.DEBUG)
-        #sys.path.append('./Libs/cadquery.zip')
-        #sys.path.append('./Libs/pyqode.zip')
 
-        #If we need a CQ menu, this would be the way to add it
+        #Turn off logging for now
+        import logging
+        logging.basicConfig(filename='C:\Users\Jeremy\Documents\log.txt', level=logging.DEBUG)
+
+        #We have our own CQ menu that's added when the user chooses our workbench
         commands = ['CadQueryOpenScript', 'CadQuerySaveScript', 'CadQuerySaveAsScript', 'CadQueryExecuteScript',
                     'CadQueryCloseScript']
         self.appendMenu('CadQuery', commands)
 
     def Activated(self):
+        import os, sys
+        from PySide import QtGui, QtCore
+        import module_locator
+
+        #Set up so that we can import from our embedded packages
+        module_base_path = module_locator.module_path()
+        libs_path = os.path.join(module_base_path, 'Libs')
+        libs_path = os.path.join(libs_path, 'libs.zip')
+        sys.path.insert(0, libs_path)
+
         import cadquery
-        from PySide import QtGui
-        import sys
+        from pyqode.python.widgets import PyCodeEdit
 
         msg = QtGui.QApplication.translate(
             "cqCodeWidget",
@@ -43,37 +55,6 @@ class CadQueryWorkbench (Workbench):
             None,
             QtGui.QApplication.UnicodeUTF8)
         FreeCAD.Console.PrintMessage(msg)
-
-        from PySide import QtGui
-        from PySide import QtCore
-
-        FreeCAD.addImportType("CadQuery Script (*.py)", "Gui.ImportCQ")
-        FreeCAD.addExportType("CadQuery Script (*.py)", "Gui.ExportCQ")
-
-        try:
-            import cadquery
-        except ImportError:
-            msg = QtGui.QApplication.translate(
-                "cqCodeWidget",
-                "The cadquery library is not installed, please install it before using this workbench.\r\n"
-                "Linux and MacOS Users: 'pip install --upgrade cadquery'\r\n"
-                "Windows Users: 'Not sure yet.\r\n",
-                None,
-                QtGui.QApplication.UnicodeUTF8)
-            FreeCAD.Console.PrintError(msg)
-
-        # import os, sys, inspect
-        # cmd_subfolder = os.path.realpath(os.path.abspath(os.path.join(os.path.split(inspect.getfile( inspect.currentframe() ))[0], "Libs/libraries.zip")))
-        # if cmd_subfolder not in sys.path:
-        #     sys.path.append(cmd_subfolder)
-        import sys
-        sys.path.insert(0, '/home/jwright/Documents/Projects/CadQuery/cadquery-freecad-module/CadQuery/Libs/libraries.zip')
-        #sys.path.append('/home/jwright/Documents/Projects/CadQuery/cadquery-freecad-module/CadQuery/Libs/libraries.zip')
-
-        from pyqode.qt import QtWidgets
-        from pyqode.python.backend import server
-        from pyqode.python.widgets import PyCodeEdit
-        from pyqode.python.widgets import code_edit
 
         #Make sure that we enforce a specific version (2.7) of the Python interpreter
         ver = hex(sys.hexversion)
@@ -110,14 +91,14 @@ class CadQueryWorkbench (Workbench):
         mw.addDockWidget(QtCore.Qt.LeftDockWidgetArea, cqCodeWidget)
 
         #Set up the text area for our CQ code
-        codePane = PyCodeEdit(server_script=server.__file__, interpreter=interpreter, args=['-s', '/home/jwright/Documents/Projects/CadQuery/cadquery-freecad-module/CadQuery/Libs/libraries.zip'])
+        server_path = os.path.join(module_base_path, 'cq_server.py')
+        codePane = PyCodeEdit(server_script=server_path, interpreter=interpreter, args=['-s', libs_path])
         codePane.setObjectName("cqCodePane")
 
         #Add the text area to our dock widget
         cqCodeWidget.setWidget(codePane)
 
     def Deactivated(self):
-        from PySide import QtGui
         from Gui import ExportCQ
 
         #Put the UI back the way we found it

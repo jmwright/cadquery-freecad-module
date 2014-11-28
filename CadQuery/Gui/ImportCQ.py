@@ -1,3 +1,6 @@
+"""Adds the ability to open files from disk to the CadQuery FreeCAD module"""
+# (c) 2014 Jeremy Wright LGPL v3
+
 import os, FreeCAD, FreeCADGui
 from PySide import QtGui
 

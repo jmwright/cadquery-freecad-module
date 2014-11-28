@@ -1,3 +1,6 @@
+"""Adds the ability to save a script file to the CadQuery module"""
+# (c) 2014 Jeremy Wright LGPL v3
+
 import FreeCAD, FreeCADGui
 from PySide import QtGui
 
