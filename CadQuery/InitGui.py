@@ -22,7 +22,8 @@ class CadQueryWorkbench (Workbench):
         os.environ['QT_API'] = 'pyside'
 
         #Turn off logging for now
-        #import logging
+        import logging
+        logging.basicConfig(filename='C:\\Users\\Jeremy\\Documents\\', level=logging.DEBUG)
         #logging.basicConfig(filename='/home/jwright/Documents/log.txt', level=logging.DEBUG)
         
         #We have our own CQ menu that's added when the user chooses our workbench
@@ -92,6 +93,11 @@ class CadQueryWorkbench (Workbench):
 
         #Set up the text area for our CQ code
         server_path = os.path.join(module_base_path, 'cq_server.py')
+        # if sys.platform.startswith('win'):
+        #     #We have to jump through extra hoops to hand-hold Windows here
+        #     server_path = "\"" + server_path + "\""
+        #     libs_path = "\"" + libs_path + "\""
+        #     FreeCAD.Console.PrintMessage( server_path + ":" + libs_path)
         codePane = PyCodeEdit(server_script=server_path, interpreter=interpreter, args=['-s', libs_path])
         codePane.setObjectName("cqCodePane")
 
