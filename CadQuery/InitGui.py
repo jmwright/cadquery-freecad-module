@@ -22,8 +22,8 @@ class CadQueryWorkbench (Workbench):
         os.environ['QT_API'] = 'pyside'
 
         #Turn off logging for now
-        import logging
-        logging.basicConfig(filename='C:\\Users\\Jeremy\\Documents\\', level=logging.DEBUG)
+        #import logging
+        #logging.basicConfig(filename='C:\\Users\\Jeremy\\Documents\\', level=logging.DEBUG)
         #logging.basicConfig(filename='/home/jwright/Documents/log.txt', level=logging.DEBUG)
         
         #We have our own CQ menu that's added when the user chooses our workbench
@@ -69,6 +69,10 @@ class CadQueryWorkbench (Workbench):
                 None,
                 QtGui.QApplication.UnicodeUTF8)
             FreeCAD.Console.PrintError("\r\n" + msg)
+
+        #The extra version numbers won't work on Windows
+        if sys.platform.startswith('win'):
+            interpreter = 'python'
 
         #Getting the main window will allow us to start setting things up the way we want
         mw = Gui.getMainWindow()
