@@ -97,7 +97,15 @@ class CadQueryWorkbench (Workbench):
 
         #Set up the text area for our CQ code
         server_path = os.path.join(module_base_path, 'cq_server.py')
-        codePane = PyCodeEdit(server_script=server_path, interpreter=interpreter, args=['-s', libs_path])
+
+        #Windows needs some exra help with paths
+        if sys.platform.startswith('win'):
+            fc_lib_path = os.path.dirname(os.path.dirname(module_base_path))
+            fc_lib_path = os.path.join(fc_lib_path, 'lib')
+            codePane = PyCodeEdit(server_script=server_path, interpreter=interpreter, args=['-s', libs_path, fc_lib_path])
+        else:
+            codePane = PyCodeEdit(server_script=server_path, interpreter=interpreter, args=['-s', libs_path])
+
         codePane.setObjectName("cqCodePane")
 
         #Add the text area to our dock widget
