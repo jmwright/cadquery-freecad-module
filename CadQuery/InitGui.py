@@ -39,8 +39,8 @@ class CadQueryWorkbench (Workbench):
 
         #Set up so that we can import from our embedded packages
         module_base_path = module_locator.module_path()
-        libs_path = os.path.join(module_base_path, 'Libs')
-        libs_path = os.path.join(libs_path, 'libs.zip')
+        libs_dir_path = os.path.join(module_base_path, 'Libs')
+        libs_path = os.path.join(libs_dir_path, 'libs.zip')
         sys.path.insert(0, libs_path)
 
         import cadquery
@@ -100,11 +100,15 @@ class CadQueryWorkbench (Workbench):
 
         #Windows needs some exra help with paths
         if sys.platform.startswith('win'):
+            #The lib directory under the FreeCAD installation
             fc_lib_path = os.path.dirname(os.path.dirname(module_base_path))
             fc_lib_path = os.path.join(fc_lib_path, 'lib')
-            codePane = PyCodeEdit(server_script=server_path, interpreter=interpreter, args=['-s', libs_path, fc_lib_path])
+
+            codePane = PyCodeEdit(server_script=server_path, interpreter=interpreter
+                                  , args=['-s', libs_path, fc_lib_path, os.path.join(libs_dir_path, 'cadquery')])
         else:
-            codePane = PyCodeEdit(server_script=server_path, interpreter=interpreter, args=['-s', libs_path])
+            codePane = PyCodeEdit(server_script=server_path, interpreter=interpreter
+                                  , args=['-s', libs_path, os.path.join(libs_dir_path, 'cadquery')])
 
         codePane.setObjectName("cqCodePane")
 
