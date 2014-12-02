@@ -35,6 +35,7 @@ class CadQueryWorkbench (Workbench):
         import os, sys
         from PySide import QtGui, QtCore
         import module_locator
+        from Gui import ImportCQ
 
         #Set up so that we can import from our embedded packages
         module_base_path = module_locator.module_path()
@@ -85,7 +86,6 @@ class CadQueryWorkbench (Workbench):
                 #Only hide the widget if it isn't already hidden
                 if not widget.isHidden():
                     widget.setVisible(False)
-                    #FreeCAD.Console.PrintMessage(widget.objectName())
                     self.closedWidgets.append(widget)
             else:
                 widget.setVisible(True)
@@ -97,16 +97,16 @@ class CadQueryWorkbench (Workbench):
 
         #Set up the text area for our CQ code
         server_path = os.path.join(module_base_path, 'cq_server.py')
-        # if sys.platform.startswith('win'):
-        #     #We have to jump through extra hoops to hand-hold Windows here
-        #     server_path = "\"" + server_path + "\""
-        #     libs_path = "\"" + libs_path + "\""
-        #     FreeCAD.Console.PrintMessage( server_path + ":" + libs_path)
         codePane = PyCodeEdit(server_script=server_path, interpreter=interpreter, args=['-s', libs_path])
         codePane.setObjectName("cqCodePane")
 
         #Add the text area to our dock widget
         cqCodeWidget.setWidget(codePane)
+
+        #Open our introduction example
+        example_path = os.path.join(module_base_path, 'Examples')
+        example_path = os.path.join(example_path, 'Ex000_Introduction.py')
+        ImportCQ.open(example_path)
 
     def Deactivated(self):
         from Gui import ExportCQ
