@@ -39,8 +39,8 @@ class CadQueryWorkbench (Workbench):
         module_base_path = module_locator.module_path()
         libs_dir_path = os.path.join(module_base_path, 'Libs')
         libs_path = os.path.join(libs_dir_path, 'libs.zip')
-        sys.path.insert(0, os.path.join(libs_dir_path, 'cadquery'))
         sys.path.insert(0, libs_dir_path)
+        sys.path.insert(0, os.path.join(libs_dir_path, 'cadquery'))
         sys.path.insert(0, libs_path)
 
         import cadquery
@@ -110,7 +110,7 @@ class CadQueryWorkbench (Workbench):
                                   , args=['-s', libs_path, fc_lib_path, os.path.join(libs_dir_path, 'cadquery')])
         else:
             codePane = PyCodeEdit(server_script=server_path, interpreter=interpreter
-                                  , args=['-s', libs_path, os.path.join(libs_dir_path, 'cadquery')])
+                                  , args=['-s', libs_path, libs_dir_path, os.path.join(libs_dir_path, 'cadquery')])
 
         codePane.setObjectName("cqCodePane")
 
