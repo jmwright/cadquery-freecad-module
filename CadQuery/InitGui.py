@@ -40,6 +40,7 @@ class CadQueryWorkbench (Workbench):
         libs_dir_path = os.path.join(module_base_path, 'Libs')
         libs_path = os.path.join(libs_dir_path, 'libs.zip')
         sys.path.insert(0, os.path.join(libs_dir_path, 'cadquery'))
+        sys.path.insert(0, libs_dir_path)
         sys.path.insert(0, libs_path)
 
         import cadquery
