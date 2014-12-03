@@ -33,7 +33,6 @@ class CadQueryWorkbench (Workbench):
 
     def Activated(self):
         import os, sys
-        from PySide import QtGui, QtCore
         import module_locator
         from Gui import ImportCQ
 
@@ -41,10 +40,12 @@ class CadQueryWorkbench (Workbench):
         module_base_path = module_locator.module_path()
         libs_dir_path = os.path.join(module_base_path, 'Libs')
         libs_path = os.path.join(libs_dir_path, 'libs.zip')
+        sys.path.insert(0, os.path.join(libs_dir_path, 'cadquery'))
         sys.path.insert(0, libs_path)
 
         import cadquery
         from pyqode.python.widgets import PyCodeEdit
+        from PySide import QtGui, QtCore
 
         msg = QtGui.QApplication.translate(
             "cqCodeWidget",
