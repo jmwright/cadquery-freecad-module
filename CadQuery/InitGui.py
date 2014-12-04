@@ -38,10 +38,10 @@ class CadQueryWorkbench (Workbench):
         #Set up so that we can import from our embedded packages
         module_base_path = module_locator.module_path()
         libs_dir_path = os.path.join(module_base_path, 'Libs')
-        libs_path = os.path.join(libs_dir_path, 'libs.zip')
+        #libs_path = os.path.join(libs_dir_path, 'libs.zip')
         sys.path.insert(0, libs_dir_path)
-        sys.path.insert(0, os.path.join(libs_dir_path, 'cadquery'))
-        sys.path.insert(0, libs_path)
+        #sys.path.insert(0, os.path.join(libs_dir_path, 'cadquery'))
+        s#ys.path.insert(0, libs_path)
 
         import cadquery
         from Gui import ImportCQ
