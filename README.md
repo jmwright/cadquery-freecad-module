@@ -16,4 +16,5 @@ Click the *Download ZIP* button for this project, extract the zip file, and copy
 * C:\Program Files (x86)\FreeCAD 0.14\Mod
 
 ### Mac
-* See the Linux directories above
+* /Applications/FreeCAD.app/Contents/Mod
+* /Applications/FreeCAD.app/Mod
