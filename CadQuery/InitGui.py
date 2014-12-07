@@ -44,8 +44,13 @@ class CadQueryWorkbench (Workbench):
         fc_base_path = os.path.dirname(os.path.dirname(module_base_path))
         fc_lib_path = os.path.join(fc_base_path, 'lib')
         fc_bin_path = os.path.join(fc_base_path, 'bin')
-        sys.path.insert(1, fc_lib_path)
-        sys.path.insert(1, fc_bin_path)
+
+        #Make sure that the directories exist before we add them to sys.path
+        #This could cause problems or solve them by overriding what CQ is setting for the paths
+        if os.path.exists(fc_lib_path):
+            sys.path.insert(1, fc_lib_path)
+        if os.path.exists(fc_bin_path):
+            sys.path.insert(1, fc_bin_path)
 
         import cadquery
         from Gui import ImportCQ
