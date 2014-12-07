@@ -102,6 +102,9 @@ def convert_to_codec_key(value):
 
     :param value: value to convert.
     """
+    if not value:
+        # fallback to utf-8
+        value = 'UTF-8'
     # UTF-8 -> utf_8
     converted = value.replace('-', '_').lower()
     # fix some corner cases, see https://github.com/pyQode/pyQode/issues/11

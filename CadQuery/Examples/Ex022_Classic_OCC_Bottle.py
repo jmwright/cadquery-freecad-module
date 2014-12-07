@@ -1,21 +1,21 @@
-#This example is meant to be used from within the CadQuery module of FreeCAD.
+# This example is meant to be used from within the CadQuery module of FreeCAD.
 import cadquery
 import Part
 
-#Set up the length, width, and thickness
-(L,w,t) = (20.0, 6.0, 3.0)
+# Set up the length, width, and thickness
+(L, w, t) = (20.0, 6.0, 3.0)
 s = cadquery.Workplane("XY")
 
-#Draw half the profile of the bottle and extrude it
+# Draw half the profile of the bottle and extrude it
 p = s.center(-L / 2.0, 0).vLine(w / 2.0) \
-    .threePointArc((L / 2.0, w / 2.0 + t),(L, w / 2.0)).vLine(-w / 2.0) \
+    .threePointArc((L / 2.0, w / 2.0 + t), (L, w / 2.0)).vLine(-w / 2.0) \
     .mirrorX().extrude(30.0, True)
 
-#Make the neck
+# Make the neck
 p.faces(">Z").workplane().circle(3.0).extrude(2.0, True)
 
-#Make a shell
+# Make a shell
 result = p.faces(">Z").shell(0.3)
 
-#Boiler plate code to render our solid in FreeCAD's GUI
+# Boiler plate code to render our solid in FreeCAD's GUI
 Part.show(result.toFreecad())

@@ -8,6 +8,7 @@ from pygments.styles import get_style_by_name, get_all_styles
 from pygments.token import Token, Punctuation
 from pygments.util import ClassNotFound
 from pyqode.core.api.mode import Mode
+from pyqode.core.api.utils import drift_color
 from pyqode.qt import QtGui, QtCore, QtWidgets
 
 
@@ -33,6 +34,8 @@ COLOR_SCHEME_KEYS = {
     "normal": Token.Text,
     # any keyword
     "keyword": Token.Keyword,
+    # type keywords
+    "type": Token.Keyword.Type,
     # reserved keyword
     "keyword_reserved": Token.Keyword.Reserved,
     # any builtin name
@@ -139,11 +142,12 @@ class ColorScheme(object):
         """ Returns a QTextCharFormat for token by reading a Pygments style.
         """
         result = QtGui.QTextCharFormat()
-        result.setForeground(self._get_brush("#000000"))
-        if token in [Token.Literal.String, Token.Literal.String.Doc,
-                     Token.Comment]:
-            result.setObjectType(result.UserObject)
-        for key, value in list(style.style_for_token(token).items()):
+        items = list(style.style_for_token(token).items())
+        for key, value in items:
+            if value is None and key == 'color':
+                # make sure to use a default visible color for the foreground
+                # brush
+                value = drift_color(self.background, 1000).name()
             if value:
                 if key == 'color':
                     result.setForeground(self._get_brush(value))
@@ -162,6 +166,10 @@ class ColorScheme(object):
                     result.setFontStyleHint(QtGui.QFont.Times)
                 elif key == 'mono':
                     result.setFontStyleHint(QtGui.QFont.TypeWriter)
+        if token in [Token.Literal.String, Token.Literal.String.Doc,
+                     Token.Comment]:
+            # mark strings, comments and docstrings regions for further queries
+            result.setObjectType(result.UserObject)
         return result
 
     def _get_brush(self, color):

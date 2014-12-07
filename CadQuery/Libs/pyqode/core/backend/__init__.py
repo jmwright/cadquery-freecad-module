@@ -9,7 +9,7 @@ analysis (lint), code completion,...
 Protocol
 --------
 
-We use a worker based json messaging server using the TCP/IP protocol.
+We use a worker based json messaging server using the TCP/IP transport.
 
 We build our own, very simple protocol where each message is made up of two
 parts:
@@ -17,7 +17,7 @@ parts:
   - a header: simply contains the length of the payload
   - a payload: a json formatted string, the content of the message.
 
-The content of the json object depends on if this is a request or a response.
+There are two type of json object: a request and a response.
 
 Request
 +++++++

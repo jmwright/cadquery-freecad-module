@@ -1,22 +1,23 @@
-#This example is meant to be used from within the CadQuery module of FreeCAD.
+# This example is meant to be used from within the CadQuery module of FreeCAD.
 import cadquery
 import Part
 
-#The dimensions of the model. These can be modified rather than changing the shape's code directly.
+# The dimensions of the model. These can be modified rather than changing the
+# shape's code directly.
 rectangle_width = 10.0
 rectangle_length = 10.0
 angle_degrees = 360.0
 
-#Revolve a cylinder from a rectangle
-#Switch comments around in this section to try the revolve operation with different parameters
+# Revolve a cylinder from a rectangle
+# Switch comments around in this section to try the revolve operation with different parameters
 result = cadquery.Workplane("XY").rect(rectangle_width, rectangle_length, False).revolve()
 #result = cadquery.Workplane("XY").rect(rectangle_width, rectangle_length, False).revolve(angle_degrees)
 #result = cadquery.Workplane("XY").rect(rectangle_width, rectangle_length).revolve(angle_degrees,(-5,-5))
 #result = cadquery.Workplane("XY").rect(rectangle_width, rectangle_length).revolve(angle_degrees,(-5, -5),(-5, 5))
 #result = cadquery.Workplane("XY").rect(rectangle_width, rectangle_length).revolve(angle_degrees,(-5,-5),(-5,5), False)
 
-#Revolve a donut with square walls
+# Revolve a donut with square walls
 #result = cadquery.Workplane("XY").rect(rectangle_width, rectangle_length, True).revolve(angle_degrees, (20, 0), (20, 10))
 
-#Boiler plate code to render our solid in FreeCAD's GUI
+# Boiler plate code to render our solid in FreeCAD's GUI
 Part.show(result.toFreecad())

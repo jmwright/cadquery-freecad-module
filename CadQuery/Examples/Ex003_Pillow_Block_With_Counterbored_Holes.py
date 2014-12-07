@@ -1,8 +1,9 @@
-#This example is meant to be used from within the CadQuery module of FreeCAD.
+# This example is meant to be used from within the CadQuery module of FreeCAD.
 import cadquery
 import Part
 
-#The dimensions of the box. These can be modified rather than changing the box's code directly.
+# The dimensions of the box. These can be modified rather than changing the
+# object's code directly.
 length = 80.0
 height = 60.0
 thickness = 10.0
@@ -11,12 +12,12 @@ cbore_hole_diameter = 2.4
 cbore_diameter = 4.4
 cbore_depth = 2.1
 
-#Create a 3D box based on the dimension variables above and add 4 counterbored holes
+# Create a 3D box based on the dimensions above and add 4 counterbored holes
 result = cadquery.Workplane("XY").box(length, height, thickness) \
     .faces(">Z").workplane().hole(center_hole_dia) \
     .faces(">Z").workplane() \
-    .rect(length - 8.0, height - 8.0, forConstruction = True) \
+    .rect(length - 8.0, height - 8.0, forConstruction=True) \
     .vertices().cboreHole(cbore_hole_diameter, cbore_diameter, cbore_depth)
 
-#Boiler plate code to render our solid in FreeCAD's GUI
+# Boiler plate code to render our solid in FreeCAD's GUI
 Part.show(result.toFreecad())

@@ -2,12 +2,13 @@
 # From within FreeCAD, you can make changes to this script and then click
 # CadQuery > Execute Script, or you can press F2.
 # There are more examples in the Examples directory included with this module.
-# Ex026_Lego_Brick.py is highly recommended as a great example of what CadQuery can do.
+# Ex026_Lego_Brick.py is highly recommended as a great example of what CadQuery
+# can do.
 import cadquery
 import Part
 
 # The dimensions of the box. These can be modified rather than changing the
-# box's code directly.
+# object's code directly.
 length = 2.0
 height = 1.0
 thickness = 1.0

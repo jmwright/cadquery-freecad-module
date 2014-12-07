@@ -91,6 +91,8 @@ class BackendManager(Manager):
         """
         Stops the backend process.
         """
+        if self._process is None:
+            return
         # close all sockets
         for socket in self._sockets:
             socket._callback = None

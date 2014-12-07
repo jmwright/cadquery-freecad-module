@@ -783,6 +783,8 @@ class SplittableCodeEditTabWidget(SplittableTabWidget):
         """
         Save current widget as.
         """
+        if self._current is None:
+            return
         mem = self._current.file.path
         self._current.file._path = None
         CodeEditTabWidget.default_directory = os.path.dirname(mem)
@@ -796,7 +798,8 @@ class SplittableCodeEditTabWidget(SplittableTabWidget):
         Save current editor. If the editor.file.path is None, a save as dialog
         will be shown.
         """
-        self.main_tab_widget.save_widget(self._current)
+        if self._current is not None:
+            self.main_tab_widget.save_widget(self._current)
 
     def save_all(self):
         """
