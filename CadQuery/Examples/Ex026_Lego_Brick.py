@@ -6,8 +6,8 @@ import Part
 #####
 # Inputs
 ######
-lbumps = 4        # number of bumps long
-wbumps = 4        # number of bumps wide
+lbumps = 1       # number of bumps long
+wbumps = 1        # number of bumps wide
 thickness = 3.2   # this is a thin lego
 # thickness = 9.6 # a thick lego
 
@@ -49,5 +49,7 @@ elif lbumps > 1:
 elif wbumps > 1:
     tmp = tmp.rarray(pitch, pitch, 1, wbumps - 1, center=True). \
         circle(t).extrude(height - t)
+else:
+    tmp = s
 
 Part.show(tmp.toFreecad())
