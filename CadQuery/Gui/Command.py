@@ -122,7 +122,12 @@ class CadQueryOpenScript():
 
         #Try to keep track of the previous path used to open as a convenience to the user
         if self.previousPath is None:
-            self.previousPath = "/home/"
+            import os, module_locator
+
+            module_base_path = module_locator.module_path()
+            exs_dir_path = os.path.join(module_base_path, 'Examples')
+
+            self.previousPath = exs_dir_path
 
         filename = QtGui.QFileDialog.getOpenFileName(mw, mw.tr("Open CadQuery Script"), self.previousPath,
                                                      mw.tr("CadQuery Files (*.py)"))
