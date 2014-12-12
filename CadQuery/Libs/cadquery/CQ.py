@@ -678,9 +678,9 @@ class CQ(object):
         def _rot(obj):
             startPt = obj.Center()
             endPt = startPt + endVec
-            obj.rotate(startPt,endPt,angleDegrees)
+            return obj.rotate(startPt,endPt,angleDegrees)
 
-        return self.each(_rot,False)
+        return self.each(_rot, False)
 
     def translate(self,vec):
         """
@@ -1436,7 +1436,6 @@ class Workplane(CQ):
                 r = r.transformShape(self.plane.rG)
             else:
                 r = callBackFunction(obj)
-
 
             if type(r) == Wire:
                 if not r.forConstruction:
