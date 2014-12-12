@@ -118,6 +118,8 @@ class CadQueryOpenScript():
         #     return True
 
     def Activated(self):
+        import sys
+
         mw = FreeCADGui.getMainWindow()
 
         #Try to keep track of the previous path used to open as a convenience to the user
@@ -132,10 +134,13 @@ class CadQueryOpenScript():
         filename = QtGui.QFileDialog.getOpenFileName(mw, mw.tr("Open CadQuery Script"), self.previousPath,
                                                      mw.tr("CadQuery Files (*.py)"))
 
-        self.previousPath = filename[0]
-
         #Make sure the user didn't click cancel
         if filename[0]:
+            self.previousPath = filename[0]
+
+            #Append this script's directory to sys.path
+            sys.path.append(os.path.dirname(filename[0]))
+
             #We've created a library that FreeCAD can use as well to open CQ files
             ImportCQ.open(filename[0])
 
