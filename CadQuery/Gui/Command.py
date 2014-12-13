@@ -118,7 +118,7 @@ class CadQueryOpenScript():
         #     return True
 
     def Activated(self):
-        import sys
+        import os, sys
 
         mw = FreeCADGui.getMainWindow()
 
