@@ -31,13 +31,13 @@ class CadQueryCloseScript:
         return True
 
     def Activated(self):
-         #Getting the main window will allow us to find the children we need to work with
+        #Getting the main window will allow us to find the children we need to work with
         mw = FreeCADGui.getMainWindow()
 
         #We need this so we can load the file into it
         cqCodePane = mw.findChild(QtGui.QPlainTextEdit, "cqCodePane")
 
-        reply = QtGui.QMessageBox.question(cqCodePane, "QMessageBox.question()", "Save script before closing?",
+        reply = QtGui.QMessageBox.question(cqCodePane, "Save CadQuery Script", "Save script before closing?",
                                            QtGui.QMessageBox.Yes | QtGui.QMessageBox.No | QtGui.QMessageBox.Cancel)
 
         if reply == QtGui.QMessageBox.Cancel:
@@ -162,6 +162,18 @@ class CadQuerySaveScript:
         #     return True
 
     def Activated(self):
+        #Getting the main window will allow us to find the children we need to work with
+        mw = FreeCADGui.getMainWindow()
+
+        #We need this so we can load the file into it
+        cqCodePane = mw.findChild(QtGui.QPlainTextEdit, "cqCodePane")
+
+        #If the codepane doesn't have a filename, we need to present the save as dialog
+        if len(cqCodePane.file.path) == 0:
+            CadQuerySaveAsScript().Activated()
+
+            return
+
         #Rely on our export library to help us save the file
         ExportCQ.save()
 
