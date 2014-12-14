@@ -27,8 +27,8 @@ class CadQueryWorkbench (Workbench):
         #logging.basicConfig(filename='/home/jwright/Documents/log.txt', level=logging.DEBUG)
         
         #We have our own CQ menu that's added when the user chooses our workbench
-        commands = ['CadQueryOpenScript', 'CadQuerySaveScript', 'CadQuerySaveAsScript', 'CadQueryExecuteScript',
-                    'CadQueryCloseScript']
+        commands = ['CadQueryNewScript', 'CadQueryOpenScript', 'CadQuerySaveScript', 'CadQuerySaveAsScript', 'CadQueryExecuteScript',
+                    'CadQueryCloseScript', 'Separator']
         self.appendMenu('CadQuery', commands)
 
     def Activated(self):
@@ -141,6 +141,7 @@ class CadQueryWorkbench (Workbench):
         #     FreeCAD.Console.PrintMessage(widget.objectName())
         #     widget.setVisible(True)
 
+FreeCADGui.addCommand('CadQueryNewScript', CadQueryNewScript())
 FreeCADGui.addCommand('CadQueryOpenScript', CadQueryOpenScript())
 FreeCADGui.addCommand('CadQuerySaveScript', CadQuerySaveScript())
 FreeCADGui.addCommand('CadQuerySaveAsScript', CadQuerySaveAsScript())

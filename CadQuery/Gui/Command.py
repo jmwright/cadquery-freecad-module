@@ -100,7 +100,39 @@ class CadQueryExecuteScript:
         FreeCAD.Console.PrintMessage("\r\n" + msg + cqCodePane.file.path)
 
 
-class CadQueryOpenScript():
+class CadQueryNewScript:
+    """CadQuery's command to start a new script file."""
+    def GetResources(self):
+        return {"MenuText": "New Script",
+                "Accel": "Alt+N",
+                "ToolTip": "Starts a new CadQuery script",
+                "Pixmap": ":/icons/document-new.svg"}
+
+    def IsActive(self):
+        return True
+
+    def Activated(self):
+        import os, module_locator
+
+        module_base_path = module_locator.module_path()
+        templ_dir_path = os.path.join(module_base_path, 'Templates')
+
+        #We've created a library that FreeCAD can use as well to open CQ files
+        ImportCQ.open(os.path.join(templ_dir_path, 'script_template.py'))
+
+        #Getting the main window will allow us to find the children we need to work with
+        mw = FreeCADGui.getMainWindow()
+
+        #We need this so we can load the file into it
+        cqCodePane = mw.findChild(QtGui.QPlainTextEdit, "cqCodePane")
+
+        #Set the file name to be blank so that we can't save over the template
+        cqCodePane.file.path = ''
+
+        FreeCAD.Console.PrintMessage("New Clicked\r\n")
+
+
+class CadQueryOpenScript:
     """CadQuery's command to open a script file."""
     previousPath = None
 
