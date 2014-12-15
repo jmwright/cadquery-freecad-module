@@ -37,26 +37,33 @@ class CadQueryCloseScript:
         #We need this so we can load the file into it
         cqCodePane = mw.findChild(QtGui.QPlainTextEdit, "cqCodePane")
 
-        reply = QtGui.QMessageBox.question(cqCodePane, "Save CadQuery Script", "Save script before closing?",
-                                           QtGui.QMessageBox.Yes | QtGui.QMessageBox.No | QtGui.QMessageBox.Cancel)
-
-        if reply == QtGui.QMessageBox.Cancel:
+        #If there's nothing open in the code pane, we don't need to close it
+        if len(cqCodePane.file.path) == 0:
             return
 
-        if reply == QtGui.QMessageBox.Yes:
-            #If we've got a file name already save it there, otherwise give a save-as dialog
-            if len(cqCodePane.file.path) == 0:
-                filename = QtGui.QFileDialog.getSaveFileName(mw, mw.tr("Save CadQuery Script As"), "/home/",
-                                                             mw.tr("CadQuery Files (*.py)"))
-            else:
-                filename = cqCodePane.file.path
+        #Check to see if we need to save the script
+        if cqCodePane.dirty:
+            reply = QtGui.QMessageBox.question(cqCodePane, "Save CadQuery Script", "Save script before closing?",
+                                               QtGui.QMessageBox.Yes | QtGui.QMessageBox.No | QtGui.QMessageBox.Cancel)
 
-            #Make sure we got a valid file name
-            if filename == None:
-                ExportCQ.save(filename)
+            if reply == QtGui.QMessageBox.Cancel:
+                return
+
+            if reply == QtGui.QMessageBox.Yes:
+                #If we've got a file name already save it there, otherwise give a save-as dialog
+                if len(cqCodePane.file.path) == 0:
+                    filename = QtGui.QFileDialog.getSaveFileName(mw, mw.tr("Save CadQuery Script As"), "/home/",
+                                                                 mw.tr("CadQuery Files (*.py)"))
+                else:
+                    filename = cqCodePane.file.path
+
+                #Make sure we got a valid file name
+                if filename is not None:
+                    ExportCQ.save(filename)
 
         #Clear our script and whatever was rendered by it out
         cqCodePane.file.close()
+        #TODO Close the matching 3D view here instead of clearing it
         clearAll()
 
 
@@ -114,22 +121,14 @@ class CadQueryNewScript:
     def Activated(self):
         import os, module_locator
 
+        #We need to close any file that's already open in the editor window
+        CadQueryCloseScript().Activated()
+
         module_base_path = module_locator.module_path()
         templ_dir_path = os.path.join(module_base_path, 'Templates')
 
-        #We've created a library that FreeCAD can use as well to open CQ files
+        #Use the library that FreeCAD can use as well to open CQ files
         ImportCQ.open(os.path.join(templ_dir_path, 'script_template.py'))
-
-        #Getting the main window will allow us to find the children we need to work with
-        mw = FreeCADGui.getMainWindow()
-
-        #We need this so we can load the file into it
-        cqCodePane = mw.findChild(QtGui.QPlainTextEdit, "cqCodePane")
-
-        #Set the file name to be blank so that we can't save over the template
-        cqCodePane.file.path = ''
-
-        FreeCAD.Console.PrintMessage("New Clicked\r\n")
 
 
 class CadQueryOpenScript:
@@ -168,6 +167,9 @@ class CadQueryOpenScript:
 
         #Make sure the user didn't click cancel
         if filename[0]:
+            #We need to close any file that's already open in the editor window
+            CadQueryCloseScript().Activated()
+
             self.previousPath = filename[0]
 
             #Append this script's directory to sys.path
@@ -194,6 +196,8 @@ class CadQuerySaveScript:
         #     return True
 
     def Activated(self):
+        import os
+
         #Getting the main window will allow us to find the children we need to work with
         mw = FreeCADGui.getMainWindow()
 
@@ -201,7 +205,9 @@ class CadQuerySaveScript:
         cqCodePane = mw.findChild(QtGui.QPlainTextEdit, "cqCodePane")
 
         #If the codepane doesn't have a filename, we need to present the save as dialog
-        if len(cqCodePane.file.path) == 0:
+        if len(cqCodePane.file.path) == 0 or os.path.basename(cqCodePane.file.path) == 'script_template.py':
+            FreeCAD.Console.PrintMessage("\r\nYou cannot save a blank file or save over a template file.")
+
             CadQuerySaveAsScript().Activated()
 
             return

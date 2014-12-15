@@ -27,8 +27,8 @@ class CadQueryWorkbench (Workbench):
         #logging.basicConfig(filename='/home/jwright/Documents/log.txt', level=logging.DEBUG)
         
         #We have our own CQ menu that's added when the user chooses our workbench
-        commands = ['CadQueryNewScript', 'CadQueryOpenScript', 'CadQuerySaveScript', 'CadQuerySaveAsScript', 'CadQueryExecuteScript',
-                    'CadQueryCloseScript', 'Separator']
+        commands = ['CadQueryNewScript', 'CadQueryOpenScript', 'CadQuerySaveScript', 'CadQuerySaveAsScript',
+                    'CadQueryCloseScript', 'Separator', 'CadQueryExecuteScript']
         self.appendMenu('CadQuery', commands)
 
     def Activated(self):
@@ -129,12 +129,15 @@ class CadQueryWorkbench (Workbench):
 
     def Deactivated(self):
         from Gui import ExportCQ
+        from Gui import Command
 
         #Put the UI back the way we found it
         FreeCAD.Console.PrintMessage("\r\nCadQuery Workbench Deactivated\r\n")
 
+        Command.CadQueryCloseScript().Activated()
+
         #Rely on our export library to help us save the file
-        ExportCQ.save()
+        #ExportCQ.save()
 
         #TODO: This won't work for now because the views are destroyed when they are hidden
         # for widget in self.closedWidgets:
