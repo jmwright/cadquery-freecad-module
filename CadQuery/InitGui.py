@@ -2,9 +2,10 @@
    This adds a workbench with a scripting editor to FreeCAD's GUI."""
 # (c) 2014 Jeremy Wright LGPL v3
 
-import FreeCAD
-import FreeCADGui
+import FreeCAD, FreeCADGui
 from Gui.Command import *
+import CadQuery_rc
+
 
 class CadQueryWorkbench (Workbench):
     """CadQuery workbench for FreeCAD"""
@@ -27,13 +28,14 @@ class CadQueryWorkbench (Workbench):
         #logging.basicConfig(filename='/home/jwright/Documents/log.txt', level=logging.DEBUG)
         
         #We have our own CQ menu that's added when the user chooses our workbench
-        commands = ['CadQueryOpenScript', 'CadQuerySaveScript', 'CadQuerySaveAsScript', 'CadQueryExecuteScript',
-                    'CadQueryCloseScript']
+        commands = ['CadQueryNewScript', 'CadQueryOpenScript', 'CadQuerySaveScript', 'CadQuerySaveAsScript',
+                    'CadQueryCloseScript', 'Separator', 'CadQueryExecuteScript']
         self.appendMenu('CadQuery', commands)
 
     def Activated(self):
         import os, sys
         import module_locator
+        from Gui import Command, ImportCQ
 
         #Set up so that we can import from our embedded packages
         module_base_path = module_locator.module_path()
@@ -53,7 +55,6 @@ class CadQueryWorkbench (Workbench):
             sys.path.insert(1, fc_bin_path)
 
         import cadquery
-        from Gui import ImportCQ
         from pyqode.python.widgets import PyCodeEdit
         from PySide import QtGui, QtCore
 
@@ -87,7 +88,7 @@ class CadQueryWorkbench (Workbench):
             interpreter = 'python'
 
         #Getting the main window will allow us to start setting things up the way we want
-        mw = Gui.getMainWindow()
+        mw = FreeCADGui.getMainWindow()
 
         #Find all of the docks that are open so we can close them (except the Python console)
         dockWidgets = mw.findChildren(QtGui.QDockWidget)
@@ -109,7 +110,7 @@ class CadQueryWorkbench (Workbench):
         #Set up the text area for our CQ code
         server_path = os.path.join(module_base_path, 'cq_server.py')
 
-        #Windows needs some exra help with paths
+        #Windows needs some extra help with paths
         if sys.platform.startswith('win'):
             codePane = PyCodeEdit(server_script=server_path, interpreter=interpreter
                                   , args=['-s', fc_lib_path, libs_dir_path])
@@ -122,25 +123,25 @@ class CadQueryWorkbench (Workbench):
         #Add the text area to our dock widget
         cqCodeWidget.setWidget(codePane)
 
-        #Open our introduction example
+        #Open and execute our introduction example
         example_path = os.path.join(module_base_path, 'Examples')
         example_path = os.path.join(example_path, 'Ex000_Introduction.py')
         ImportCQ.open(example_path)
+        docname = os.path.splitext(os.path.basename(example_path))[0]
+        FreeCAD.newDocument(docname)
+        Command.CadQueryExecuteScript().Activated()
+
+        #Get a nice view of our example
+        FreeCADGui.activeDocument().activeView().viewAxometric()
+        FreeCADGui.SendMsgToActiveView("ViewFit")
 
     def Deactivated(self):
-        from Gui import ExportCQ
-
         #Put the UI back the way we found it
         FreeCAD.Console.PrintMessage("\r\nCadQuery Workbench Deactivated\r\n")
 
-        #Rely on our export library to help us save the file
-        ExportCQ.save()
+        Command.CadQueryCloseScript().Activated()
 
-        #TODO: This won't work for now because the views are destroyed when they are hidden
-        # for widget in self.closedWidgets:
-        #     FreeCAD.Console.PrintMessage(widget.objectName())
-        #     widget.setVisible(True)
-
+FreeCADGui.addCommand('CadQueryNewScript', CadQueryNewScript())
 FreeCADGui.addCommand('CadQueryOpenScript', CadQueryOpenScript())
 FreeCADGui.addCommand('CadQuerySaveScript', CadQuerySaveScript())
 FreeCADGui.addCommand('CadQuerySaveAsScript', CadQuerySaveAsScript())
