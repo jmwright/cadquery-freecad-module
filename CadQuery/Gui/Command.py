@@ -70,7 +70,12 @@ class CadQueryCloseScript:
         #Close the matching 3D view if it's open
         if cqCodePane.file.path is not None:
             docname = os.path.splitext(os.path.basename(cqCodePane.file.path))[0]
-            FreeCAD.closeDocument(docname)
+
+            try:
+                FreeCAD.closeDocument(docname)
+            except:
+                #Assume that the document has already been closed
+                pass
 
         #Clear our script and whatever was rendered by it out
         cqCodePane.file.close()
