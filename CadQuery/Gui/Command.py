@@ -6,6 +6,7 @@ import FreeCAD, FreeCADGui
 from PySide import QtGui
 import ExportCQ, ImportCQ
 import module_locator
+import Settings
 
 #Distinguish python built-in open function from the one declared here
 if open.__module__ == '__builtin__':
@@ -213,8 +214,9 @@ class CadQuerySaveScript:
         cqCodePane = mw.findChild(QtGui.QPlainTextEdit, "cqCodePane")
 
         #If the code pane doesn't have a filename, we need to present the save as dialog
-        if len(cqCodePane.file.path) == 0 or os.path.basename(cqCodePane.file.path) == 'script_template.py':
-            FreeCAD.Console.PrintMessage("\r\nYou cannot save a blank file or save over a template file.")
+        if len(cqCodePane.file.path) == 0 or os.path.basename(cqCodePane.file.path) == 'script_template.py' \
+                or os.path.split(cqCodePane.file.path)[-2].endswith('Examples'):
+            FreeCAD.Console.PrintError("\r\nYou cannot save over a blank file, example file or template file.")
 
             CadQuerySaveAsScript().Activated()
 
@@ -222,6 +224,10 @@ class CadQuerySaveScript:
 
         #Rely on our export library to help us save the file
         ExportCQ.save()
+
+        #Execute the script if the user has asked for it
+        if Settings.execute_on_save:
+            CadQueryExecuteScript().Activated()
 
 class CadQuerySaveAsScript:
     """CadQuery's command to save-as a script file"""
