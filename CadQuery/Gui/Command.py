@@ -1,17 +1,20 @@
 """Adds all of the commands that are used for the menus of the CadQuery module"""
 # (c) 2014 Jeremy Wright LGPL v3
 
-import tempfile
+import imp, os, sys, tempfile
 import FreeCAD, FreeCADGui
 from PySide import QtGui
-import ExportCQ, ImportCQ, CadQuery_rc
+import ExportCQ, ImportCQ
+import module_locator
 
 #Distinguish python built-in open function from the one declared here
 if open.__module__ == '__builtin__':
     pythonopen = open
 
 
-def clearAll():
+def clearActiveDocument():
+    """Clears the currently active 3D view so that we can re-render"""
+
     doc = FreeCAD.ActiveDocument
 
     #Make sure we have an active document to work with
@@ -29,12 +32,14 @@ class CadQueryCloseScript:
 
     def IsActive(self):
         return True
+        # if FreeCAD.ActiveDocument is None:
+        #     return False
+        # else:
+        #     return True
 
     def Activated(self):
-        #Getting the main window will allow us to find the children we need to work with
+        #Grab our code editor so we can interact with it
         mw = FreeCADGui.getMainWindow()
-
-        #We need this so we can load the file into it
         cqCodePane = mw.findChild(QtGui.QPlainTextEdit, "cqCodePane")
 
         #If there's nothing open in the code pane, we don't need to close it
@@ -61,10 +66,13 @@ class CadQueryCloseScript:
                 if filename is not None:
                     ExportCQ.save(filename)
 
+        #Close the matching 3D view if it's open
+        if cqCodePane.file.path is not None:
+            docname = os.path.splitext(os.path.basename(cqCodePane.file.path))[0]
+            FreeCAD.closeDocument(docname)
+
         #Clear our script and whatever was rendered by it out
         cqCodePane.file.close()
-        #TODO Close the matching 3D view here instead of clearing it
-        clearAll()
 
 
 class CadQueryExecuteScript:
@@ -78,26 +86,32 @@ class CadQueryExecuteScript:
 
     def IsActive(self):
         return True
-        # if FreeCAD.ActiveDocument is None:
-        #     return False
-        # else:
-        #     return True
 
     def Activated(self):
-        #Getting the main window will allow us to find the children we need to work with
+        #Grab our code editor so we can interact with it
         mw = FreeCADGui.getMainWindow()
-
-        #We need this so we can load the file into it
         cqCodePane = mw.findChild(QtGui.QPlainTextEdit, "cqCodePane")
 
-        clearAll()
+        #Clear the old render before re-rendering
+        clearActiveDocument()
 
         #Save our code to a tempfile and render it
         tempFile = tempfile.NamedTemporaryFile(delete=False)
         tempFile.write(cqCodePane.toPlainText())
         tempFile.close()
         FreeCAD.Console.PrintMessage("\r\n")
-        execfile(tempFile.name)
+
+        docname = os.path.splitext(os.path.basename(cqCodePane.file.path))[0]
+
+        #If the matching 3D view has been closed, we need to open a new one
+        try:
+           FreeCAD.getDocument(docname)
+        except:
+            FreeCAD.newDocument(docname)
+
+
+        #We import this way because using execfile() causes non-standard script execution in some situations
+        imp.load_source('temp.module', tempFile.name)
 
         msg = QtGui.QApplication.translate(
             "cqCodeWidget",
@@ -119,8 +133,6 @@ class CadQueryNewScript:
         return True
 
     def Activated(self):
-        import os, module_locator
-
         #We need to close any file that's already open in the editor window
         CadQueryCloseScript().Activated()
 
@@ -143,20 +155,14 @@ class CadQueryOpenScript:
 
     def IsActive(self):
         return True
-        # if FreeCAD.ActiveDocument is None:
-        #     return False
-        # else:
-        #     return True
 
     def Activated(self):
-        import os, sys
-
+        #So we can open the "Open File" dialog
         mw = FreeCADGui.getMainWindow()
 
         #Try to keep track of the previous path used to open as a convenience to the user
         if self.previousPath is None:
-            import os, module_locator
-
+            #Start off defaulting to the Examples directory
             module_base_path = module_locator.module_path()
             exs_dir_path = os.path.join(module_base_path, 'Examples')
 
@@ -178,6 +184,16 @@ class CadQueryOpenScript:
             #We've created a library that FreeCAD can use as well to open CQ files
             ImportCQ.open(filename[0])
 
+            docname = os.path.splitext(os.path.basename(filename[0]))[0]
+            FreeCAD.newDocument(docname)
+
+            #Execute the script
+            CadQueryExecuteScript().Activated()
+
+            #Get a nice view of our model
+            FreeCADGui.activeDocument().activeView().viewAxometric()
+            FreeCADGui.SendMsgToActiveView("ViewFit")
+
 
 class CadQuerySaveScript:
     """CadQuery's command to save a script file"""
@@ -190,21 +206,13 @@ class CadQuerySaveScript:
 
     def IsActive(self):
         return True
-        # if FreeCAD.ActiveDocument is None:
-        #     return False
-        # else:
-        #     return True
 
     def Activated(self):
-        import os
-
-        #Getting the main window will allow us to find the children we need to work with
+        #Grab our code editor so we can interact with it
         mw = FreeCADGui.getMainWindow()
-
-        #We need this so we can load the file into it
         cqCodePane = mw.findChild(QtGui.QPlainTextEdit, "cqCodePane")
 
-        #If the codepane doesn't have a filename, we need to present the save as dialog
+        #If the code pane doesn't have a filename, we need to present the save as dialog
         if len(cqCodePane.file.path) == 0 or os.path.basename(cqCodePane.file.path) == 'script_template.py':
             FreeCAD.Console.PrintMessage("\r\nYou cannot save a blank file or save over a template file.")
 
@@ -227,13 +235,11 @@ class CadQuerySaveAsScript:
 
     def IsActive(self):
         return True
-        # if FreeCAD.ActiveDocument is None:
-        #     return False
-        # else:
-        #     return True
 
     def Activated(self):
+        #So we can open the save-as dialog
         mw = FreeCADGui.getMainWindow()
+        cqCodePane = mw.findChild(QtGui.QPlainTextEdit, "cqCodePane")
 
         #Try to keep track of the previous path used to open as a convenience to the user
         if self.previousPath is None:
@@ -246,6 +252,14 @@ class CadQuerySaveAsScript:
 
         #Make sure the user didn't click cancel
         if filename[0]:
-            #Save the file before the re-render
+            #Close the 3D view for the original script if it's open
+            try:
+                docname = os.path.splitext(os.path.basename(cqCodePane.file.path))[0]
+                FreeCAD.closeDocument(docname)
+            except:
+                #Assume that there was no 3D view to close
+                pass
+
+            #Save the file before closing the original and the re-rendering the new one
             ExportCQ.save(filename[0])
-            execfile(filename[0])
+            CadQueryExecuteScript().Activated()

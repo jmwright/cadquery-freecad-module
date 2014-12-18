@@ -13,10 +13,8 @@ def save(filename=None):
     :param filename: The path and file name to save to. If not provided we try to pull it from the code pane itself
     """
 
-    #Getting the main window will allow us to find the children we need to work with
+    #Grab our code editor so we can interact with it
     mw = FreeCADGui.getMainWindow()
-
-    #We need this so we can load the file into it
     cqCodePane = mw.findChild(QtGui.QPlainTextEdit, "cqCodePane")
 
     #If we weren't provided a file name, we need to find it from the text field
