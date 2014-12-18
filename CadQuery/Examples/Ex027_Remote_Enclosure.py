@@ -42,7 +42,6 @@ def trapezoid(b1, b2, h):
 # This has to be a function because we need to create multiple copies of
 # the shape.
 def base(h):
-    global width, trapezoidFudge, length, zFilletRadius
     return (trapezoid(width, width * trapezoidFudge, length)
             .extrude(h)
             .translate((0, 0, height / 2))
