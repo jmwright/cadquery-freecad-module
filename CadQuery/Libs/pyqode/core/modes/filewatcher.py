@@ -18,6 +18,9 @@ class FileWatcherMode(Mode, QtCore.QObject):
     #: the editor.
     file_deleted = QtCore.Signal(object)
 
+    #: Signal emitted when the file has been reloaded in the editor.
+    file_reloaded = QtCore.Signal()
+
     @property
     def auto_reload(self):
         """
@@ -145,6 +148,7 @@ class FileWatcherMode(Mode, QtCore.QObject):
         def inner_action(*args):
             """ Inner action: open file """
             self.editor.file.open(self.editor.file.path)
+            self.file_reloaded.emit()
 
         args = ("File changed",
                 "The file <i>%s</i> has changed externally.\nDo you want to "

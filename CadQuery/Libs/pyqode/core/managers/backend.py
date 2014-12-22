@@ -56,6 +56,9 @@ class BackendManager(Manager):
         The script can be run with a custom interpreter. The default is to use
         sys.executable.
 
+        .. note:: This restart the backend process if it was previously
+                  running.
+
         :param script: Path to the backend script.
         :param interpreter: The python interpreter to use to run the backend
             script. If None, sys.executable is used unless we are in a frozen
@@ -64,8 +67,7 @@ class BackendManager(Manager):
             the backend process.
         """
         if self.running:
-            # already started
-            return
+            self.stop()
         self.server_script = script
         self.interpreter = interpreter
         self.args = args
