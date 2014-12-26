@@ -36,6 +36,7 @@ class CadQueryWorkbench (Workbench):
         import os, sys
         import module_locator
         from Gui import Command, ImportCQ
+        import Settings
 
         #Set up so that we can import from our embedded packages
         module_base_path = module_locator.module_path()
@@ -55,6 +56,7 @@ class CadQueryWorkbench (Workbench):
             sys.path.insert(1, fc_bin_path)
 
         import cadquery
+        from pyqode.core.modes import FileWatcherMode
         from pyqode.python.widgets import PyCodeEdit
         from PySide import QtGui, QtCore
 
@@ -118,6 +120,12 @@ class CadQueryWorkbench (Workbench):
             codePane = PyCodeEdit(server_script=server_path, interpreter=interpreter
                                   , args=['-s', libs_dir_path])
 
+        # Allow easy use of an external editor
+        if Settings.use_external_editor:
+            codePane.modes.append(FileWatcherMode())
+            codePane.modes.get(FileWatcherMode).file_reloaded.connect(self.AutoExecute)
+            codePane.modes.get(FileWatcherMode).auto_reload = True
+
         codePane.setObjectName("cqCodePane")
 
         #Add the text area to our dock widget
@@ -135,11 +143,21 @@ class CadQueryWorkbench (Workbench):
         FreeCADGui.activeDocument().activeView().viewAxometric()
         FreeCADGui.SendMsgToActiveView("ViewFit")
 
+    def AutoExecute(self):
+        """We should be able to pass the Gui.Commands.CadQueryExecuteScript function directly to the file_reloaded
+           connect function, but that causes a segfault in FreeCAD. This function is a work-around for that. This
+           function is passed to file_reloaded signal and in turn calls the CadQueryExecuteScript.Activated function."""
+        import Gui.Command
+
+        Gui.Command.CadQueryExecuteScript().Activated()
+
     def Deactivated(self):
+        import Gui.Command
+
         #Put the UI back the way we found it
         FreeCAD.Console.PrintMessage("\r\nCadQuery Workbench Deactivated\r\n")
 
-        Command.CadQueryCloseScript().Activated()
+        Gui.Command.CadQueryCloseScript().Activated()
 
 FreeCADGui.addCommand('CadQueryNewScript', CadQueryNewScript())
 FreeCADGui.addCommand('CadQueryOpenScript', CadQueryOpenScript())
