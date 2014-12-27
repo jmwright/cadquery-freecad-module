@@ -34,13 +34,14 @@ class FileSystemTreeView(QtWidgets.QTreeView):
         Excludes :attr:`ignored_directories` and :attr:`ignored_extensions`
         from the file system model.
         """
+        #: The list of directories to exclude
+        ignored_directories = ['__pycache__']
+        #: The list of file extension to exclude
+        ignored_extensions = ['.pyc', '.pyd', '.so', '.dll', '.exe',
+                              '.egg-info', '.coverage', '.DS_Store']
+
         def __init__(self):
             super(FileSystemTreeView.FilterProxyModel, self).__init__()
-            #: The list of directories to exclude
-            self.ignored_directories = ['__pycache__']
-            #: The list of file extension to exclude
-            self.ignored_extensions = ['.pyc', '.pyd', '.so', '.dll', '.exe',
-                                       '.egg-info', '.coverage', '.DS_Store']
             self._ignored_unused = []
 
         def set_root_path(self, path):
@@ -48,7 +49,7 @@ class FileSystemTreeView(QtWidgets.QTreeView):
             Sets the root path to watch.
             :param path: root path (str).
             """
-            self._ignored_unused = []
+            self._ignored_unused[:] = []
             parent_dir = os.path.dirname(path)
             for item in os.listdir(parent_dir):
                 item_path = os.path.join(parent_dir, item)
@@ -91,10 +92,6 @@ class FileSystemTreeView(QtWidgets.QTreeView):
 
     def __init__(self, parent=None):
         super(FileSystemTreeView, self).__init__(parent)
-        self._fs_model_source = QtWidgets.QFileSystemModel()
-        self._fs_model_proxy = self.FilterProxyModel()
-        self._fs_model_proxy.setSourceModel(self._fs_model_source)
-        self.setModel(self._fs_model_proxy)
         self.context_menu = None
         self.root_path = None
         self.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
@@ -102,7 +99,8 @@ class FileSystemTreeView(QtWidgets.QTreeView):
         self.helper = FileSystemHelper(self)
         self.setSelectionMode(self.ExtendedSelection)
 
-    def ignore_directories(self, *directories):
+    @classmethod
+    def ignore_directories(cls, *directories):
         """
         Adds the specified directories to the list of ignored directories.
 
@@ -111,9 +109,10 @@ class FileSystemTreeView(QtWidgets.QTreeView):
         :param directories: the directories to ignore
         """
         for d in directories:
-            self._fs_model_proxy.ignored_directories.append(d)
+            cls.FilterProxyModel.ignored_directories.append(d)
 
-    def ignore_extensions(self, *extensions):
+    @classmethod
+    def ignore_extensions(cls, *extensions):
         """
         Adds the specified extensions to the list of ignored directories.
 
@@ -124,7 +123,7 @@ class FileSystemTreeView(QtWidgets.QTreeView):
         .. note:: extension must have the dot: '.py' and not 'py'
         """
         for d in extensions:
-            self._fs_model_proxy.ignored_extensions.append(d)
+            cls.FilterProxyModel.ignored_extensions.append(d)
 
     def set_context_menu(self, context_menu):
         """
@@ -137,13 +136,18 @@ class FileSystemTreeView(QtWidgets.QTreeView):
         for action in self.context_menu.actions():
             self.addAction(action)
 
-    def set_root_path(self, path):
+    def set_root_path(self, path, hide_extra_columns=True):
         """
         Sets the root path to watch
         :param path: root path - str
+        :param hide_extra_columns: Hide extra column (size, paths,...)
         """
         if os.path.isfile(path):
             path = os.path.abspath(os.path.join(path, os.pardir))
+        self._fs_model_source = QtWidgets.QFileSystemModel()
+        self._fs_model_proxy = self.FilterProxyModel()
+        self._fs_model_proxy.setSourceModel(self._fs_model_source)
+        self.setModel(self._fs_model_proxy)
         self._fs_model_proxy.set_root_path(path)
         self.root_path = os.path.dirname(path)
         file_root_index = self._fs_model_source.setRootPath(self.root_path)
@@ -153,6 +157,10 @@ class FileSystemTreeView(QtWidgets.QTreeView):
         file_parent_index = self._fs_model_source.index(path)
         self.setExpanded(self._fs_model_proxy.mapFromSource(
             file_parent_index), True)
+        if hide_extra_columns:
+            self.setHeaderHidden(True)
+            for i in range(1, 4):
+                self.hideColumn(i)
 
     def filePath(self, index):
         """

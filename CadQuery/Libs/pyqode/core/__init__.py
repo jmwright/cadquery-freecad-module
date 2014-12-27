@@ -8,4 +8,4 @@ a series of modes and panels that might be useful for any kind of code editor
 widget, i.e. pyqode.core is a generic code editor widget.
 """
 
-__version__ = '2.5.dev'
+__version__ = '2.5.dev1'

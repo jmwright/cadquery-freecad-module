@@ -136,7 +136,7 @@ class JsonServer(socketserver.ThreadingTCPServer):
                         ret_val = worker(data['data'])
                     except Exception:
                         _logger().exception('something went bad with worker '
-                                            '%r(data=%r)')
+                                            '%r(data=%r)', worker, data['data'])
                         ret_val = None
                     if ret_val is None:
                         ret_val = []

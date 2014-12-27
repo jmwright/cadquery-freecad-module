@@ -512,6 +512,8 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
                 list(self.panels), list(clone.panels)):
             panel.enabled = original_panel.isEnabled()
             panel.clone_settings(original_panel)
+            if not original_panel.isVisible():
+                panel.setVisible(False)
         clone.use_spaces_instead_of_tabs = self.use_spaces_instead_of_tabs
         clone.tab_length = self.tab_length
         clone.save_on_focus_out = self.save_on_focus_out
