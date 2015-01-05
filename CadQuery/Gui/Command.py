@@ -23,6 +23,25 @@ def clearActiveDocument():
         for obj in doc.Objects:
             doc.removeObject(obj.Label)
 
+class CadQueryClearOutput:
+    """Allows the user to clear the reports view when it gets overwhelmed with output"""
+
+    def GetResources(self):
+        return {"MenuText": "Clear Output",
+                "ToolTip": "Clears the script output from the Reports view"}
+
+    def IsActive(self):
+        return True
+
+    def Activated(self):
+        #Grab our code editor so we can interact with it
+        mw = FreeCADGui.getMainWindow()
+
+        reportView = mw.findChild(QtGui.QDockWidget, "Report view")
+
+        #Clear the view because it gets overwhelmed sometimes and won't scroll to the bottom
+        reportView.widget().clear()
+
 
 class CadQueryCloseScript:
     """Allows the user to close a file without saving"""
