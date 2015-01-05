@@ -29,7 +29,7 @@ class CadQueryWorkbench (Workbench):
         
         #We have our own CQ menu that's added when the user chooses our workbench
         commands = ['CadQueryNewScript', 'CadQueryOpenScript', 'CadQuerySaveScript', 'CadQuerySaveAsScript',
-                    'CadQueryCloseScript', 'Separator', 'CadQueryExecuteScript']
+                    'CadQueryCloseScript', 'Separator', 'CadQueryExecuteScript', 'CadQueryClearOutput']
         self.appendMenu('CadQuery', commands)
 
     def Activated(self):
@@ -165,5 +165,6 @@ FreeCADGui.addCommand('CadQuerySaveScript', CadQuerySaveScript())
 FreeCADGui.addCommand('CadQuerySaveAsScript', CadQuerySaveAsScript())
 FreeCADGui.addCommand('CadQueryExecuteScript', CadQueryExecuteScript())
 FreeCADGui.addCommand('CadQueryCloseScript', CadQueryCloseScript())
+FreeCADGui.addCommand('CadQueryClearOutput', CadQueryClearOutput())
 
 FreeCADGui.addWorkbench(CadQueryWorkbench())
