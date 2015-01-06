@@ -1,6 +1,6 @@
 # This example is meant to be used from within the CadQuery module of FreeCAD.
 import cadquery as cq
-import Part
+from Helpers import show
 
 exploded = False        # when true, moves the base away from the top so we see
 showTop = True          # When true, the top is rendered.
@@ -84,6 +84,6 @@ cover = (base(coverThickness)
 
 # Conditionally render the parts
 if showTop:
-    Part.show(top.toFreecad())
+    show(top)
 if showCover:
-    Part.show(cover.toFreecad())
+    show(cover)

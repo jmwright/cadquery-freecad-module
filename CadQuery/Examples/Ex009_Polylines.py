@@ -1,6 +1,6 @@
 # This example is meant to be used from within the CadQuery module of FreeCAD.
 import cadquery
-import Part
+from Helpers import show
 
 # Set up our Length, Height, Width, and thickness of the beam
 (L, H, W, t) = (100.0, 20.0, 20.0, 1.0)
@@ -21,5 +21,5 @@ pts = [
 # I-beam
 result = cadquery.Workplane("front").polyline(pts).mirrorY().extrude(L)
 
-# Boiler plate code to render our solid in FreeCAD's GUI
-Part.show(result.toFreecad())
+# Render the solid
+show(result)

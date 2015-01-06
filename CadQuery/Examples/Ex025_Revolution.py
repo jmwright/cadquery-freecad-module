@@ -1,6 +1,6 @@
 # This example is meant to be used from within the CadQuery module of FreeCAD.
 import cadquery
-import Part
+from Helpers import show
 
 # The dimensions of the model. These can be modified rather than changing the
 # shape's code directly.
@@ -19,5 +19,5 @@ result = cadquery.Workplane("XY").rect(rectangle_width, rectangle_length, False)
 # Revolve a donut with square walls
 #result = cadquery.Workplane("XY").rect(rectangle_width, rectangle_length, True).revolve(angle_degrees, (20, 0), (20, 10))
 
-# Boiler plate code to render our solid in FreeCAD's GUI
-Part.show(result.toFreecad())
+# Render the solid
+show(result)
