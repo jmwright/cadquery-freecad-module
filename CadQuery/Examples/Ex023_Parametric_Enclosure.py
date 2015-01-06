@@ -1,6 +1,6 @@
 # This example is meant to be used from within the CadQuery module of FreeCAD.
 import cadquery
-import Part
+from Helpers import show
 
 # Parameter definitions
 p_outerWidth = 100.0  # Outer width of box enclosure
@@ -80,5 +80,5 @@ if p_flipLid:
 # Return the combined result
 result = topOfLid.combineSolids(bottom)
 
-# Boiler plate code to render our solid in FreeCAD's GUI
-Part.show(result.toFreecad())
+# Render the solid
+show(result)

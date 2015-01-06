@@ -1,6 +1,6 @@
 # This example is meant to be used from within the CadQuery module of FreeCAD.
 import cadquery
-import Part
+from Helpers import show
 
 # The dimensions of the model. These can be modified rather than changing the
 # object's code directly.
@@ -14,5 +14,5 @@ result = cadquery.Workplane("front").circle(circle_radius) \
                                     .rect(rectangle_width, rectangle_length) \
                                     .extrude(thickness)
 
-# Boiler plate code to render our solid in FreeCAD's GUI
-Part.show(result.toFreecad())
+# Render the solid
+show(result)

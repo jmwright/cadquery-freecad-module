@@ -1,6 +1,6 @@
 # This example is meant to be used from within the CadQuery module of FreeCAD.
 import cadquery
-import Part
+from Helpers import show
 
 # The dimensions of the model. These can be modified rather than changing the
 # object's code directly.
@@ -18,5 +18,5 @@ result = result.center(-1.5, 1.5).circle(0.25)  # New work center is ( 0.0,1.5)
 
 result = result.extrude(thickness)
 
-# Boiler plate code to render our solid in FreeCAD's GUI
-Part.show(result.toFreecad())
+# Render the solid
+show(result)

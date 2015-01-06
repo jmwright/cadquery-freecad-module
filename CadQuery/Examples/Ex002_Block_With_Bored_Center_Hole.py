@@ -1,6 +1,6 @@
 # This example is meant to be used from within the CadQuery module of FreeCAD.
 import cadquery
-import Part
+from Helpers import show
 
 # The dimensions of the box. These can be modified rather than changing the
 # object's code directly.
@@ -13,5 +13,5 @@ center_hole_dia = 22.0
 result = cadquery.Workplane("XY").box(length, height, thickness) \
     .faces(">Z").workplane().hole(center_hole_dia)
 
-# Boiler plate code to render our solid in FreeCAD's GUI
-Part.show(result.toFreecad())
+# Render the solid
+show(result)

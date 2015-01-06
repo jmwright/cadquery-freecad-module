@@ -1,7 +1,7 @@
 # This example is meant to be used from within the CadQuery module of FreeCAD.
 # This script can create any regular rectangular Lego(TM) Brick
 import cadquery
-import Part
+from Helpers import show
 
 #####
 # Inputs
@@ -52,4 +52,5 @@ elif wbumps > 1:
 else:
     tmp = s
 
-Part.show(tmp.toFreecad())
+# Render the solid
+show(tmp)

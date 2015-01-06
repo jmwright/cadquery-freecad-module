@@ -1,6 +1,6 @@
 # This example is meant to be used from within the CadQuery module of FreeCAD.
 import cadquery
-import Part
+from Helpers import show
 
 # The dimensions of the box. These can be modified rather than changing the
 # object's code directly.
@@ -19,5 +19,5 @@ result = cadquery.Workplane("XY").box(length, height, thickness) \
     .rect(length - 8.0, height - 8.0, forConstruction=True) \
     .vertices().cboreHole(cbore_hole_diameter, cbore_diameter, cbore_depth)
 
-# Boiler plate code to render our solid in FreeCAD's GUI
-Part.show(result.toFreecad())
+# Render the solid
+show(result)

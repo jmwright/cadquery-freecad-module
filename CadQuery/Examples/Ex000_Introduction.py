@@ -5,7 +5,7 @@
 # Ex026_Lego_Brick.py is highly recommended as a great example of what CadQuery
 # can do.
 import cadquery
-import Part
+from Helpers import show
 
 # The dimensions of the box. These can be modified rather than changing the
 # object's code directly.
@@ -16,5 +16,5 @@ thickness = 1.0
 # Create a 3D box based on the dimension variables above
 result = cadquery.Workplane("XY").box(length, height, thickness)
 
-# Boiler plate code to render our solid in FreeCAD's GUI
-Part.show(result.toFreecad())
+# Render the solid
+show(result)
