@@ -21,7 +21,7 @@ def clearActiveDocument():
     #Make sure we have an active document to work with
     if doc is not None:
         for obj in doc.Objects:
-            doc.removeObject(obj.Label)
+            doc.removeObject(obj.Name)
 
 class CadQueryClearOutput:
     """Allows the user to clear the reports view when it gets overwhelmed with output"""
