@@ -26,11 +26,19 @@ class CadQueryWorkbench (Workbench):
         #import logging
         #logging.basicConfig(filename='C:\\Users\\Jeremy\\Documents\\', level=logging.DEBUG)
         #logging.basicConfig(filename='/home/jwright/Documents/log.txt', level=logging.DEBUG)
-        
+        submenu = []
+
+        dirs = self.ListExamples()
+
+        # Step through and add an Examples submenu item for each example
+        for curFile in dirs:
+            submenu.append(str(curFile))
+
         #We have our own CQ menu that's added when the user chooses our workbench
-        commands = ['CadQueryNewScript', 'CadQueryOpenScript', 'CadQuerySaveScript', 'CadQuerySaveAsScript',
-                    'CadQueryCloseScript', 'Separator', 'CadQueryExecuteScript', 'CadQueryClearOutput']
-        self.appendMenu('CadQuery', commands)
+        self.appendMenu('CadQuery', ['CadQueryNewScript', 'CadQueryOpenScript', 'CadQuerySaveScript',
+                                     'CadQuerySaveAsScript', 'CadQueryCloseScript'])
+        self.appendMenu(['CadQuery', 'Examples'], submenu)
+        self.appendMenu('CadQuery', ['Separator', 'CadQueryExecuteScript', 'CadQueryClearOutput'])
 
     def Activated(self):
         import os, sys
@@ -159,6 +167,21 @@ class CadQueryWorkbench (Workbench):
 
         Gui.Command.CadQueryCloseScript().Activated()
 
+    @staticmethod
+    def ListExamples():
+        import os
+        import module_locator
+
+        dirs = []
+
+        # List all of the example files in an order that makes sense
+        module_base_path = module_locator.module_path()
+        exs_dir_path = os.path.join(module_base_path, 'Examples')
+        dirs = os.listdir(exs_dir_path)
+        dirs.sort()
+
+        return dirs
+
 FreeCADGui.addCommand('CadQueryNewScript', CadQueryNewScript())
 FreeCADGui.addCommand('CadQueryOpenScript', CadQueryOpenScript())
 FreeCADGui.addCommand('CadQuerySaveScript', CadQuerySaveScript())
@@ -166,5 +189,10 @@ FreeCADGui.addCommand('CadQuerySaveAsScript', CadQuerySaveAsScript())
 FreeCADGui.addCommand('CadQueryExecuteScript', CadQueryExecuteScript())
 FreeCADGui.addCommand('CadQueryCloseScript', CadQueryCloseScript())
 FreeCADGui.addCommand('CadQueryClearOutput', CadQueryClearOutput())
+
+# Step through and add an Examples submenu item for each example
+dirs = CadQueryWorkbench.ListExamples()
+for curFile in dirs:
+    FreeCADGui.addCommand(curFile, CadQueryExecuteExample(curFile))
 
 FreeCADGui.addWorkbench(CadQueryWorkbench())

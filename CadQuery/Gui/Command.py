@@ -100,6 +100,45 @@ class CadQueryCloseScript:
         cqCodePane.file.close()
 
 
+class CadQueryExecuteExample:
+    exFile = None
+
+    def __init__(self, exFile):
+        self.exFile = str(exFile)
+
+    def GetResources(self):
+        return {"MenuText": str(self.exFile)}
+
+    def Activated(self):
+        FreeCAD.Console.PrintMessage(self.exFile + "\r\n")
+
+        #So we can open the "Open File" dialog
+        mw = FreeCADGui.getMainWindow()
+
+        #Start off defaulting to the Examples directory
+        module_base_path = module_locator.module_path()
+        exs_dir_path = os.path.join(module_base_path, 'Examples')
+
+        #We need to close any file that's already open in the editor window
+        CadQueryCloseScript().Activated()
+
+        #Append this script's directory to sys.path
+        sys.path.append(os.path.dirname(exs_dir_path))
+
+        #We've created a library that FreeCAD can use as well to open CQ files
+        ImportCQ.open(os.path.join(exs_dir_path, self.exFile))
+
+        docname = os.path.splitext(os.path.basename(self.exFile))[0]
+        FreeCAD.newDocument(docname)
+
+        #Execute the script
+        CadQueryExecuteScript().Activated()
+
+        #Get a nice view of our model
+        FreeCADGui.activeDocument().activeView().viewAxometric()
+        FreeCADGui.SendMsgToActiveView("ViewFit")
+
+
 class CadQueryExecuteScript:
     """CadQuery's command to execute a script file"""
 
