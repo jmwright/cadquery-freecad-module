@@ -1,6 +1,6 @@
 cadquery-freecad-module
 =======================
-[![GitHub version](https://badge.fury.io/gh/jmwright%2Fcadquery-freecad-module.svg)](http://badge.fury.io/gh/jmwright%2Fcadquery-freecad-module)
+[![GitHub version](https://badge.fury.io/gh/jmwright%2Fcadquery-freecad-module.svg)](https://github.com/jmwright/cadquery-freecad-module/releases/tag/v0.1.8)
 [![License](https://img.shields.io/badge/license-LGPL-lightgrey.svg)](https://github.com/jmwright/cadquery-freecad-module/blob/master/LICENSE)
 
 A module-workbench combo that adds a CadQuery editor to FreeCAD. Please see the [wiki](https://github.com/jmwright/cadquery-freecad-module/wiki) for more detailed information on getting started.
