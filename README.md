@@ -2,7 +2,7 @@ cadquery-freecad-module
 =======================
 [![License](https://img.shields.io/badge/license-LGPL-lightgrey.svg)](https://github.com/jmwright/cadquery-freecad-module/blob/master/LICENSE)
 
-A module-workbench combo that adds a CadQuery editor to FreeCAD
+A module-workbench combo that adds a CadQuery editor to FreeCAD. Please see the [wiki](https://github.com/jmwright/cadquery-freecad-module/wiki) for more detailed information on getting started.
 
 **Requires FreeCAD 0.14 or newer**
 
