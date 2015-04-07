@@ -2271,3 +2271,27 @@ class Workplane(CQ):
             #combine everything
             return self.union(boxes)
 
+    def sphere(self, radius, direct=(0, 0, 1), angle1=-90, angle2=90, angle3=360, centered=(True, True, True), combine=True):
+        # Convert the direction tuple to a vector, if needed
+        if isinstance(direct, tuple):
+            direct = Vector(direct)
+
+        def _makesphere(pnt):
+            (xp, yp, zp) = pnt.toTuple()
+
+            if centered[0]:
+                xp = xp - radius
+            if centered[1]:
+                yp = yp - radius
+            if centered[2]:
+                zp = zp - radius
+
+            return Solid.makeSphere(radius, Vector(xp, yp, zp), direct, angle1, angle2, angle3)
+
+        spheres = self.eachpoint(_makesphere, True)
+
+        # If we don't need to combine everything, just return the created spheres
+        if not combine:
+            return spheres
+        else:
+            return self.union(spheres)

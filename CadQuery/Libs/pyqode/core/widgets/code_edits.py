@@ -35,11 +35,13 @@ class TextCodeEdit(CodeEdit):
 
     def __init__(self, parent=None, server_script=server.__file__,
                  interpreter=sys.executable, args=None,
-                 create_default_actions=True, color_scheme='qt'):
+                 create_default_actions=True, color_scheme='qt',
+                 reuse_backend=False):
         from pyqode.core import panels
         from pyqode.core import modes
         super(TextCodeEdit, self).__init__(parent, create_default_actions)
-        self.backend.start(server_script, interpreter, args)
+        self.backend.start(server_script, interpreter, args,
+                           reuse=reuse_backend)
 
         # append panels
         self.panels.append(panels.FoldingPanel())
@@ -86,11 +88,13 @@ class GenericCodeEdit(CodeEdit):
 
     def __init__(self, parent=None, server_script=server.__file__,
                  interpreter=sys.executable, args=None,
-                 create_default_actions=True, color_scheme='qt'):
+                 create_default_actions=True, color_scheme='qt',
+                 reuse_backend=False):
         super(GenericCodeEdit, self).__init__(parent, create_default_actions)
         from pyqode.core import panels
         from pyqode.core import modes
-        self.backend.start(server_script, interpreter, args)
+        self.backend.start(server_script, interpreter, args,
+                           reuse=reuse_backend)
         # append panels
         self.panels.append(panels.FoldingPanel())
         self.panels.append(panels.LineNumberPanel())

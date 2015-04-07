@@ -43,8 +43,23 @@ class RecentFilesManager(QtCore.QObject):
         :param default: default value.
         :return: value
         """
-        return [os.path.normpath(pth) for pth in
-                self._settings.value('recent_files/%s' % key, default)]
+        def unique(seq, idfun=None):
+            if idfun is None:
+                def idfun(x):
+                    return x
+            # order preserving
+            seen = {}
+            result = []
+            for item in seq:
+                marker = idfun(item)
+                if marker in seen:
+                    continue
+                seen[marker] = 1
+                result.append(item)
+            return result
+
+        return unique([os.path.normpath(pth) for pth in
+                       self._settings.value('recent_files/%s' % key, default)])
 
     def set_value(self, key, value):
         """
@@ -105,7 +120,7 @@ class MenuRecentFiles(QtWidgets.QMenu):
     """
     Menu that manage the list of recent files.
 
-    To use the menu, simply pass connect to the open_requested signal.
+    To use the menu, simply connect to the open_requested signal.
 
     """
     #: Signal emitted when the user clicked on a recent file action.

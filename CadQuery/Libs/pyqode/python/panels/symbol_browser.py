@@ -5,6 +5,7 @@ SymbolBrowserPanel
 import logging
 from pyqode.core.api import Panel, TextHelper
 from pyqode.qt import QtGui, QtCore, QtWidgets
+from pyqode.core.share import Definition
 
 
 def _logger():
@@ -39,26 +40,40 @@ class SymbolBrowserPanel(Panel):
                 self._on_cursor_pos_changed)
             try:
                 self.editor.modes.get(
-                    'DocumentAnalyserMode').document_changed.connect(
+                    'OutlineMode').document_changed.connect(
                         self._on_document_changed)
             except KeyError:
-                _logger().warning("No DocumentAnalyserMode found, install it "
+                _logger().warning("No OutlineMode found, install it "
                                   "before SymbolBrowserPanel!")
         else:
             self.editor.cursorPositionChanged.disconnect(
                 self._on_cursor_pos_changed)
             try:
                 self.editor.modes.get(
-                    'DocumentAnalyserMode').document_changed.disconnect(
+                    'OutlineMode').document_changed.disconnect(
                         self._on_document_changed)
             except KeyError:
                 pass
 
     def _on_document_changed(self):
+        def flatten(results):
+            """
+            Flattens the document structure tree as a simple sequential list.
+            """
+            ret_val = []
+            for de in results:
+                ret_val.append(de)
+                for sub_d in de.children:
+                    nd = Definition(
+                        sub_d.name, sub_d.line, sub_d.column, sub_d.icon)
+                    nd.name = "  " + nd.name
+                    ret_val.append(nd)
+            return ret_val
+
         if not self or not self.editor:
             return
-        mode = self.editor.modes.get('DocumentAnalyserMode')
-        definitions = mode.flattened_results
+        mode = self.editor.modes.get('OutlineMode')
+        definitions = flatten(mode.definitions)
         self.combo_box.clear()
         if definitions:
             self.combo_box.addItem(" < Select a symbol >")

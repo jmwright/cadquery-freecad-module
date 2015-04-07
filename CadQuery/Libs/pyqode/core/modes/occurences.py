@@ -143,6 +143,12 @@ class OccurrencesHighlighterMode(Mode):
                 self._request_highlight()
 
     def _on_results_available(self, results):
+        if len(results) > 500:
+            # limit number of results (on very big file where a lots of
+            # occurrences can be found, this would totally freeze the editor
+            # during a few seconds, with a limit of 500 we can make sure
+            # the editor will always remain responsive).
+            results = results[:500]
         if len(results) > 1:
             for start, end in results:
                 deco = TextDecoration(self.editor.textCursor(),

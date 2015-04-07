@@ -237,7 +237,10 @@ class PyAutoIndentMode(AutoIndentMode):
         tc2 = QTextCursor(tc)
         tc2.movePosition(QTextCursor.PreviousCharacter, QTextCursor.KeepAnchor)
         char = tc2.selectedText()
-        return char
+        while char == ' ':
+            tc2.movePosition(QTextCursor.PreviousCharacter, QTextCursor.KeepAnchor)
+            char = tc2.selectedText()
+        return char.strip()
 
     def _handle_indent_between_paren(self, column, line, parent_impl, tc):
         """
@@ -254,7 +257,7 @@ class PyAutoIndentMode(AutoIndentMode):
         open_line_indent = len(open_line_txt) - len(open_line_txt.lstrip())
         if prev_open:
             post = (open_line_indent + self.editor.tab_length) * ' '
-        elif next_close:
+        elif next_close and prev_char != ',':
             post = open_line_indent * ' '
         elif tc.block().blockNumber() == open_line:
             post = open_symbol_col * ' '

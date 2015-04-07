@@ -740,16 +740,24 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         """
         cursor = self.textCursor()
         assert isinstance(cursor, QtGui.QTextCursor)
-        cursor.beginEditBlock()
-        col = cursor.positionInBlock()
-        cursor.select(cursor.LineUnderCursor)
+        has_selection = True
+        if not cursor.hasSelection():
+            cursor.select(cursor.LineUnderCursor)
+            has_selection = False
         line = cursor.selectedText()
-        cursor.movePosition(cursor.EndOfBlock)
-        cursor.insertText('\n' + line)
-        cursor.movePosition(cursor.StartOfBlock)
-        cursor.movePosition(cursor.Right, cursor.MoveAnchor, col)
-        self.setTextCursor(cursor)
+        line = '\n'.join(line.split('\u2029'))
+        end = cursor.selectionEnd()
+        cursor.setPosition(end)
+        cursor.beginEditBlock()
+        cursor.insertText('\n')
+        cursor.insertText(line)
         cursor.endEditBlock()
+        if has_selection:
+            pos = cursor.position()
+            cursor.setPosition(end+1)
+            cursor.setPosition(pos, cursor.KeepAnchor)
+        self.setTextCursor(cursor)
+
 
     @QtCore.Slot()
     def indent(self):
@@ -1170,7 +1178,7 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         move = QtGui.QTextCursor.MoveAnchor
         if select:
             move = QtGui.QTextCursor.KeepAnchor
-        if delta:
+        if delta > 0:
             cursor.movePosition(QtGui.QTextCursor.Left, move, delta)
         else:
             cursor.movePosition(QtGui.QTextCursor.StartOfBlock, move)

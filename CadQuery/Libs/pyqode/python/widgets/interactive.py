@@ -36,6 +36,13 @@ class PyInteractiveConsole(InteractiveConsole):
         self.setLineWrapMode(self.NoWrap)
         self._module_color = QtGui.QColor('blue')
 
+    def start_process(self, process, args=None, cwd=None, env=None):
+        if env is None:
+            env = {}
+        if 'PYTHONUNBUFFERED' not in env:
+            env['PYTHONUNBUFFERED'] = '1'
+        super(PyInteractiveConsole, self).start_process(process, args, cwd, env)
+
     def _write(self, text_edit, text, color):
         def write(text_edit, text, color):
             text_edit.moveCursor(QtGui.QTextCursor.End)

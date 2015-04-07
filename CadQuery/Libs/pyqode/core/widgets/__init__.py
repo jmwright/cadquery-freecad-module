@@ -12,6 +12,7 @@ pyqode applications:
     - CodeEditTabWidget: tab widget made to handle CodeEdit instances (or
       any other object that have the same interface).
     - ErrorsTable: a QTableWidget specialised to show CheckerMessage.
+    - OutlineTreeWidget: a widget that show the outline of an editor.
 
 
 """
@@ -25,6 +26,7 @@ from pyqode.core.widgets.menu_recents import RecentFilesManager
 from pyqode.core.widgets.tabs import TabWidget
 from pyqode.core.widgets.tab_bar import TabBar
 from pyqode.core.widgets.prompt_line_edit import PromptLineEdit
+from pyqode.core.widgets.outline import OutlineTreeWidget
 from pyqode.core.widgets.splittable_tab_widget import (
     SplittableTabWidget, SplittableCodeEditTabWidget)
 from pyqode.core.widgets.filesystem_treeview import FileSystemTreeView
@@ -46,6 +48,7 @@ __all__ = [
     'TextCodeEdit',
     'GenericCodeEdit',
     'PromptLineEdit',
+    'OutlineTreeWidget',
     'SplittableTabWidget',
     'SplittableCodeEditTabWidget',
     'TabBar'

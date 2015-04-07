@@ -8,7 +8,6 @@ from .autocomplete import PyAutoCompleteMode
 from .autoindent import PyAutoIndentMode
 from .calltips import CalltipsMode
 from .comments import CommentsMode
-from .document_analyser import DocumentAnalyserMode
 from .frosted_checker import FrostedCheckerMode
 from .goto_assignements import Assignment
 from .goto_assignements import GoToAssignmentsMode
@@ -30,7 +29,6 @@ __all__ = [
     'Assignment',
     'CalltipsMode',
     'CommentsMode',
-    'DocumentAnalyserMode',
     'FrostedCheckerMode',
     'GoToAssignmentsMode',
     'PEP8CheckerMode',

@@ -1,6 +1,7 @@
 """
 This module contains the splittable tab widget API
 """
+import inspect
 import logging
 import mimetypes
 import os
@@ -770,8 +771,13 @@ class SplittableCodeEditTabWidget(SplittableTabWidget):
     def register_code_edit(cls, code_edit_class):
         """
         Register an additional code edit **class**
-        :param code_edit_class: code edit class to regiter.
+
+        .. warning: This method expect a class, not an instance!
+
+        :param code_edit_class: code edit class to register.
         """
+        if not inspect.isclass(code_edit_class):
+            raise TypeError('must be a class, not an instance.')
         for mimetype in code_edit_class.mimetypes:
             if mimetype in cls.editors:
                 _logger().warn('editor for mimetype already registered, '
@@ -814,27 +820,37 @@ class SplittableCodeEditTabWidget(SplittableTabWidget):
         open/create.
 
         :type mimetype: mime type
-        :return: CodeEdit instance
+        :param args: Positional arguments that must be forwarded to the editor
+            widget constructor.
+        :param kwargs: Keyworded arguments that must be forwarded to the editor
+            widget constructor.
+        :return: Code editor widget instance.
         """
         if mimetype in self.editors.keys():
             return self.editors[mimetype](
                 *args, parent=self.main_tab_widget, **kwargs)
-        return self.fallback_editor(parent=self.main_tab_widget)
+        return self.fallback_editor(*args, parent=self.main_tab_widget,
+                                    **kwargs)
 
-    def create_new_document(self, base_name='New Document', extension='.txt'):
+    def create_new_document(self, base_name='New Document', extension='.txt',
+                            *args, **kwargs):
         """
         Creates a new document.
 
         The document name will be ``base_name + count + extension``
 
-        :type base_name: Base name of the document. An int will be appended.
-        :type extension: Document extension (must include the DOT)
+        :param base_name: Base name of the document. An int will be appended.
+        :param extension: Document extension (dotted)
+        :param args: Positional arguments that must be forwarded to the editor
+            widget constructor.
+        :param kwargs: Keyworded arguments that must be forwarded to the editor
+            widget constructor.
 
-        :return: The created code editor
+        :return: Code editor widget instance.
         """
         SplittableCodeEditTabWidget._new_count += 1
         name = '%s%d%s' % (base_name, self._new_count, extension)
-        tab = self._create_code_edit(self.guess_mimetype(name))
+        tab = self._create_code_edit(self.guess_mimetype(name), *args, **kwargs)
         tab.setDocumentTitle(name)
         self.add_tab(tab, title=name, icon=self._icon(name))
         return tab

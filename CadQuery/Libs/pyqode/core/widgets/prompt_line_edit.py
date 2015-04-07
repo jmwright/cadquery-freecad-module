@@ -4,9 +4,14 @@ This module contains the PromptLineEdit widget implementation.
 """
 import os
 from pyqode.qt import QtWidgets, QtCore, QtGui
+from pyqode.qt import QT_API
+from pyqode.qt import PYQT5_API
+from pyqode.qt import PYQT4_API
+from pyqode.qt import PYSIDE_API
 
 
 class PromptLineEdit(QtWidgets.QLineEdit):
+
     """
     Extends QLineEdit to show a prompt text and a clear icon
     """
@@ -52,16 +57,20 @@ class PromptLineEdit(QtWidgets.QLineEdit):
     def paintEvent(self, event):
         super(PromptLineEdit, self).paintEvent(event)
 
+        qt_api = os.environ['QT_API'].lower()
         if self._prompt_text and not self.text() and self.isEnabled():
-            if os.environ['QT_API'].lower() == 'pyqt4':
+            if qt_api in PYQT4_API:
                 from PyQt4.QtGui import QStyleOptionFrameV3
                 option = QStyleOptionFrameV3()
-            elif os.environ['QT_API'].lower() == 'pyside':
+            elif qt_api in PYSIDE_API:
                 from PySide.QtGui import QStyleOptionFrameV3
                 option = QStyleOptionFrameV3()
-            else:
+            elif qt_api in PYQT5_API:
                 from PyQt5.QtWidgets import QStyleOptionFrame
                 option = QStyleOptionFrame()
+            else:
+                msg = 'Qt bindings "%s" is not supported' % qt_api
+                raise PythonQtError(msg)
 
             self.initStyleOption(option)
 

@@ -6,5 +6,5 @@ panels for the frontend and a series of worker for the backend (code
 completion, documentation lookups, code linters, and so on...).
 
 """
-__version__ = '2.4.dev'
 
+__version__ = '2.5.0'

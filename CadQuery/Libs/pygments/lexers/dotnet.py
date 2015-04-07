@@ -497,7 +497,7 @@ class GenericAspxLexer(RegexLexer):
 # TODO support multiple languages within the same source file
 class CSharpAspxLexer(DelegatingLexer):
     """
-    Lexer for highligting C# within ASP.NET pages.
+    Lexer for highlighting C# within ASP.NET pages.
     """
 
     name = 'aspx-cs'
@@ -518,7 +518,7 @@ class CSharpAspxLexer(DelegatingLexer):
 
 class VbNetAspxLexer(DelegatingLexer):
     """
-    Lexer for highligting Visual Basic.net within ASP.NET pages.
+    Lexer for highlighting Visual Basic.net within ASP.NET pages.
     """
 
     name = 'aspx-vb'
@@ -623,6 +623,7 @@ class FSharpLexer(RegexLexer):
             (r'\b(member|override)(\s+)(\w+)(\.)(\w+)',
              bygroups(Keyword, Text, Name, Punctuation, Name.Function)),
             (r'\b(%s)\b' % '|'.join(keywords), Keyword),
+            (r'``([^`\n\r\t]|`[^`\n\r\t])+``', Name),
             (r'(%s)' % '|'.join(keyopts), Operator),
             (r'(%s|%s)?%s' % (infix_syms, prefix_syms, operators), Operator),
             (r'\b(%s)\b' % '|'.join(word_operators), Operator.Word),

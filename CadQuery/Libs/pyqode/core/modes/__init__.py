@@ -17,6 +17,7 @@ from .filewatcher import FileWatcherMode
 from .indenter import IndenterMode
 from .matcher import SymbolMatcherMode
 from .occurences import OccurrencesHighlighterMode
+from .outline import OutlineMode
 from .right_margin import RightMarginMode
 from .pygments_sh import PygmentsSH
 from .wordclick import WordClickMode
@@ -39,6 +40,7 @@ __all__ = [
     'FileWatcherMode',
     'IndenterMode',
     'OccurrencesHighlighterMode',
+    'OutlineMode',
     'PygmentsSH',
     'PygmentsSyntaxHighlighter',
     'PYGMENTS_STYLES',

@@ -52,20 +52,24 @@ import os
 import sys
 import logging
 
-__version__ = '2.5.dev'
+__version__ = '2.5.0'
 
 
 #: Qt API environment variable name
 QT_API = 'QT_API'
-#: name of the expected PyQt5 api
-PYQT5_API = 'pyqt5'
-#: name of the expected PyQt4 api
-PYQT4_API = 'pyqt4'
-#: name of the expected PySide api
-PYSIDE_API = 'pyside'
+#: names of the expected PyQt5 api
+PYQT5_API = ['pyqt5']
+#: names of the expected PyQt4 api
+PYQT4_API = [
+    'pyqt',  # name used in IPython.qt
+    'pyqt4'  # pyqode.qt original name
+]
+#: names of the expected PySide api
+PYSIDE_API = ['pyside']
 
 
 class PythonQtError(Exception):
+
     """
     Error raise if no bindings could be selected
     """
@@ -103,20 +107,20 @@ def autodetect():
     try:
         logging.getLogger(__name__).debug('trying PyQt5')
         import PyQt5
-        os.environ[QT_API] = PYQT5_API
+        os.environ[QT_API] = PYQT5_API[0]
         logging.getLogger(__name__).debug('imported PyQt5')
     except ImportError:
         try:
             logging.getLogger(__name__).debug('trying PyQt4')
             setup_apiv2()
             import PyQt4
-            os.environ[QT_API] = PYQT4_API
+            os.environ[QT_API] = PYQT4_API[0]
             logging.getLogger(__name__).debug('imported PyQt4')
         except ImportError:
             try:
                 logging.getLogger(__name__).debug('trying PySide')
                 import PySide
-                os.environ[QT_API] = PYSIDE_API
+                os.environ[QT_API] = PYSIDE_API[0]
                 logging.getLogger(__name__).debug('imported PySide')
             except ImportError:
                 raise PythonQtError('No Qt bindings could be found')
@@ -125,21 +129,21 @@ def autodetect():
 if QT_API in os.environ:
     # check if the selected QT_API is available
     try:
-        if os.environ[QT_API].lower() == PYQT5_API.lower():
+        if os.environ[QT_API].lower() in PYQT5_API:
             logging.getLogger(__name__).debug('importing PyQt5')
             import PyQt5
-            os.environ[QT_API] = PYQT5_API
+            os.environ[QT_API] = PYQT5_API[0]
             logging.getLogger(__name__).debug('imported PyQt5')
-        elif os.environ[QT_API].lower() == PYQT4_API.lower():
+        elif os.environ[QT_API].lower() in PYQT4_API:
             logging.getLogger(__name__).debug('importing PyQt4')
             setup_apiv2()
             import PyQt4
-            os.environ[QT_API] = PYQT4_API
+            os.environ[QT_API] = PYQT4_API[0]
             logging.getLogger(__name__).debug('imported PyQt4')
-        elif os.environ[QT_API].lower() == PYSIDE_API.lower():
+        elif os.environ[QT_API].lower() in PYSIDE_API:
             logging.getLogger(__name__).debug('importing PySide')
             import PySide
-            os.environ[QT_API] = PYSIDE_API
+            os.environ[QT_API] = PYSIDE_API[0]
             logging.getLogger(__name__).debug('imported PySide')
     except ImportError:
         logging.getLogger(__name__).warning(

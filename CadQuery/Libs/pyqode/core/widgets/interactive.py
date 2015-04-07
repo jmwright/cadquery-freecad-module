@@ -45,16 +45,13 @@ class InteractiveConsole(QTextEdit):
         self._app_msg_col = QColor("#4040FF")
         self._stdin_col = QColor("#22AA22")
         self._stderr_col = QColor("#FF0000")
-        self._process = None
+        self._write_app_messages = True
+        self._process_name = ''
+        self.process = None
         self._args = None
         self._usr_buffer = ""
         self._clear_on_start = True
-        self.process = QProcess()
         self._merge_outputs = False
-        self.process.finished.connect(self._on_process_finished)
-        self.process.error.connect(self._write_error)
-        self.process.readyReadStandardError.connect(self._on_stderr)
-        self.process.readyReadStandardOutput.connect(self._on_stdout)
         self._running = False
         self._writer = self.write
         self._user_stop = False
@@ -94,6 +91,14 @@ class InteractiveConsole(QTextEdit):
             locale.getpreferredencoding())
         _logger().debug('%s', txt)
         self._writer(self, txt, self.stderr_color)
+
+    @property
+    def write_app_messages(self):
+        return self._write_app_messages
+
+    @write_app_messages.setter
+    def write_app_messages(self, value):
+        self._write_app_messages = value
 
     @property
     def background_color(self):
@@ -220,6 +225,11 @@ class InteractiveConsole(QTextEdit):
         if args is None:
             args = []
         if not self._running:
+            self.process = QProcess()
+            self.process.finished.connect(self._on_process_finished)
+            self.process.error.connect(self._write_error)
+            self.process.readyReadStandardError.connect(self._on_stderr)
+            self.process.readyReadStandardOutput.connect(self._on_stdout)
             if cwd:
                 self.process.setWorkingDirectory(cwd)
             e = self.process.systemEnvironment()
@@ -231,13 +241,13 @@ class InteractiveConsole(QTextEdit):
                 ev.insert(k, v)
             self.process.setProcessEnvironment(ev)
             self._running = True
-            self._process = process
+            self._process_name = process
             self._args = args
             if self._clear_on_start:
                 self.clear()
             self._user_stop = False
-            self.process.start(process, args)
             self._write_started()
+            self.process.start(process, args)
         else:
             _logger().warning('a process is already running')
 
@@ -246,9 +256,11 @@ class InteractiveConsole(QTextEdit):
         Stop the process (by killing it).
         """
         _logger().debug('killing process')
-        self._user_stop = True
-        self.process.kill()
-        self.setReadOnly(True)
+        if self.process is not None:
+            self._user_stop = True
+            self.process.kill()
+            self.setReadOnly(True)
+            self._running = False
 
     def keyPressEvent(self, event):
         if event.key() == Qt.Key_Return or event.key() == Qt.Key_Enter:
@@ -274,9 +286,10 @@ class InteractiveConsole(QTextEdit):
 
     def _on_process_finished(self, exit_code, exit_status):
         if not self._user_stop:
-            self._writer(
-                self, "\nProcess finished with exit code %d" %
-                exit_code, self._app_msg_col)
+            if self._write_app_messages:
+                self._writer(
+                    self, "\nProcess finished with exit code %d" %
+                    exit_code, self._app_msg_col)
         self._running = False
         _logger().debug('process finished (exit_code=%r, exit_status=%r)',
                         exit_code, exit_status)
@@ -284,8 +297,10 @@ class InteractiveConsole(QTextEdit):
         self.setReadOnly(True)
 
     def _write_started(self):
+        if not self._write_app_messages:
+            return
         self._writer(self, "{0} {1}\n".format(
-            self._process, " ".join(self._args)), self._app_msg_col)
+            self._process_name, " ".join(self._args)), self._app_msg_col)
         self._running = True
         _logger().debug('process started')
 
@@ -295,7 +310,7 @@ class InteractiveConsole(QTextEdit):
                          self.app_msg_color)
         else:
             self._writer(self, "Failed to start {0} {1}\n".format(
-                self._process, " ".join(self._args)), self.app_msg_color)
+                self._process_name, " ".join(self._args)), self.app_msg_color)
             err = PROCESS_ERROR_STRING[error]
             self._writer(self, "Error: %s" % err, self.stderr_color)
             _logger().debug('process error: %s', err)

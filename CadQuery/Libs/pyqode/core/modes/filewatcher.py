@@ -3,8 +3,10 @@
 Contains the mode that control the external changes of file.
 """
 import os
+from pyqode.core.api import TextHelper
 from pyqode.core.api.mode import Mode
 from pyqode.qt import QtCore, QtWidgets
+from pyqode.core.cache import Cache
 
 
 class FileWatcherMode(Mode, QtCore.QObject):
@@ -57,9 +59,6 @@ class FileWatcherMode(Mode, QtCore.QObject):
         if state:
             self.editor.new_text_set.connect(self._update_mtime)
             self.editor.new_text_set.connect(self._timer.start)
-            # self.editor.text_saved.connect(self._update_mtime)
-            # self.editor.text_saved.connect(self._timer.start)
-            # self.editor.text_saving.connect(self._timer.stop)
             self.editor.text_saving.connect(self._cancel_next_change)
             self.editor.text_saved.connect(self._restart_monitoring)
             self.editor.focused_in.connect(self._check_for_pending)
@@ -67,9 +66,6 @@ class FileWatcherMode(Mode, QtCore.QObject):
             self._timer.stop()
             self.editor.new_text_set.connect(self._update_mtime)
             self.editor.new_text_set.connect(self._timer.start)
-            # self.editor.text_saved.disconnect(self._update_mtime)
-            # self.editor.text_saved.disconnect(self._timer.start)
-            # self.editor.text_saving.disconnect(self._timer.stop)
             self.editor.text_saving.disconnect(self._cancel_next_change)
             self.editor.text_saved.disconnect(self._restart_monitoring)
             self.editor.focused_in.disconnect(self._check_for_pending)
@@ -147,6 +143,12 @@ class FileWatcherMode(Mode, QtCore.QObject):
         """
         def inner_action(*args):
             """ Inner action: open file """
+            # cache cursor position before reloading so that the cursor position
+            # is restored automatically after reload has finished.
+            # See OpenCobolIDE/OpenCobolIDE#97
+            Cache().set_cursor_position(
+                self.editor.file.path,
+                TextHelper(self.editor).cursor_position())
             self.editor.file.open(self.editor.file.path)
             self.file_reloaded.emit()
 

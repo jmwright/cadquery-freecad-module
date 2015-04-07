@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """ Contains the AutoCompleteMode """
 import logging
+from pyqode.qt import QtCore
 from pyqode.core.api import TextHelper
 from pyqode.core.api.mode import Mode
 
@@ -71,10 +72,29 @@ class AutoCompleteMode(Mode):
         next_char = TextHelper(self.editor).get_right_character()
         self.logger.debug('next char: %s', next_char)
         ignore = False
-        if txt and next_char == txt and next_char in self.MAPPING:
+        if event.key() == QtCore.Qt.Key_Backspace:
+            # get the character that will get deleted
+            tc = self.editor.textCursor()
+            pos = tc.position()
+            tc.movePosition(tc.Left)
+            tc.movePosition(tc.Right, tc.KeepAnchor)
+            del_char = tc.selectedText()
+            if del_char in self.MAPPING and self.MAPPING[del_char] == next_char:
+                tc.beginEditBlock()
+                tc.movePosition(tc.Right, tc.KeepAnchor)
+                tc.insertText('')
+                tc.setPosition(pos - 2)
+                tc.endEditBlock()
+                self.editor.setTextCursor(tc)
+                ignore = True
+        elif txt and next_char == txt and next_char in self.MAPPING:
             ignore = True
         elif event.text() == ')' or event.text() == ']' or event.text() == '}':
-            if next_char == ')' or next_char == ']' or next_char == '}':
+            # if typing the same symbol twice, the symbol should not be written
+            # and the cursor moved just after the char
+            # e.g. if you type ) just before ), the cursor will just move after
+            # the existing )
+            if next_char == event.text():
                 ignore = True
         if ignore:
             event.accept()

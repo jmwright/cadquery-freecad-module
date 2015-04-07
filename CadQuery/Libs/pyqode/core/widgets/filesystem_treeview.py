@@ -34,14 +34,13 @@ class FileSystemTreeView(QtWidgets.QTreeView):
         Excludes :attr:`ignored_directories` and :attr:`ignored_extensions`
         from the file system model.
         """
-        #: The list of directories to exclude
-        ignored_directories = ['__pycache__']
-        #: The list of file extension to exclude
-        ignored_extensions = ['.pyc', '.pyd', '.so', '.dll', '.exe',
-                              '.egg-info', '.coverage', '.DS_Store']
-
         def __init__(self):
             super(FileSystemTreeView.FilterProxyModel, self).__init__()
+            #: The list of directories to ignore
+            self.ignored_directories = ['__pycache__']
+            #: The list of file extension to exclude
+            self.ignored_extensions = ['.pyc', '.pyd', '.so', '.dll', '.exe',
+                                  '.egg-info', '.coverage', '.DS_Store']
             self._ignored_unused = []
 
         def set_root_path(self, path):
@@ -98,9 +97,10 @@ class FileSystemTreeView(QtWidgets.QTreeView):
         self.customContextMenuRequested.connect(self._show_context_menu)
         self.helper = FileSystemHelper(self)
         self.setSelectionMode(self.ExtendedSelection)
+        self._ignored_extensions = []
+        self._ignored_directories = []
 
-    @classmethod
-    def ignore_directories(cls, *directories):
+    def ignore_directories(self, *directories):
         """
         Adds the specified directories to the list of ignored directories.
 
@@ -109,10 +109,9 @@ class FileSystemTreeView(QtWidgets.QTreeView):
         :param directories: the directories to ignore
         """
         for d in directories:
-            cls.FilterProxyModel.ignored_directories.append(d)
+            self._ignored_directories.append(d)
 
-    @classmethod
-    def ignore_extensions(cls, *extensions):
+    def ignore_extensions(self, *extensions):
         """
         Adds the specified extensions to the list of ignored directories.
 
@@ -123,7 +122,7 @@ class FileSystemTreeView(QtWidgets.QTreeView):
         .. note:: extension must have the dot: '.py' and not 'py'
         """
         for d in extensions:
-            cls.FilterProxyModel.ignored_extensions.append(d)
+            self._ignored_extensions.append(d)
 
     def set_context_menu(self, context_menu):
         """
@@ -146,6 +145,10 @@ class FileSystemTreeView(QtWidgets.QTreeView):
             path = os.path.abspath(os.path.join(path, os.pardir))
         self._fs_model_source = QtWidgets.QFileSystemModel()
         self._fs_model_proxy = self.FilterProxyModel()
+        for item in self._ignored_directories:
+            self._fs_model_proxy.ignored_directories.append(item)
+        for item in self._ignored_extensions:
+            self._fs_model_proxy.ignored_extensions.append(item)
         self._fs_model_proxy.setSourceModel(self._fs_model_source)
         self.setModel(self._fs_model_proxy)
         self._fs_model_proxy.set_root_path(path)
@@ -519,7 +522,15 @@ class FileSystemContextMenu(QtWidgets.QMenu):
         self.action_delete.triggered.connect(self._on_delete_triggered)
         self.addAction(self.action_delete)
         self.addSeparator()
-        action = self.addAction('Show in explorer')
+
+        system = platform.system()
+        if system == 'Windows':
+            text = 'Open in explorer'
+        elif system == 'Darwin':
+            text = 'Open in finder'
+        else:
+            text = 'Show in %s' % self.get_linux_file_explorer().capitalize()
+        action = self.addAction(text)
         action.triggered.connect(self._on_show_in_explorer_triggered)
 
     def get_new_user_actions(self):
@@ -564,13 +575,20 @@ class FileSystemContextMenu(QtWidgets.QMenu):
     def _on_create_file_triggered(self):
         self.tree_view.helper.create_file()
 
+    def get_linux_file_explorer(self):
+        output = subprocess.check_output(
+            ['xdg-mime', 'query', 'default', 'inode/directory']).decode()
+        if output:
+            explorer = output.splitlines()[0].replace(
+                '.desktop', '').split('.')[-1].lower()
+            return explorer
+        return 'nautilus'
+
     def _on_show_in_explorer_triggered(self):
         path = self.tree_view.helper.get_current_path()
         system = platform.system()
         if system == 'Linux':
-            output = subprocess.check_output(
-                ['xdg-mime', 'query', 'default', 'inode/directory']).decode()
-            explorer = output.splitlines()[0].replace('.desktop', '')
+            explorer = self.get_linux_file_explorer()
             if explorer in ['nautilus', 'dolphin']:
                 subprocess.Popen([explorer, '--select', path])
             else:

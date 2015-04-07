@@ -7,6 +7,7 @@ import logging
 import os
 import tempfile
 import jedi
+from pyqode.core.share import Definition
 
 
 def _logger():
@@ -73,66 +74,6 @@ def goto_assignments(request_data):
 _old_definitions = {}
 
 
-class Definition(object):
-    """
-    Represents a defined name in a python source code (import, function, class,
-    method). Definition usually form a tree limited to 2 levels (we stop at the
-    method level).
-    """
-    def __init__(self, name='', icon='', line=1, column=0, full_name=''):
-        #: Icon resource name associated with the definition, can be None
-        self.icon = icon
-        #: Definition name (name of the class, method, variable)
-        self.name = name
-        #: The line of the definition in the current editor text
-        self.line = line
-        #: The column of the definition in the current editor text
-        self.column = column
-        #: Symbol name + parent name (for methods and class variables)
-        self.full_name = full_name
-        #: Possible list of children (only classes have children)
-        self.children = []
-        if self.full_name == "":
-            self.full_name = self.name
-
-    def add_child(self, definition):
-        """
-        Adds a child definition
-        """
-        self.children.append(definition)
-
-    def to_dict(self):
-        """
-        Serialises a definition to a dictionary, ready for json.
-
-        Children are serialised recursively.
-        """
-        ddict = {'name': self.name, 'icon': self.icon,
-                 'line': self.line, 'column': self.column,
-                 'full_name': self.full_name, 'children': []}
-        for child in self.children:
-            ddict['children'].append(child.to_dict())
-        return ddict
-
-    def from_dict(self, ddict):
-        """
-        Deserialise the definition from a simple dict.
-        """
-        self.name = ddict['name']
-        self.icon = ddict['icon']
-        self.line = ddict['line']
-        self.column = ddict['column']
-        self.full_name = ddict['full_name']
-        self.children[:] = []
-        for child_dict in ddict['children']:
-            self.children.append(Definition().from_dict(child_dict))
-        return self
-
-    def __repr__(self):
-        return 'Definition(%r, %r, %r, %r)' % (self.name, self.icon,
-                                               self.line, self.column)
-
-
 def _extract_def(d):
     d_line, d_column = d.start_pos
     # use full name for import type
@@ -144,8 +85,8 @@ def _extract_def(d):
             name = d.name
     else:
         name = d.name
-    definition = Definition(name, icon_from_typename(d.name, d.type),
-                            d_line - 1, d_column, d.full_name)
+    definition = Definition(name, d_line - 1, d_column,
+                            icon_from_typename(d.name, d.type))
     # check for methods in class or nested methods/classes
     if d.type == "class" or d.type == 'function':
         try:
@@ -210,7 +151,7 @@ def run_pep8(request_data):
     path = request_data['path']
     # setup our custom style guide with our custom checker which returns a list
     # of strings instread of spitting the results at stdout
-    pep8style = pep8.StyleGuide(parse_argv=False, config_file=True,
+    pep8style = pep8.StyleGuide(parse_argv=False, config_file='',
                                 checker_class=CustomChecker)
     try:
         results = pep8style.input_file(path, lines=code.splitlines(True))

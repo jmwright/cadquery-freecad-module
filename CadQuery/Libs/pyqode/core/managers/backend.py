@@ -27,6 +27,9 @@ class BackendManager(Manager):
         - send_request
 
     """
+    LAST_PORT = None
+    LAST_PROCESS = None
+    SHARE_COUNT = 0
 
     def __init__(self, editor):
         super(BackendManager, self).__init__(editor)
@@ -35,6 +38,7 @@ class BackendManager(Manager):
         self.server_script = None
         self.interpreter = None
         self.args = None
+        self._shared = False
 
     @staticmethod
     def pick_free_port():
@@ -45,7 +49,8 @@ class BackendManager(Manager):
         test_socket.close()
         return free_port
 
-    def start(self, script, interpreter=sys.executable, args=None, error_callback=None):
+    def start(self, script, interpreter=sys.executable, args=None,
+              error_callback=None, reuse=False):
         """
         Starts the backend process.
 
@@ -65,29 +70,46 @@ class BackendManager(Manager):
             application (frozen backends do not require an interpreter).
         :param args: list of additional command line args to use to start
             the backend process.
+        :param reuse: True to reuse an existing backend process. WARNING: to
+            use this, your application must have one single server script. If
+            you're creating an app which supports multiple programming languages
+            you will need to merge all backend scripts into one single script,
+            otherwise the wrong script might be picked up).
         """
-        if self.running:
-            self.stop()
-        self.server_script = script
-        self.interpreter = interpreter
-        self.args = args
-        backend_script = script.replace('.pyc', '.py')
-        self._port = self.pick_free_port()
-        if hasattr(sys, "frozen") and not backend_script.endswith('.py'):
-            # frozen backend script on windows/mac does not need an interpreter
-            program = backend_script
-            pgm_args = [str(self._port)]
+        self._shared = reuse
+        if reuse and BackendManager.SHARE_COUNT:
+            self._port = BackendManager.LAST_PORT
+            self._process = BackendManager.LAST_PROCESS
+            BackendManager.SHARE_COUNT += 1
         else:
-            program = interpreter
-            pgm_args = [backend_script, str(self._port)]
-        if args:
-            pgm_args += args
-        self._process = BackendProcess(self.editor)
-        if error_callback:
-            self._process.error.connect(error_callback)
-        self._process.start(program, pgm_args)
-        _logger().info('starting backend process: %s %s', program,
-                       ' '.join(pgm_args))
+            if self.running:
+                self.stop()
+            self.server_script = script
+            self.interpreter = interpreter
+            self.args = args
+            backend_script = script.replace('.pyc', '.py')
+            self._port = self.pick_free_port()
+            if hasattr(sys, "frozen") and not backend_script.endswith('.py'):
+                # frozen backend script on windows/mac does not need an
+                # interpreter
+                program = backend_script
+                pgm_args = [str(self._port)]
+            else:
+                program = interpreter
+                pgm_args = [backend_script, str(self._port)]
+            if args:
+                pgm_args += args
+            self._process = BackendProcess(self.editor)
+            if error_callback:
+                self._process.error.connect(error_callback)
+            self._process.start(program, pgm_args)
+
+            if reuse:
+                BackendManager.LAST_PROCESS = self._process
+                BackendManager.LAST_PORT = self._port
+                BackendManager.SHARE_COUNT += 1
+            _logger().info('starting backend process: %s %s', program,
+                           ' '.join(pgm_args))
 
     def stop(self):
         """
@@ -95,6 +117,10 @@ class BackendManager(Manager):
         """
         if self._process is None:
             return
+        if self._shared:
+            BackendManager.SHARE_COUNT -= 1
+            if BackendManager.SHARE_COUNT:
+                return
         _logger().debug('stopping backend process')
         # close all sockets
         for socket in self._sockets:
