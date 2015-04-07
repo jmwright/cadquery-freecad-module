@@ -12,11 +12,10 @@ ZIP = os.path.join(os.getcwd(), 'libs.zip')
 
 if len(sys.argv) == 2 and sys.argv[1] == 'gen':
     #--- gen zip file
-    import jedi, pep8, pyqode, pyqode.core, pyqode.python, pyqode.qt, pygments, frosted, pies, builtins, future, \
-        docutils
+    import jedi, pep8, pyqode, pyqode.core, pyqode.python, pyqode.qt, pygments, frosted, pies, builtins, future, pyflakes, docutils
     from qidle.system import embed_package_into_zip
     embed_package_into_zip([jedi, pep8, pyqode, pyqode.core, pyqode.python,
-                            pyqode.qt, pygments, frosted, pies, builtins, future, docutils], ZIP)
+                            pyqode.qt, pygments, pyflakes, builtins, future, docutils], ZIP)
 else:
     # remove all pyqode path from sys.path (to make sure the package are
     # imported from the zip archive)
