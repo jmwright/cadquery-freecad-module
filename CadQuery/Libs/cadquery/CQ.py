@@ -1261,7 +1261,7 @@ class Workplane(CQ):
         #attempt to consolidate wires together.
         consolidated = n.consolidateWires()
 
-        rotatedWires = self.plane.rotateShapes(consolidated.wires().vals(),matrix)
+        rotatedWires = self.plane.rotateShapes(consolidated.wires().vals(), matrix)
 
         for w in rotatedWires:
             consolidated.objects.append(w)
@@ -1269,6 +1269,7 @@ class Workplane(CQ):
 
         #attempt again to consolidate all of the wires
         c = consolidated.consolidateWires()
+
         return c
 
     def mirrorY(self):
@@ -1288,7 +1289,6 @@ class Workplane(CQ):
 
             Future Enhancements:
                 mirrorX().mirrorY() should work but doesnt, due to some FreeCAD weirdness
-
         """
         tm = Matrix()
         tm.rotateY(math.pi)
@@ -1307,7 +1307,6 @@ class Workplane(CQ):
 
             Future Enhancements:
                 mirrorX().mirrorY() should work but doesnt, due to some FreeCAD weirdness
-
         """
         tm = Matrix()
         tm.rotateX(math.pi)
@@ -1349,11 +1348,9 @@ class Workplane(CQ):
             If possible, a new object with the results are returned.
             if not possible, the wires remain separated
 
-            FreeCAD has a bug in Part.Wire([]) which does not create wires/edges properly somtimes
-            Additionally, it has a bug where a profile compose of two wires ( rathre than one )
-            also does not work properly
-
-            together these are a real problem.
+            FreeCAD has a bug in Part.Wire([]) which does not create wires/edges properly sometimes
+            Additionally, it has a bug where a profile compose of two wires ( rather than one )
+            also does not work properly. Together these are a real problem.
         """
         wires = self.wires().vals()
         if len(wires) < 2:
@@ -2272,11 +2269,48 @@ class Workplane(CQ):
             return self.union(boxes)
 
     def sphere(self, radius, direct=(0, 0, 1), angle1=-90, angle2=90, angle3=360, centered=(True, True, True), combine=True):
+        """
+        Returns a 3D sphere with the specified radius for each point on the stack
+
+        :param radius: The radius of the sphere
+        :type radius: float > 0
+        :param direct: The direction axis for the creation of the sphere
+        :type direct: A three-tuple
+        :param angle1: The first angle to sweep the sphere arc through
+        :type angle1: float > 0
+        :param angle2: The second angle to sweep the sphere arc through
+        :type angle2: float > 0
+        :param angle3: The third angle to sweep the sphere arc through
+        :type angle3: float > 0
+        :param centered: A three-tuple of booleans that determines whether the sphere is centered on each axis origin
+        :param combine: Whether the results should be combined with other solids on the stack (and each other)
+        :type combine: true to combine shapes, false otherwise
+        :return: A sphere object for each point on the stack
+
+        Centered is a tuple that describes whether the sphere should be centered on the x,y, and z axes.  If true,
+        the sphere is centered on the respective axis relative to the workplane origin, if false, the workplane center
+        will represent the lower bound of the resulting sphere
+
+        One sphere is created for each item on the current stack. If no items are on the stack, one box using
+        the current workplane center is created.
+
+        If combine is true, the result will be a single object on the stack:
+            If a solid was found in the chain, the result is that solid with all spheres produced fused onto it
+            otherwise, the result is the combination of all the produced boxes
+
+        If combine is false, the result will be a list of the spheres produced
+        """
+
         # Convert the direction tuple to a vector, if needed
         if isinstance(direct, tuple):
             direct = Vector(direct)
 
         def _makesphere(pnt):
+            """
+            Inner function that is used to create a sphere for each point/object on the workplane
+            :param pnt: The center point for the sphere
+            :return: A CQ Solid object representing a sphere
+            """
             (xp, yp, zp) = pnt.toTuple()
 
             if centered[0]:
@@ -2288,6 +2322,7 @@ class Workplane(CQ):
 
             return Solid.makeSphere(radius, Vector(xp, yp, zp), direct, angle1, angle2, angle3)
 
+        # We want a sphere for each point on the workplane
         spheres = self.eachpoint(_makesphere, True)
 
         # If we don't need to combine everything, just return the created spheres
