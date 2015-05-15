@@ -1,5 +1,5 @@
 """
-    Copyright (C) 2011-2014  Parametric Products Intellectual Holdings, LLC
+    Copyright (C) 2011-2015  Parametric Products Intellectual Holdings, LLC
 
     This file is part of CadQuery.
 
@@ -1160,7 +1160,7 @@ class Workplane(CQ):
         return self.newObject([self.plane.toWorldCoords(newCenter)])
 
 
-    def spline(self,listOfXYTuple,forConstruction=False):
+    def spline(self, listOfXYTuple, forConstruction=False):
         """
             Create a spline interpolated through the provided points.
 
@@ -1196,7 +1196,7 @@ class Workplane(CQ):
         gstartPoint = self._findFromPoint(False)
         gEndPoint = self.plane.toWorldCoords(listOfXYTuple[-1])
 
-        vecs = [self.plane.toWorldCoords(p) for p in listOfXYTuple ]
+        vecs = [self.plane.toWorldCoords(p) for p in listOfXYTuple]
         allPoints = [gstartPoint] + vecs
 
         e = Edge.makeSpline(allPoints)
@@ -1336,7 +1336,7 @@ class Workplane(CQ):
             CadQuery tracks edges as they are drawn, and automatically combines them into wires
             when the user does an operation that needs it.
 
-            Similarly, cadQuery tracks pending wires, and automaticlaly combines them into faces
+            Similarly, cadQuery tracks pending wires, and automatically combines them into faces
             when necessary to make a solid.
         """
         self.ctx.pendingWires.append(wire)
@@ -1349,7 +1349,7 @@ class Workplane(CQ):
             if not possible, the wires remain separated
 
             FreeCAD has a bug in Part.Wire([]) which does not create wires/edges properly sometimes
-            Additionally, it has a bug where a profile compose of two wires ( rather than one )
+            Additionally, it has a bug where a profile composed of two wires ( rather than one )
             also does not work properly. Together these are a real problem.
         """
         wires = self.wires().vals()
