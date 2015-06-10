@@ -98,6 +98,7 @@ class CadQueryCloseScript:
 
         #Clear our script and whatever was rendered by it out
         cqCodePane.file.close()
+        cqCodePane.close()
 
 class CadQueryExecuteExample:
     exFile = None
