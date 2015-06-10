@@ -1,6 +1,6 @@
 """CadQuery GUI init module for FreeCAD
    This adds a workbench with a scripting editor to FreeCAD's GUI."""
-# (c) 2014 Jeremy Wright LGPL v3
+# (c) 2014-2015 Jeremy Wright LGPL v3
 
 import FreeCAD, FreeCADGui
 from Gui.Command import *
@@ -100,16 +100,12 @@ class CadQueryWorkbench (Workbench):
         #Getting the main window will allow us to start setting things up the way we want
         mw = FreeCADGui.getMainWindow()
 
-        #Find all of the docks that are open so we can close them (except the Python console)
+        # TODO: Fix the extra newline foolishness with the output in the report view
+
         dockWidgets = mw.findChildren(QtGui.QDockWidget)
 
         for widget in dockWidgets:
-            if widget.objectName() != "Report view":
-                #Only hide the widget if it isn't already hidden
-                if not widget.isHidden():
-                    widget.setVisible(False)
-                    self.closedWidgets.append(widget)
-            else:
+            if widget.objectName() == "Report view":
                 widget.setVisible(True)
 
         #Add a new widget here that's a simple text area to begin with. It will become the CQ coding area
@@ -139,9 +135,27 @@ class CadQueryWorkbench (Workbench):
         #Add the text area to our dock widget
         cqCodeWidget.setWidget(codePane)
 
-        #Open and execute our introduction example
+        #Set up the paths to allow us to open and execute our introduction example
         example_path = os.path.join(module_base_path, 'Examples')
         example_path = os.path.join(example_path, 'Ex000_Introduction.py')
+
+        # TODO: Enable this for FreeCAD 0.16 or greater
+        # Make sure we get the correct MdiArea object
+        # for child in mw.children():
+        #     if child.__class__ == QtGui.QMdiArea:
+        #         mdiArea = child
+        #
+        # # Set up the editor in a new subwindow
+        # #sub_window = QtGui.QMdiSubWindow(mw.centralWidget())
+        # sub_window = QtGui.QMdiSubWindow(mdiArea)
+        # #sub_window.setWidget(codePane)
+        # sub_window.setWidget(QtGui.QPlainTextEdit())
+        # sub_window.setWindowTitle('Ex000_Introduction.py')
+        # sub_window.setWindowIcon(QtGui.QIcon(':/icons/applications-python.svg'))
+        #
+        # #mw.centralWidget().addSubWindow(sub_window)
+        # mdiArea.addSubWindow(sub_window)
+
         ImportCQ.open(example_path)
         docname = os.path.splitext(os.path.basename(example_path))[0]
         FreeCAD.newDocument(docname)
@@ -161,11 +175,21 @@ class CadQueryWorkbench (Workbench):
 
     def Deactivated(self):
         import Gui.Command
+        from PySide import QtGui
 
         #Put the UI back the way we found it
         FreeCAD.Console.PrintMessage("\r\nCadQuery Workbench Deactivated\r\n")
 
         Gui.Command.CadQueryCloseScript().Activated()
+
+        #Getting the main window will allow us to start setting things up the way we want
+        mw = FreeCADGui.getMainWindow()
+
+        dockWidgets = mw.findChildren(QtGui.QDockWidget)
+
+        for widget in dockWidgets:
+            if widget.objectName() == "cqCodeView":
+                mw.removeDockWidget(widget)
 
     @staticmethod
     def ListExamples():

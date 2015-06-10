@@ -1,5 +1,5 @@
 """Adds all of the commands that are used for the menus of the CadQuery module"""
-# (c) 2014 Jeremy Wright LGPL v3
+# (c) 2014-2015 Jeremy Wright LGPL v3
 
 import imp, os, sys, tempfile
 import FreeCAD, FreeCADGui
@@ -98,7 +98,6 @@ class CadQueryCloseScript:
 
         #Clear our script and whatever was rendered by it out
         cqCodePane.file.close()
-
 
 class CadQueryExecuteExample:
     exFile = None

@@ -1,0 +1,337 @@
+DEBUG:pyqode.qt:importing PySide
+DEBUG:pyqode.qt:imported PySide
+INFO:pyqode.qt:using pyside
+INFO:pyqode.core.managers.backend:starting backend process: python2.7 /usr/lib/freecad/Mod/CadQuery/cq_server.py 35380 -s /usr/lib/freecad/Mod/CadQuery/Libs
+DEBUG:pyqode.core.managers.modes:adding mode 'OutlineMode'
+DEBUG:pyqode.core.managers.panels:adding panel FoldingPanel at 'left'
+DEBUG:pyqode.core.managers.panels:refresh_panels
+DEBUG:pyqode.core.managers.panels:panel FoldingPanel installed
+DEBUG:pyqode.core.managers.panels:adding panel LineNumberPanel at 'left'
+DEBUG:pyqode.core.managers.panels:refresh_panels
+DEBUG:pyqode.core.managers.panels:panel LineNumberPanel installed
+DEBUG:pyqode.core.managers.panels:adding panel CheckerPanel at 'left'
+DEBUG:pyqode.core.managers.panels:refresh_panels
+DEBUG:pyqode.core.managers.panels:panel CheckerPanel installed
+DEBUG:pyqode.core.managers.panels:adding panel GlobalCheckerPanel at 'right'
+DEBUG:pyqode.core.managers.panels:refresh_panels
+DEBUG:pyqode.core.managers.panels:panel GlobalCheckerPanel installed
+DEBUG:pyqode.core.managers.panels:adding panel SearchAndReplacePanel at 'bottom'
+DEBUG:pyqode.core.managers.panels:refresh_panels
+DEBUG:pyqode.core.api.panel:SearchAndReplacePanel visibility changed
+DEBUG:pyqode.core.managers.panels:refresh_panels
+DEBUG:pyqode.core.managers.panels:panel SearchAndReplacePanel installed
+DEBUG:pyqode.core.api.panel:EncodingPanel visibility changed
+DEBUG:pyqode.core.managers.panels:adding panel EncodingPanel at 'top'
+DEBUG:pyqode.core.managers.panels:refresh_panels
+DEBUG:pyqode.core.managers.panels:panel EncodingPanel installed
+DEBUG:pyqode.core.managers.panels:adding panel QuickDocPanel at 'bottom'
+DEBUG:pyqode.core.managers.panels:refresh_panels
+DEBUG:pyqode.core.api.panel:QuickDocPanel visibility changed
+DEBUG:pyqode.core.managers.panels:refresh_panels
+DEBUG:pyqode.core.managers.panels:panel QuickDocPanel installed
+DEBUG:pyqode.core.managers.modes:adding mode 'CaretLineHighlighterMode'
+DEBUG:pyqode.core.managers.modes:adding mode 'FileWatcherMode'
+DEBUG:pyqode.core.managers.modes:adding mode 'RightMarginMode'
+DEBUG:pyqode.core.managers.modes:adding mode 'ZoomMode'
+DEBUG:pyqode.core.managers.modes:adding mode 'SymbolMatcherMode'
+DEBUG:pyqode.core.managers.modes:adding mode 'CodeCompletionMode'
+DEBUG:pyqode.core.managers.modes:adding mode 'OccurrencesHighlighterMode'
+DEBUG:pyqode.core.managers.modes:adding mode 'SmartBackSpaceMode'
+DEBUG:pyqode.core.managers.modes:adding mode 'ExtendedSelectionMode'
+DEBUG:pyqode.core.managers.modes:adding mode 'CaseConverterMode'
+DEBUG:pyqode.core.managers.modes:adding mode 'PyAutoIndentMode'
+DEBUG:pyqode.core.managers.modes:adding mode 'PyAutoCompleteMode'
+DEBUG:pyqode.core.managers.modes:adding mode 'FrostedCheckerMode'
+DEBUG:pyqode.core.modes.checker [FrostedCheckerMode]:running analysis
+DEBUG:pyqode.core.managers.modes:adding mode 'PEP8CheckerMode'
+DEBUG:pyqode.core.modes.checker [PEP8CheckerMode]:running analysis
+DEBUG:pyqode.core.managers.modes:adding mode 'CalltipsMode'
+DEBUG:pyqode.core.managers.modes:adding mode 'PyIndenterMode'
+DEBUG:pyqode.core.managers.modes:adding mode 'GoToAssignmentsMode'
+DEBUG:pyqode.core.managers.modes:adding mode 'CommentsMode'
+DEBUG:pyqode.core.managers.modes:adding mode 'PythonSH'
+DEBUG:pyqode.core.managers.file:detecting mimetype for Ex000_Introduction.py
+DEBUG:pyqode.core.managers.file:mimetype detected: text/x-python
+DEBUG:pyqode.core.modes.checker [FrostedCheckerMode]:running analysis
+DEBUG:pyqode.core.modes.checker [PEP8CheckerMode]:running analysis
+INFO:pyqode.core.api.code_edit:setPlainText duration: 0.006855s
+INFO:pyqode.core.managers.backend:sending request, worker=<function defined_names at 0x7efddc9a91b8>
+DEBUG:pyqode.core.api.client:connecting to 127.0.0.1:35380
+DEBUG:pyqode.core.api.panel:FoldingPanel visibility changed
+DEBUG:pyqode.core.managers.panels:refresh_panels
+DEBUG:pyqode.core.api.panel:LineNumberPanel visibility changed
+DEBUG:pyqode.core.managers.panels:refresh_panels
+DEBUG:pyqode.core.api.panel:CheckerPanel visibility changed
+DEBUG:pyqode.core.managers.panels:refresh_panels
+DEBUG:pyqode.core.api.panel:GlobalCheckerPanel visibility changed
+DEBUG:pyqode.core.managers.panels:refresh_panels
+DEBUG:pyqode.core.api.code_edit:show event: PyCodeEdit(path=u'/usr/lib/freecad/Mod/CadQuery/Examples/Ex000_Introduction.py')
+INFO:pyqode.core.api.client:backend process started
+DEBUG:pyqode.core.api.client:connected to backend: 127.0.0.1:35380
+DEBUG:pyqode.core.api.client:sending request: {'data': {'path': u'/usr/lib/freecad/Mod/CadQuery/Examples/Ex000_Introduction.py', 'code': u'# This example is meant to be used from within the CadQuery module of FreeCAD.\n# From within FreeCAD, you can make changes to this script and then click\n# CadQuery > Execute Script, or you can press F2.\n# There are more examples in the Examples directory included with this module.\n# Ex026_Lego_Brick.py is highly recommended as a great example of what CadQuery\n# can do.\nimport cadquery\nfrom Helpers import show\n\n# The dimensions of the box. These can be modified rather than changing the\n# object\'s code directly.\nlength = 2.0\nheight = 1.0\nthickness = 1.0\n\n# Create a 3D box based on the dimension variables above\nresult = cadquery.Workplane("XY").box(length, height, thickness)\n\n# Render the solid\nshow(result)\n', 'encoding': u'UTF-8'}, 'worker': 'pyqode.python.backend.workers.defined_names', 'request_id': '1e7186db-d287-441f-a254-121368a5ff5b'}
+DEBUG:pyqode.core.api.client:reading header
+DEBUG:pyqode.core.api.client:header content: 490
+DEBUG:pyqode.core.api.client:reading payload data
+DEBUG:pyqode.core.api.client:remaining bytes to read: 490
+DEBUG:pyqode.core.api.client:490 bytes read
+DEBUG:pyqode.core.api.client:payload read: u'{"results": [{"column": 0, "line": 11, "children": [], "name": "length", "icon": ":/pyqode_python_icons/rc/var.png"}, {"column": 0, "line": 12, "children": [], "name": "height", "icon": ":/pyqode_python_icons/rc/var.png"}, {"column": 0, "line": 13, "children": [], "name": "thickness", "icon": ":/pyqode_python_icons/rc/var.png"}, {"column": 0, "line": 16, "children": [], "name": "result", "icon": ":/pyqode_python_icons/rc/var.png"}], "request_id": "1e7186db-d287-441f-a254-121368a5ff5b"}'
+DEBUG:pyqode.core.api.client:payload length: 490
+DEBUG:pyqode.core.api.client:decoding payload as json object
+DEBUG:pyqode.core.api.client:response received: {u'results': [{u'column': 0, u'line': 11, u'icon': u':/pyqode_python_icons/rc/var.png', u'children': [], u'name': u'length'}, {u'column': 0, u'line': 12, u'icon': u':/pyqode_python_icons/rc/var.png', u'children': [], u'name': u'height'}, {u'column': 0, u'line': 13, u'icon': u':/pyqode_python_icons/rc/var.png', u'children': [], u'name': u'thickness'}, {u'column': 0, u'line': 16, u'icon': u':/pyqode_python_icons/rc/var.png', u'children': [], u'name': u'result'}], u'request_id': u'1e7186db-d287-441f-a254-121368a5ff5b'}
+DEBUG:pyqode.core.modes.outline:Document structure changed
+DEBUG:pyqode.core.api.client:disconnected from backend: 127.0.0.1:35380
+INFO:pyqode.core.managers.backend:sending request, worker=<function run_pep8 at 0x7efddc9a92a8>
+DEBUG:pyqode.core.api.client:connecting to 127.0.0.1:35380
+DEBUG:pyqode.core.api.client:connected to backend: 127.0.0.1:35380
+DEBUG:pyqode.core.api.client:sending request: {'data': {'path': u'/usr/lib/freecad/Mod/CadQuery/Examples/Ex000_Introduction.py', 'code': u'# This example is meant to be used from within the CadQuery module of FreeCAD.\n# From within FreeCAD, you can make changes to this script and then click\n# CadQuery > Execute Script, or you can press F2.\n# There are more examples in the Examples directory included with this module.\n# Ex026_Lego_Brick.py is highly recommended as a great example of what CadQuery\n# can do.\nimport cadquery\nfrom Helpers import show\n\n# The dimensions of the box. These can be modified rather than changing the\n# object\'s code directly.\nlength = 2.0\nheight = 1.0\nthickness = 1.0\n\n# Create a 3D box based on the dimension variables above\nresult = cadquery.Workplane("XY").box(length, height, thickness)\n\n# Render the solid\nshow(result)\n', 'encoding': u'UTF-8'}, 'worker': 'pyqode.python.backend.workers.run_pep8', 'request_id': '24988c5a-7f1c-470c-950c-a6f1bcf7c8c5'}
+DEBUG:pyqode.core.api.client:reading header
+DEBUG:pyqode.core.api.client:header content: 69
+DEBUG:pyqode.core.api.client:reading payload data
+DEBUG:pyqode.core.api.client:remaining bytes to read: 69
+DEBUG:pyqode.core.api.client:69 bytes read
+DEBUG:pyqode.core.api.client:payload read: u'{"results": [], "request_id": "24988c5a-7f1c-470c-950c-a6f1bcf7c8c5"}'
+DEBUG:pyqode.core.api.client:payload length: 69
+DEBUG:pyqode.core.api.client:decoding payload as json object
+DEBUG:pyqode.core.api.client:response received: {u'results': [], u'request_id': u'24988c5a-7f1c-470c-950c-a6f1bcf7c8c5'}
+DEBUG:pyqode.core.modes.checker [PEP8CheckerMode]:adding 0 messages
+DEBUG:pyqode.core.api.client:disconnected from backend: 127.0.0.1:35380
+DEBUG:pyqode.core.modes.checker [PEP8CheckerMode]:finished
+INFO:pyqode.core.managers.backend:sending request, worker=<function defined_names at 0x7efddc9a91b8>
+DEBUG:pyqode.core.api.client:connecting to 127.0.0.1:35380
+DEBUG:pyqode.core.api.client:connected to backend: 127.0.0.1:35380
+DEBUG:pyqode.core.api.client:sending request: {'data': {'path': u'/usr/lib/freecad/Mod/CadQuery/Examples/Ex000_Introduction.py', 'code': u'# This example is meant to be used from within the CadQuery module of FreeCAD.\n# From within FreeCAD, you can make changes to this script and then click\n# CadQuery > Execute Script, or you can press F2.\n# There are more examples in the Examples directory included with this module.\n# Ex026_Lego_Brick.py is highly recommended as a great example of what CadQuery\n# can do.\nimport cadquery\nfrom Helpers import show\n\n# The dimensions of the box. These can be modified rather than changing the\n# object\'s code directly.\nlength = 2.0\nheight = 1.0\nthickness = 1.0\n\n# Create a 3D box based on the dimension variables above\nresult = cadquery.Workplane("XY").box(length, height, thickness)\n\n# Render the solid\nshow(result)\n', 'encoding': u'UTF-8'}, 'worker': 'pyqode.python.backend.workers.defined_names', 'request_id': '941244af-b241-4eb3-89ad-3cbfd46999f7'}
+INFO:pyqode.core.managers.backend:sending request, worker=<function findall at 0x7efdf4087410>
+DEBUG:pyqode.core.api.client:connecting to 127.0.0.1:35380
+DEBUG:pyqode.core.api.client:reading header
+DEBUG:pyqode.core.api.client:header content: 490
+DEBUG:pyqode.core.api.client:reading payload data
+DEBUG:pyqode.core.api.client:remaining bytes to read: 490
+DEBUG:pyqode.core.api.client:490 bytes read
+DEBUG:pyqode.core.api.client:payload read: u'{"results": [{"column": 0, "line": 11, "children": [], "name": "length", "icon": ":/pyqode_python_icons/rc/var.png"}, {"column": 0, "line": 12, "children": [], "name": "height", "icon": ":/pyqode_python_icons/rc/var.png"}, {"column": 0, "line": 13, "children": [], "name": "thickness", "icon": ":/pyqode_python_icons/rc/var.png"}, {"column": 0, "line": 16, "children": [], "name": "result", "icon": ":/pyqode_python_icons/rc/var.png"}], "request_id": "941244af-b241-4eb3-89ad-3cbfd46999f7"}'
+DEBUG:pyqode.core.api.client:payload length: 490
+DEBUG:pyqode.core.api.client:decoding payload as json object
+DEBUG:pyqode.core.api.client:response received: {u'results': [{u'column': 0, u'line': 11, u'icon': u':/pyqode_python_icons/rc/var.png', u'children': [], u'name': u'length'}, {u'column': 0, u'line': 12, u'icon': u':/pyqode_python_icons/rc/var.png', u'children': [], u'name': u'height'}, {u'column': 0, u'line': 13, u'icon': u':/pyqode_python_icons/rc/var.png', u'children': [], u'name': u'thickness'}, {u'column': 0, u'line': 16, u'icon': u':/pyqode_python_icons/rc/var.png', u'children': [], u'name': u'result'}], u'request_id': u'941244af-b241-4eb3-89ad-3cbfd46999f7'}
+DEBUG:pyqode.core.modes.outline:Document structure changed
+DEBUG:pyqode.core.api.client:disconnected from backend: 127.0.0.1:35380
+DEBUG:pyqode.core.api.client:connected to backend: 127.0.0.1:35380
+DEBUG:pyqode.core.api.client:sending request: {'data': {'regex': False, 'case_sensitive': True, 'string': u'# This example is meant to be used from within the CadQuery module of FreeCAD.\n# From within FreeCAD, you can make changes to this script and then click\n# CadQuery > Execute Script, or you can press F2.\n# There are more examples in the Examples directory included with this module.\n# Ex026_Lego_Brick.py is highly recommended as a great example of what CadQuery\n# can do.\nimport cadquery\nfrom Helpers import show\n\n# The dimensions of the box. These can be modified rather than changing the\n# object\'s code directly.\nlength = 2.0\nheight = 1.0\nthickness = 1.0\n\n# Create a 3D box based on the dimension variables above\nresult = cadquery.Workplane("XY").box(length, height, thickness)\n\n# Render the solid\nshow(result)\n', 'whole_word': True, 'sub': u'thickness'}, 'worker': 'pyqode.core.backend.workers.findall', 'request_id': 'c6181405-ad7c-43f2-ac0f-ecd39bfc4a7c'}
+DEBUG:pyqode.core.api.client:reading header
+DEBUG:pyqode.core.api.client:header content: 91
+DEBUG:pyqode.core.api.client:reading payload data
+DEBUG:pyqode.core.api.client:remaining bytes to read: 91
+DEBUG:pyqode.core.api.client:91 bytes read
+DEBUG:pyqode.core.api.client:payload read: u'{"results": [[542, 551], [670, 679]], "request_id": "c6181405-ad7c-43f2-ac0f-ecd39bfc4a7c"}'
+DEBUG:pyqode.core.api.client:payload length: 91
+DEBUG:pyqode.core.api.client:decoding payload as json object
+DEBUG:pyqode.core.api.client:response received: {u'results': [[542, 551], [670, 679]], u'request_id': u'c6181405-ad7c-43f2-ac0f-ecd39bfc4a7c'}
+DEBUG:pyqode.core.api.client:disconnected from backend: 127.0.0.1:35380
+INFO:pyqode.core.managers.backend:sending request, worker=<function run_frosted at 0x7efddc9a9320>
+DEBUG:pyqode.core.api.client:connecting to 127.0.0.1:35380
+DEBUG:pyqode.core.api.client:connected to backend: 127.0.0.1:35380
+DEBUG:pyqode.core.api.client:sending request: {'data': {'path': u'/usr/lib/freecad/Mod/CadQuery/Examples/Ex000_Introduction.py', 'code': u'# This example is meant to be used from within the CadQuery module of FreeCAD.\n# From within FreeCAD, you can make changes to this script and then click\n# CadQuery > Execute Script, or you can press F2.\n# There are more examples in the Examples directory included with this module.\n# Ex026_Lego_Brick.py is highly recommended as a great example of what CadQuery\n# can do.\nimport cadquery\nfrom Helpers import show\n\n# The dimensions of the box. These can be modified rather than changing the\n# object\'s code directly.\nlength = 2.0\nheight = 1.0\nthickness = 1.0\n\n# Create a 3D box based on the dimension variables above\nresult = cadquery.Workplane("XY").box(length, height, thickness)\n\n# Render the solid\nshow(result)\n', 'encoding': u'UTF-8'}, 'worker': 'pyqode.python.backend.workers.run_frosted', 'request_id': '882866ac-4f1c-4dc6-9e65-a53b603e3b5a'}
+DEBUG:pyqode.core.api.client:reading header
+DEBUG:pyqode.core.api.client:header content: 69
+DEBUG:pyqode.core.api.client:reading payload data
+DEBUG:pyqode.core.api.client:remaining bytes to read: 69
+DEBUG:pyqode.core.api.client:69 bytes read
+DEBUG:pyqode.core.api.client:payload read: u'{"results": [], "request_id": "882866ac-4f1c-4dc6-9e65-a53b603e3b5a"}'
+DEBUG:pyqode.core.api.client:payload length: 69
+DEBUG:pyqode.core.api.client:decoding payload as json object
+DEBUG:pyqode.core.api.client:response received: {u'results': [], u'request_id': u'882866ac-4f1c-4dc6-9e65-a53b603e3b5a'}
+DEBUG:pyqode.core.modes.checker [FrostedCheckerMode]:adding 0 messages
+DEBUG:pyqode.core.api.client:disconnected from backend: 127.0.0.1:35380
+DEBUG:pyqode.core.modes.checker [FrostedCheckerMode]:finished
+DEBUG:pyqode.core.modes.checker [FrostedCheckerMode]:running analysis
+DEBUG:pyqode.core.modes.checker [PEP8CheckerMode]:running analysis
+INFO:pyqode.core.managers.backend:sending request, worker=<function run_pep8 at 0x7efddc9a92a8>
+DEBUG:pyqode.core.api.client:connecting to 127.0.0.1:35380
+DEBUG:pyqode.core.api.client:connected to backend: 127.0.0.1:35380
+DEBUG:pyqode.core.api.client:sending request: {'data': {'path': '', 'code': u'', 'encoding': 'UTF-8'}, 'worker': 'pyqode.python.backend.workers.run_pep8', 'request_id': '20d68ec9-edca-43f3-98aa-3958233147fe'}
+DEBUG:pyqode.core.api.client:reading header
+DEBUG:pyqode.core.api.client:header content: 69
+DEBUG:pyqode.core.api.client:reading payload data
+DEBUG:pyqode.core.api.client:remaining bytes to read: 69
+DEBUG:pyqode.core.api.client:69 bytes read
+DEBUG:pyqode.core.api.client:payload read: u'{"results": [], "request_id": "20d68ec9-edca-43f3-98aa-3958233147fe"}'
+DEBUG:pyqode.core.api.client:payload length: 69
+DEBUG:pyqode.core.api.client:decoding payload as json object
+DEBUG:pyqode.core.api.client:response received: {u'results': [], u'request_id': u'20d68ec9-edca-43f3-98aa-3958233147fe'}
+DEBUG:pyqode.core.modes.checker [PEP8CheckerMode]:adding 0 messages
+DEBUG:pyqode.core.api.client:disconnected from backend: 127.0.0.1:35380
+DEBUG:pyqode.core.modes.checker [PEP8CheckerMode]:finished
+INFO:pyqode.core.managers.backend:sending request, worker=<function run_frosted at 0x7efddc9a9320>
+DEBUG:pyqode.core.api.client:connecting to 127.0.0.1:35380
+DEBUG:pyqode.core.api.client:connected to backend: 127.0.0.1:35380
+DEBUG:pyqode.core.api.client:sending request: {'data': {'path': '', 'code': u'', 'encoding': 'UTF-8'}, 'worker': 'pyqode.python.backend.workers.run_frosted', 'request_id': '397ee783-d8e8-4845-82c3-4ea2a9b6f7a1'}
+DEBUG:pyqode.core.api.client:reading header
+DEBUG:pyqode.core.api.client:header content: 69
+DEBUG:pyqode.core.api.client:reading payload data
+DEBUG:pyqode.core.api.client:remaining bytes to read: 69
+DEBUG:pyqode.core.api.client:69 bytes read
+DEBUG:pyqode.core.api.client:payload read: u'{"results": [], "request_id": "397ee783-d8e8-4845-82c3-4ea2a9b6f7a1"}'
+DEBUG:pyqode.core.api.client:payload length: 69
+DEBUG:pyqode.core.api.client:decoding payload as json object
+DEBUG:pyqode.core.api.client:response received: {u'results': [], u'request_id': u'397ee783-d8e8-4845-82c3-4ea2a9b6f7a1'}
+DEBUG:pyqode.core.modes.checker [FrostedCheckerMode]:adding 0 messages
+DEBUG:pyqode.core.api.client:disconnected from backend: 127.0.0.1:35380
+DEBUG:pyqode.core.modes.checker [FrostedCheckerMode]:finished
+INFO:pyqode.core.managers.backend:starting backend process: python2.7 /usr/lib/freecad/Mod/CadQuery/cq_server.py 58626 -s /usr/lib/freecad/Mod/CadQuery/Libs
+DEBUG:pyqode.core.managers.modes:adding mode 'OutlineMode'
+DEBUG:pyqode.core.managers.panels:adding panel FoldingPanel at 'left'
+DEBUG:pyqode.core.managers.panels:refresh_panels
+DEBUG:pyqode.core.managers.panels:panel FoldingPanel installed
+DEBUG:pyqode.core.managers.panels:adding panel LineNumberPanel at 'left'
+DEBUG:pyqode.core.managers.panels:refresh_panels
+DEBUG:pyqode.core.managers.panels:panel LineNumberPanel installed
+DEBUG:pyqode.core.managers.panels:adding panel CheckerPanel at 'left'
+DEBUG:pyqode.core.managers.panels:refresh_panels
+DEBUG:pyqode.core.managers.panels:panel CheckerPanel installed
+DEBUG:pyqode.core.managers.panels:adding panel GlobalCheckerPanel at 'right'
+DEBUG:pyqode.core.managers.panels:refresh_panels
+DEBUG:pyqode.core.managers.panels:panel GlobalCheckerPanel installed
+DEBUG:pyqode.core.managers.panels:adding panel SearchAndReplacePanel at 'bottom'
+DEBUG:pyqode.core.managers.panels:refresh_panels
+DEBUG:pyqode.core.api.panel:SearchAndReplacePanel visibility changed
+DEBUG:pyqode.core.managers.panels:refresh_panels
+DEBUG:pyqode.core.managers.panels:panel SearchAndReplacePanel installed
+DEBUG:pyqode.core.api.panel:EncodingPanel visibility changed
+DEBUG:pyqode.core.managers.panels:adding panel EncodingPanel at 'top'
+DEBUG:pyqode.core.managers.panels:refresh_panels
+DEBUG:pyqode.core.managers.panels:panel EncodingPanel installed
+DEBUG:pyqode.core.managers.panels:adding panel QuickDocPanel at 'bottom'
+DEBUG:pyqode.core.managers.panels:refresh_panels
+DEBUG:pyqode.core.api.panel:QuickDocPanel visibility changed
+DEBUG:pyqode.core.managers.panels:refresh_panels
+DEBUG:pyqode.core.managers.panels:panel QuickDocPanel installed
+DEBUG:pyqode.core.managers.modes:adding mode 'CaretLineHighlighterMode'
+DEBUG:pyqode.core.managers.modes:adding mode 'FileWatcherMode'
+DEBUG:pyqode.core.managers.modes:adding mode 'RightMarginMode'
+DEBUG:pyqode.core.managers.modes:adding mode 'ZoomMode'
+DEBUG:pyqode.core.managers.modes:adding mode 'SymbolMatcherMode'
+DEBUG:pyqode.core.managers.modes:adding mode 'CodeCompletionMode'
+DEBUG:pyqode.core.managers.modes:adding mode 'OccurrencesHighlighterMode'
+DEBUG:pyqode.core.managers.modes:adding mode 'SmartBackSpaceMode'
+DEBUG:pyqode.core.managers.modes:adding mode 'ExtendedSelectionMode'
+DEBUG:pyqode.core.managers.modes:adding mode 'CaseConverterMode'
+DEBUG:pyqode.core.managers.modes:adding mode 'PyAutoIndentMode'
+DEBUG:pyqode.core.managers.modes:adding mode 'PyAutoCompleteMode'
+DEBUG:pyqode.core.managers.modes:adding mode 'FrostedCheckerMode'
+DEBUG:pyqode.core.modes.checker [FrostedCheckerMode]:running analysis
+DEBUG:pyqode.core.managers.modes:adding mode 'PEP8CheckerMode'
+DEBUG:pyqode.core.modes.checker [PEP8CheckerMode]:running analysis
+DEBUG:pyqode.core.managers.modes:adding mode 'CalltipsMode'
+DEBUG:pyqode.core.managers.modes:adding mode 'PyIndenterMode'
+DEBUG:pyqode.core.managers.modes:adding mode 'GoToAssignmentsMode'
+DEBUG:pyqode.core.managers.modes:adding mode 'CommentsMode'
+DEBUG:pyqode.core.managers.modes:adding mode 'PythonSH'
+DEBUG:pyqode.core.managers.file:detecting mimetype for Ex000_Introduction.py
+DEBUG:pyqode.core.managers.file:mimetype detected: text/x-python
+DEBUG:pyqode.core.modes.checker [FrostedCheckerMode]:running analysis
+DEBUG:pyqode.core.modes.checker [PEP8CheckerMode]:running analysis
+INFO:pyqode.core.api.code_edit:setPlainText duration: 0.006969s
+INFO:pyqode.core.managers.backend:sending request, worker=<function defined_names at 0x7efddc9a91b8>
+DEBUG:pyqode.core.api.client:connecting to 127.0.0.1:35380
+DEBUG:pyqode.core.api.panel:FoldingPanel visibility changed
+DEBUG:pyqode.core.managers.panels:refresh_panels
+DEBUG:pyqode.core.api.panel:LineNumberPanel visibility changed
+DEBUG:pyqode.core.managers.panels:refresh_panels
+DEBUG:pyqode.core.api.panel:CheckerPanel visibility changed
+DEBUG:pyqode.core.managers.panels:refresh_panels
+DEBUG:pyqode.core.api.panel:GlobalCheckerPanel visibility changed
+DEBUG:pyqode.core.managers.panels:refresh_panels
+DEBUG:pyqode.core.api.code_edit:show event: PyCodeEdit(path='')
+DEBUG:pyqode.core.modes.checker [FrostedCheckerMode]:running analysis
+DEBUG:pyqode.core.modes.checker [PEP8CheckerMode]:running analysis
+INFO:pyqode.core.api.client:backend process started
+DEBUG:pyqode.core.api.client:connected to backend: 127.0.0.1:35380
+DEBUG:pyqode.core.api.client:sending request: {'data': {'path': u'/usr/lib/freecad/Mod/CadQuery/Examples/Ex000_Introduction.py', 'code': u'# This example is meant to be used from within the CadQuery module of FreeCAD.\n# From within FreeCAD, you can make changes to this script and then click\n# CadQuery > Execute Script, or you can press F2.\n# There are more examples in the Examples directory included with this module.\n# Ex026_Lego_Brick.py is highly recommended as a great example of what CadQuery\n# can do.\nimport cadquery\nfrom Helpers import show\n\n# The dimensions of the box. These can be modified rather than changing the\n# object\'s code directly.\nlength = 2.0\nheight = 1.0\nthickness = 1.0\n\n# Create a 3D box based on the dimension variables above\nresult = cadquery.Workplane("XY").box(length, height, thickness)\n\n# Render the solid\nshow(result)\n', 'encoding': u'UTF-8'}, 'worker': 'pyqode.python.backend.workers.defined_names', 'request_id': '7e17d22b-d1f6-48a9-b309-ce7a73389d49'}
+DEBUG:pyqode.core.api.client:reading header
+DEBUG:pyqode.core.api.client:header content: 490
+DEBUG:pyqode.core.api.client:reading payload data
+DEBUG:pyqode.core.api.client:remaining bytes to read: 490
+DEBUG:pyqode.core.api.client:490 bytes read
+DEBUG:pyqode.core.api.client:payload read: u'{"results": [{"column": 0, "line": 11, "children": [], "name": "length", "icon": ":/pyqode_python_icons/rc/var.png"}, {"column": 0, "line": 12, "children": [], "name": "height", "icon": ":/pyqode_python_icons/rc/var.png"}, {"column": 0, "line": 13, "children": [], "name": "thickness", "icon": ":/pyqode_python_icons/rc/var.png"}, {"column": 0, "line": 16, "children": [], "name": "result", "icon": ":/pyqode_python_icons/rc/var.png"}], "request_id": "7e17d22b-d1f6-48a9-b309-ce7a73389d49"}'
+DEBUG:pyqode.core.api.client:payload length: 490
+DEBUG:pyqode.core.api.client:decoding payload as json object
+DEBUG:pyqode.core.api.client:response received: {u'results': [{u'column': 0, u'line': 11, u'icon': u':/pyqode_python_icons/rc/var.png', u'children': [], u'name': u'length'}, {u'column': 0, u'line': 12, u'icon': u':/pyqode_python_icons/rc/var.png', u'children': [], u'name': u'height'}, {u'column': 0, u'line': 13, u'icon': u':/pyqode_python_icons/rc/var.png', u'children': [], u'name': u'thickness'}, {u'column': 0, u'line': 16, u'icon': u':/pyqode_python_icons/rc/var.png', u'children': [], u'name': u'result'}], u'request_id': u'7e17d22b-d1f6-48a9-b309-ce7a73389d49'}
+DEBUG:pyqode.core.modes.outline:Document structure changed
+DEBUG:pyqode.core.api.client:disconnected from backend: 127.0.0.1:35380
+INFO:pyqode.core.managers.backend:sending request, worker=<function run_pep8 at 0x7efddc9a92a8>
+DEBUG:pyqode.core.api.client:connecting to 127.0.0.1:35380
+DEBUG:pyqode.core.api.client:connected to backend: 127.0.0.1:35380
+DEBUG:pyqode.core.api.client:sending request: {'data': {'path': u'/usr/lib/freecad/Mod/CadQuery/Examples/Ex000_Introduction.py', 'code': u'# This example is meant to be used from within the CadQuery module of FreeCAD.\n# From within FreeCAD, you can make changes to this script and then click\n# CadQuery > Execute Script, or you can press F2.\n# There are more examples in the Examples directory included with this module.\n# Ex026_Lego_Brick.py is highly recommended as a great example of what CadQuery\n# can do.\nimport cadquery\nfrom Helpers import show\n\n# The dimensions of the box. These can be modified rather than changing the\n# object\'s code directly.\nlength = 2.0\nheight = 1.0\nthickness = 1.0\n\n# Create a 3D box based on the dimension variables above\nresult = cadquery.Workplane("XY").box(length, height, thickness)\n\n# Render the solid\nshow(result)\n', 'encoding': u'UTF-8'}, 'worker': 'pyqode.python.backend.workers.run_pep8', 'request_id': '70e75602-33de-4af5-bbf9-125a7ab27287'}
+DEBUG:pyqode.core.api.client:reading header
+DEBUG:pyqode.core.api.client:header content: 69
+DEBUG:pyqode.core.api.client:reading payload data
+DEBUG:pyqode.core.api.client:remaining bytes to read: 69
+DEBUG:pyqode.core.api.client:69 bytes read
+DEBUG:pyqode.core.api.client:payload read: u'{"results": [], "request_id": "70e75602-33de-4af5-bbf9-125a7ab27287"}'
+DEBUG:pyqode.core.api.client:payload length: 69
+DEBUG:pyqode.core.api.client:decoding payload as json object
+DEBUG:pyqode.core.api.client:response received: {u'results': [], u'request_id': u'70e75602-33de-4af5-bbf9-125a7ab27287'}
+DEBUG:pyqode.core.modes.checker [PEP8CheckerMode]:adding 0 messages
+DEBUG:pyqode.core.api.client:disconnected from backend: 127.0.0.1:35380
+DEBUG:pyqode.core.modes.checker [PEP8CheckerMode]:finished
+INFO:pyqode.core.managers.backend:sending request, worker=<function run_pep8 at 0x7efddc9a92a8>
+DEBUG:pyqode.core.api.client:connecting to 127.0.0.1:58626
+DEBUG:pyqode.core.api.client:connected to backend: 127.0.0.1:58626
+DEBUG:pyqode.core.api.client:sending request: {'data': {'path': '', 'code': u'', 'encoding': 'UTF-8'}, 'worker': 'pyqode.python.backend.workers.run_pep8', 'request_id': 'ab095628-619b-4dd1-b88e-73dac127f293'}
+DEBUG:pyqode.core.api.client:reading header
+DEBUG:pyqode.core.api.client:header content: 69
+DEBUG:pyqode.core.api.client:reading payload data
+DEBUG:pyqode.core.api.client:remaining bytes to read: 69
+DEBUG:pyqode.core.api.client:69 bytes read
+DEBUG:pyqode.core.api.client:payload read: u'{"results": [], "request_id": "ab095628-619b-4dd1-b88e-73dac127f293"}'
+DEBUG:pyqode.core.api.client:payload length: 69
+DEBUG:pyqode.core.api.client:decoding payload as json object
+DEBUG:pyqode.core.api.client:response received: {u'results': [], u'request_id': u'ab095628-619b-4dd1-b88e-73dac127f293'}
+DEBUG:pyqode.core.modes.checker [PEP8CheckerMode]:adding 0 messages
+DEBUG:pyqode.core.api.client:disconnected from backend: 127.0.0.1:58626
+DEBUG:pyqode.core.modes.checker [PEP8CheckerMode]:finished
+INFO:pyqode.core.managers.backend:sending request, worker=<function defined_names at 0x7efddc9a91b8>
+DEBUG:pyqode.core.api.client:connecting to 127.0.0.1:35380
+DEBUG:pyqode.core.api.client:connected to backend: 127.0.0.1:35380
+DEBUG:pyqode.core.api.client:sending request: {'data': {'path': u'/usr/lib/freecad/Mod/CadQuery/Examples/Ex000_Introduction.py', 'code': u'# This example is meant to be used from within the CadQuery module of FreeCAD.\n# From within FreeCAD, you can make changes to this script and then click\n# CadQuery > Execute Script, or you can press F2.\n# There are more examples in the Examples directory included with this module.\n# Ex026_Lego_Brick.py is highly recommended as a great example of what CadQuery\n# can do.\nimport cadquery\nfrom Helpers import show\n\n# The dimensions of the box. These can be modified rather than changing the\n# object\'s code directly.\nlength = 2.0\nheight = 1.0\nthickness = 1.0\n\n# Create a 3D box based on the dimension variables above\nresult = cadquery.Workplane("XY").box(length, height, thickness)\n\n# Render the solid\nshow(result)\n', 'encoding': u'UTF-8'}, 'worker': 'pyqode.python.backend.workers.defined_names', 'request_id': 'f8aed6ab-7e1e-41ff-885d-59827a81f4a6'}
+DEBUG:pyqode.core.api.client:reading header
+DEBUG:pyqode.core.api.client:header content: 490
+DEBUG:pyqode.core.api.client:reading payload data
+DEBUG:pyqode.core.api.client:remaining bytes to read: 490
+DEBUG:pyqode.core.api.client:490 bytes read
+DEBUG:pyqode.core.api.client:payload read: u'{"results": [{"column": 0, "line": 11, "children": [], "name": "length", "icon": ":/pyqode_python_icons/rc/var.png"}, {"column": 0, "line": 12, "children": [], "name": "height", "icon": ":/pyqode_python_icons/rc/var.png"}, {"column": 0, "line": 13, "children": [], "name": "thickness", "icon": ":/pyqode_python_icons/rc/var.png"}, {"column": 0, "line": 16, "children": [], "name": "result", "icon": ":/pyqode_python_icons/rc/var.png"}], "request_id": "f8aed6ab-7e1e-41ff-885d-59827a81f4a6"}'
+DEBUG:pyqode.core.api.client:payload length: 490
+DEBUG:pyqode.core.api.client:decoding payload as json object
+DEBUG:pyqode.core.api.client:response received: {u'results': [{u'column': 0, u'line': 11, u'icon': u':/pyqode_python_icons/rc/var.png', u'children': [], u'name': u'length'}, {u'column': 0, u'line': 12, u'icon': u':/pyqode_python_icons/rc/var.png', u'children': [], u'name': u'height'}, {u'column': 0, u'line': 13, u'icon': u':/pyqode_python_icons/rc/var.png', u'children': [], u'name': u'thickness'}, {u'column': 0, u'line': 16, u'icon': u':/pyqode_python_icons/rc/var.png', u'children': [], u'name': u'result'}], u'request_id': u'f8aed6ab-7e1e-41ff-885d-59827a81f4a6'}
+DEBUG:pyqode.core.modes.outline:Document structure changed
+DEBUG:pyqode.core.api.client:disconnected from backend: 127.0.0.1:35380
+INFO:pyqode.core.managers.backend:sending request, worker=<function run_frosted at 0x7efddc9a9320>
+DEBUG:pyqode.core.api.client:connecting to 127.0.0.1:35380
+DEBUG:pyqode.core.api.client:connected to backend: 127.0.0.1:35380
+DEBUG:pyqode.core.api.client:sending request: {'data': {'path': u'/usr/lib/freecad/Mod/CadQuery/Examples/Ex000_Introduction.py', 'code': u'# This example is meant to be used from within the CadQuery module of FreeCAD.\n# From within FreeCAD, you can make changes to this script and then click\n# CadQuery > Execute Script, or you can press F2.\n# There are more examples in the Examples directory included with this module.\n# Ex026_Lego_Brick.py is highly recommended as a great example of what CadQuery\n# can do.\nimport cadquery\nfrom Helpers import show\n\n# The dimensions of the box. These can be modified rather than changing the\n# object\'s code directly.\nlength = 2.0\nheight = 1.0\nthickness = 1.0\n\n# Create a 3D box based on the dimension variables above\nresult = cadquery.Workplane("XY").box(length, height, thickness)\n\n# Render the solid\nshow(result)\n', 'encoding': u'UTF-8'}, 'worker': 'pyqode.python.backend.workers.run_frosted', 'request_id': '56a665d2-9dd4-438d-a8be-183939b92385'}
+DEBUG:pyqode.core.api.client:reading header
+DEBUG:pyqode.core.api.client:header content: 69
+DEBUG:pyqode.core.api.client:reading payload data
+DEBUG:pyqode.core.api.client:remaining bytes to read: 69
+DEBUG:pyqode.core.api.client:69 bytes read
+DEBUG:pyqode.core.api.client:payload read: u'{"results": [], "request_id": "56a665d2-9dd4-438d-a8be-183939b92385"}'
+DEBUG:pyqode.core.api.client:payload length: 69
+DEBUG:pyqode.core.api.client:decoding payload as json object
+DEBUG:pyqode.core.api.client:response received: {u'results': [], u'request_id': u'56a665d2-9dd4-438d-a8be-183939b92385'}
+DEBUG:pyqode.core.modes.checker [FrostedCheckerMode]:adding 0 messages
+DEBUG:pyqode.core.api.client:disconnected from backend: 127.0.0.1:35380
+DEBUG:pyqode.core.modes.checker [FrostedCheckerMode]:finished
+INFO:pyqode.core.managers.backend:sending request, worker=<function run_frosted at 0x7efddc9a9320>
+DEBUG:pyqode.core.api.client:connecting to 127.0.0.1:58626
+DEBUG:pyqode.core.api.client:connected to backend: 127.0.0.1:58626
+DEBUG:pyqode.core.api.client:sending request: {'data': {'path': '', 'code': u'', 'encoding': 'UTF-8'}, 'worker': 'pyqode.python.backend.workers.run_frosted', 'request_id': '37460cb5-aa42-487c-a683-14fb84add50f'}
+DEBUG:pyqode.core.api.client:reading header
+DEBUG:pyqode.core.api.client:header content: 69
+DEBUG:pyqode.core.api.client:reading payload data
+DEBUG:pyqode.core.api.client:remaining bytes to read: 69
+DEBUG:pyqode.core.api.client:69 bytes read
+DEBUG:pyqode.core.api.client:payload read: u'{"results": [], "request_id": "37460cb5-aa42-487c-a683-14fb84add50f"}'
+DEBUG:pyqode.core.api.client:payload length: 69
+DEBUG:pyqode.core.api.client:decoding payload as json object
+DEBUG:pyqode.core.api.client:response received: {u'results': [], u'request_id': u'37460cb5-aa42-487c-a683-14fb84add50f'}
+DEBUG:pyqode.core.modes.checker [FrostedCheckerMode]:adding 0 messages
+DEBUG:pyqode.core.api.client:disconnected from backend: 127.0.0.1:58626
+DEBUG:pyqode.core.modes.checker [FrostedCheckerMode]:finished
