@@ -185,6 +185,9 @@ class CadQueryWorkbench (Workbench):
         #Getting the main window will allow us to start setting things up the way we want
         mw = FreeCADGui.getMainWindow()
 
+        cqCodePane = mw.findChild(QtGui.QPlainTextEdit, "cqCodePane")
+        cqCodePane.close()
+
         dockWidgets = mw.findChildren(QtGui.QDockWidget)
 
         for widget in dockWidgets:
