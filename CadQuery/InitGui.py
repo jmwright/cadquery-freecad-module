@@ -187,6 +187,7 @@ class CadQueryWorkbench (Workbench):
 
         cqCodePane = mw.findChild(QtGui.QPlainTextEdit, "cqCodePane")
         cqCodePane.close()
+        cqCodePane.setParent(None)
 
         dockWidgets = mw.findChildren(QtGui.QDockWidget)
 
