@@ -15,7 +15,7 @@ Download the [latest released version](https://github.com/jmwright/cadquery-free
 * /usr/lib/freecad/Mod
 * /usr/local/lib/freecad/Mod
 
-If you are running Ubuntu Linux, be sure to run the following line with superuser priveledges.
+If you are running Ubuntu Linux, be sure to run the following line in a terminal before using this module.
 ```
 sudo apt-get install python-pyside.qtnetwork
 ```
