@@ -15,6 +15,11 @@ Download the [latest released version](https://github.com/jmwright/cadquery-free
 * /usr/lib/freecad/Mod
 * /usr/local/lib/freecad/Mod
 
+If you are running Ubuntu Linux, be sure to run the following line with superuser priveledges.
+```
+sudo apt-get install python-pyside.qtnetwork
+```
+
 ### Windows
 * C:\Program Files\FreeCAD 0.14\Mod
 * C:\Program Files (x86)\FreeCAD 0.14\Mod
@@ -23,4 +28,5 @@ Download the [latest released version](https://github.com/jmwright/cadquery-free
 * /Applications/FreeCAD.app/Contents/Mod
 * /Applications/FreeCAD.app/Mod
 
+## It's Installed, Now What?
 For additional information and troubleshooting steps, please see the [wiki](https://github.com/jmwright/cadquery-freecad-module/wiki)
