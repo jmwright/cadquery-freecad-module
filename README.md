@@ -29,4 +29,4 @@ sudo apt-get install python-pyside.qtnetwork
 * /Applications/FreeCAD.app/Mod
 
 ## It's Installed, Now What?
-For additional information and troubleshooting steps, please see the [wiki](https://github.com/jmwright/cadquery-freecad-module/wiki)
+For getting started information and troubleshooting steps, please see the [wiki](https://github.com/jmwright/cadquery-freecad-module/wiki)
