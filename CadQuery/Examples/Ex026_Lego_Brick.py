@@ -8,17 +8,19 @@ from Helpers import show
 ######
 lbumps = 1       # number of bumps long
 wbumps = 1        # number of bumps wide
-thickness = 3.2   # this is a thin lego
-# thickness = 9.6 # a thick lego
+thin = True  # True for thin, False for thick
 
 #
 # Lego Brick Constants-- these make a lego brick a lego :)
 #
 pitch = 8.0
 clearance = 0.1
-height = 3.2
 bumpDiam = 4.8
 bumpHeight = 1.8
+if thin:
+    height = 3.2
+else:
+    height = 9.6
 
 t = (pitch - (2 * clearance) - bumpDiam) / 2.0
 postDiam = pitch - t  # works out to 6.5
