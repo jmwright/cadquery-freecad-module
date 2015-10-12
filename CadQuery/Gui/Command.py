@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """Adds all of the commands that are used for the menus of the CadQuery module"""
 # (c) 2014-2015 Jeremy Wright LGPL v3
 
@@ -160,7 +161,7 @@ class CadQueryExecuteScript:
 
         #Save our code to a tempfile and render it
         tempFile = tempfile.NamedTemporaryFile(delete=False)
-        tempFile.write(cqCodePane.toPlainText())
+        tempFile.write(cqCodePane.toPlainText().encode('utf-8'))
         tempFile.close()
         FreeCAD.Console.PrintMessage("\r\n")
 
