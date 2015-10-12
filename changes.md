@@ -13,4 +13,6 @@ v0.2.0
     
 v0.3.0
 -----
-    * Converted thickness setting to thickness boolean in the Lego brick example (thanks @galou)
+    * Converted thickness setting to thickness boolean in the Lego brick example (thanks @galou) #59
+    * Improved parametric encosure (Ex023) example (thanks @galou) #61
+    * Added braille and NumPy examples (thanks @galou) #61
