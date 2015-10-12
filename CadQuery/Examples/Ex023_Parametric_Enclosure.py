@@ -19,7 +19,6 @@ p_boreDiameter = 8.0  # Diameter of the counterbore hole, if any
 p_boreDepth = 1.0  # Depth of the counterbore hole, if
 p_countersinkDiameter = 0.0  # Outer diameter of countersink. Should roughly match the outer diameter of the screw head
 p_countersinkAngle = 90.0  # Countersink angle (complete angle between opposite sides, not from center to one side)
-p_flipLid = True  # Whether to place the lid with the top facing down or not.
 p_lipHeight = 1.0  # Height of lip on the underside of the lid. Sits inside the box body for a snug fit.
 
 # Outer shell
@@ -72,10 +71,6 @@ elif p_countersinkDiameter > 0 and p_countersinkAngle > 0:
     topOfLid = topOfLidCenters.cskHole(p_screwpostID, p_countersinkDiameter, p_countersinkAngle, (2.0) * p_thickness)
 else:
     topOfLid= topOfLidCenters.hole(p_screwpostID, 2.0 * p_thickness)
-
-# Flip lid upside down if desired
-if p_flipLid:
-    topOfLid.rotateAboutCenter((1, 0, 0), 180)
 
 # Return the combined result
 result = topOfLid.combineSolids(bottom)
