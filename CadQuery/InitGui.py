@@ -177,8 +177,14 @@ class CadQueryWorkbench (Workbench):
         import Gui.Command
         from PySide import QtGui
 
-        #Put the UI back the way we found it
-        FreeCAD.Console.PrintMessage("\r\nCadQuery Workbench Deactivated\r\n")
+        # msg = QtGui.QApplication.translate(
+        #         "cqCodeWidget",
+        #         "\r\nCadQuery Workbench Deactivated\r\n",
+        #         None,
+        #         QtGui.QApplication.UnicodeUTF8)
+        #
+        # #Put the UI back the way we found it
+        # FreeCAD.Console.PrintMessage(msg)
 
         Gui.Command.CadQueryCloseScript().Activated()
 
