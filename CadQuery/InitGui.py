@@ -51,6 +51,10 @@ class CadQueryWorkbench (Workbench):
         libs_dir_path = os.path.join(module_base_path, 'Libs')
         sys.path.insert(0, libs_dir_path)
 
+        # Tack on our CadQuery library git subtree
+        cq_lib_path = os.path.join(libs_dir_path, 'cadquery-lib')
+        sys.path.insert(1, cq_lib_path)
+
         #Make sure we get the right libs under the FreeCAD installation
         fc_base_path = os.path.dirname(os.path.dirname(module_base_path))
         fc_lib_path = os.path.join(fc_base_path, 'lib')
