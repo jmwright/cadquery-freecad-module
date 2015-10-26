@@ -91,7 +91,7 @@ class EncodingPanel(Panel):
             pass
 
     def __init__(self, add_context_menu=True):
-        super(EncodingPanel, self).__init__()
+        super(EncodingPanel, self).__init__(dynamic=True)
         # leave it here otherwise you will have circular import errors
         from pyqode.core._forms.pnl_encoding_ui import Ui_Form
         self.ui = Ui_Form()

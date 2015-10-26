@@ -15,10 +15,10 @@ class PyFileManager(FileManager):
 
     """
     #: True to fold import statements on open.
-    fold_imports = True
+    fold_imports = False
 
     #: True to fold docstring on open
-    fold_docstrings = True
+    fold_docstrings = False
 
     def detect_encoding(self, path):
         """

@@ -16,6 +16,7 @@ A worker is always tightly coupled with its caller, so are the data.
     python2, which might happen in pyqode.python to support python2 syntax).
 
 """
+import logging
 import re
 import sys
 import traceback
@@ -99,6 +100,7 @@ class CodeCompletionWorker(object):
         path = data['path']
         encoding = data['encoding']
         prefix = data['prefix']
+        req_id = data['request_id']
         completions = []
         for prov in CodeCompletionWorker.providers:
             try:
@@ -112,7 +114,7 @@ class CodeCompletionWorker(object):
                                  % prov)
                 exc1, exc2, exc3 = sys.exc_info()
                 traceback.print_exception(exc1, exc2, exc3, file=sys.stderr)
-        return completions
+        return [(line, column, req_id)] + completions
 
 
 class DocumentWordsProvider(object):

@@ -154,7 +154,7 @@ class IndenterMode(Mode):
             indentation = cursor.positionInBlock()
             max_spaces = tab_len - (indentation - (indentation % tab_len))
             spaces = self.count_deletable_spaces(cursor, max_spaces)
-            _logger().info('deleting %d space before cursor' % spaces)
+            _logger().debug('deleting %d space before cursor' % spaces)
             cursor.beginEditBlock()
             if spaces:
                 # delete spaces before cursor

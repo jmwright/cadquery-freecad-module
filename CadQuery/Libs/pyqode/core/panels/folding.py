@@ -232,7 +232,7 @@ class FoldingPanel(Panel):
         # Draw fold triggers
         for top_position, line_number, block in self.editor.visible_blocks:
             if TextBlockHelper.is_fold_trigger(block):
-                collapsed = TextBlockHelper.get_fold_trigger_state(block)
+                collapsed = TextBlockHelper.is_collapsed(block)
                 mouse_over = self._mouse_over_line == line_number
                 self._draw_fold_indicator(
                     top_position, mouse_over, collapsed, painter)
@@ -509,7 +509,7 @@ class FoldingPanel(Panel):
             self._clear_scope_decos()
             # highlight surrounding parent scopes with a darker color
             start, end = scope.get_range()
-            if not TextBlockHelper.get_fold_trigger_state(block):
+            if not TextBlockHelper.is_collapsed(block):
                 self._add_scope_decorations(block, start, end)
 
     def mouseMoveEvent(self, event):
@@ -640,35 +640,39 @@ class FoldingPanel(Panel):
                 self._block_nbr = -1
             self.editor.new_text_set.disconnect(self._clear_block_deco)
 
-    def _select_scope(self, block, c):
-        """
-        Select the content of a scope
-        """
-        start_block = block
-        _, end = FoldScope(block).get_range()
-        end_block = self.editor.document().findBlockByNumber(end)
-        c.beginEditBlock()
-        c.setPosition(start_block.position())
-        c.setPosition(end_block.position(), c.KeepAnchor)
-        c.deleteChar()
-        c.endEditBlock()
-
     def _on_key_pressed(self, event):
         """
         Override key press to select the current scope if the user wants
         to deleted a folded scope (without selecting it).
         """
-        keys = [QtCore.Qt.Key_Delete, QtCore.Qt.Key_Backspace]
-        if event.key() in keys:
-            c = self.editor.textCursor()
-            assert isinstance(c, QtGui.QTextCursor)
-            if c.hasSelection():
-                for deco in self._block_decos:
-                    if c.selectedText() == deco.cursor.selectedText():
-                        block = deco.block
-                        self._select_scope(block, c)
-                        event.accept()
-                        break
+        delete_request = event.key() in [QtCore.Qt.Key_Backspace,
+                                         QtCore.Qt.Key_Delete]
+        if event.text() or delete_request:
+            cursor = self.editor.textCursor()
+            if cursor.hasSelection():
+                # change selection to encompass the whole scope.
+                positions_to_check = cursor.selectionStart(), cursor.selectionEnd()
+            else:
+                positions_to_check = (cursor.position(), )
+            for pos in positions_to_check:
+                block = self.editor.document().findBlock(pos)
+                th = TextBlockHelper()
+                if th.is_fold_trigger(block) and th.is_collapsed(block):
+                    self.toggle_fold_trigger(block)
+                    if delete_request and cursor.hasSelection():
+                        scope = FoldScope(self.find_parent_scope(block))
+                        tc = TextHelper(self.editor).select_lines(*scope.get_range())
+                        if tc.selectionStart() > cursor.selectionStart():
+                            start = cursor.selectionStart()
+                        else:
+                            start = tc.selectionStart()
+                        if tc.selectionEnd() < cursor.selectionEnd():
+                            end = cursor.selectionEnd()
+                        else:
+                            end = tc.selectionEnd()
+                        tc.setPosition(start)
+                        tc.setPosition(end, tc.KeepAnchor)
+                        self.editor.setTextCursor(tc)
 
     @staticmethod
     def _show_previous_blank_lines(block):
@@ -732,7 +736,7 @@ class FoldingPanel(Panel):
             if trigger:
                 if lvl == 0:
                     self._show_previous_blank_lines(block)
-                TextBlockHelper.set_fold_trigger_state(block, True)
+                TextBlockHelper.set_collapsed(block, True)
             block.setVisible(lvl == 0)
             if block == last and block.text().strip() == '':
                 block.setVisible(True)
@@ -758,7 +762,7 @@ class FoldingPanel(Panel):
         """
         block = self.editor.document().firstBlock()
         while block.isValid():
-            TextBlockHelper.set_fold_trigger_state(block, False)
+            TextBlockHelper.set_collapsed(block, False)
             block.setVisible(True)
             block = block.next()
         self._clear_block_deco()

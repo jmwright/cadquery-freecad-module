@@ -13,6 +13,7 @@ class LineNumberPanel(Panel):
         Panel.__init__(self)
         self.scrollable = True
         self._selecting = False
+        self._start_line = -1
         self._sel_start = -1
         self._line_color_u = self.palette().color(
             QtGui.QPalette.Disabled, QtGui.QPalette.WindowText)
@@ -49,6 +50,7 @@ class LineNumberPanel(Panel):
         self._sel_start = e.pos().y()
         start = end = TextHelper(self.editor).line_nbr_from_position(
             self._sel_start)
+        self._start_line = start
         TextHelper(self.editor).select_lines(start, end)
 
     def cancel_selection(self):
@@ -62,19 +64,25 @@ class LineNumberPanel(Panel):
         # Cancels selection
         self.cancel_selection()
 
-    def leaveEvent(self, event):
-        # Cancels selection
-        self.cancel_selection()
+    # def leaveEvent(self, event):
+    #     # Cancels selection
+    #     self.cancel_selection()
 
     def mouseMoveEvent(self, e):
         # Updates end of selection if we are currently selecting
         if self._selecting:
             end_pos = e.pos().y()
-            start_line = TextHelper(self.editor).line_nbr_from_position(
-                self._sel_start)
             end_line = TextHelper(self.editor).line_nbr_from_position(
                 end_pos)
-            TextHelper(self.editor).select_lines(start_line, end_line)
+            if end_line == -1 and self.editor.visible_blocks:
+                # take last visible block
+                if end_pos < 50:
+                    _, end_line, _ = self.editor.visible_blocks[0]
+                    end_line -= 1
+                else:
+                    _, end_line, _ = self.editor.visible_blocks[-1]
+                    end_line += 1
+            TextHelper(self.editor).select_lines(self._start_line, end_line)
 
     def paintEvent(self, event):
         # Paints the line numbers

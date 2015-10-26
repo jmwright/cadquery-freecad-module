@@ -7,7 +7,6 @@ import sys
 from pyqode.core.api.client import JsonTcpClient, BackendProcess
 from pyqode.core.api.manager import Manager
 from pyqode.core.backend import NotRunning
-import time
 
 
 def _logger():
@@ -72,9 +71,9 @@ class BackendManager(Manager):
             the backend process.
         :param reuse: True to reuse an existing backend process. WARNING: to
             use this, your application must have one single server script. If
-            you're creating an app which supports multiple programming languages
-            you will need to merge all backend scripts into one single script,
-            otherwise the wrong script might be picked up).
+            you're creating an app which supports multiple programming
+            languages you will need to merge all backend scripts into one
+            single script, otherwise the wrong script might be picked up).
         """
         self._shared = reuse
         if reuse and BackendManager.SHARE_COUNT:
@@ -108,8 +107,8 @@ class BackendManager(Manager):
                 BackendManager.LAST_PROCESS = self._process
                 BackendManager.LAST_PORT = self._port
                 BackendManager.SHARE_COUNT += 1
-            _logger().info('starting backend process: %s %s', program,
-                           ' '.join(pgm_args))
+            _logger().debug('starting backend process: %s %s', program,
+                            ' '.join(pgm_args))
 
     def stop(self):
         """
@@ -123,9 +122,9 @@ class BackendManager(Manager):
                 return
         _logger().debug('stopping backend process')
         # close all sockets
-        for socket in self._sockets:
-            socket._callback = None
-            socket.close()
+        for s in self._sockets:
+            s._callback = None
+            s.close()
 
         self._sockets[:] = []
         # prevent crash logs from being written if we are busy killing
@@ -141,7 +140,7 @@ class BackendManager(Manager):
             else:
                 self._process.terminate()
         self._process._prevent_logs = False
-        _logger().info('backend process terminated')
+        _logger().debug('backend process terminated')
 
     def send_request(self, worker_class_or_function, args, on_receive=None):
         """
@@ -159,8 +158,8 @@ class BackendManager(Manager):
         if not self.running:
             raise NotRunning()
         else:
-            _logger().info('sending request, worker=%r' %
-                           worker_class_or_function)
+            _logger().debug('sending request, worker=%r' %
+                            worker_class_or_function)
             # create a socket, the request will be send as soon as the socket
             # has connected
             socket = JsonTcpClient(

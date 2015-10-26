@@ -9,8 +9,6 @@ It is approximately 3 time faster then :class:`pyqode.core.modes.PygmentsSH`.
 """
 import builtins
 import re
-import sys
-from pyqode.qt import QtGui
 from pyqode.core.api import SyntaxHighlighter as BaseSH
 from pyqode.core.api import TextBlockHelper
 
@@ -25,8 +23,6 @@ kwlist = [
     'False',
     'None',
     'True',
-    'and',
-    'as',
     'assert',
     'break',
     'class',
@@ -38,16 +34,10 @@ kwlist = [
     'except',
     'finally',
     'for',
-    'from',
     'global',
     'if',
-    'import',
-    'in',
-    'is',
     'lambda',
     'nonlocal',
-    'not',
-    'or',
     'pass',
     'raise',
     'return',
@@ -57,10 +47,15 @@ kwlist = [
     'yield',
 ]
 
+kw_namespace_list = ['from', 'import', 'as']
+wordop_list = ['and', 'or', 'not', 'in', 'is']
+
 
 def make_python_patterns(additional_keywords=[], additional_builtins=[]):
     """Strongly inspired from idlelib.ColorDelegator.make_pat"""
     kw = r"\b" + any("keyword", kwlist + additional_keywords) + r"\b"
+    kw_namespace = r"\b" + any("namespace", kw_namespace_list) + r"\b"
+    word_operators = r"\b" + any("operator_word", wordop_list) + r"\b"
     builtinlist = [str(name) for name in dir(builtins)
                    if not name.startswith('_')] + additional_builtins
     for v in ['None', 'True', 'False']:
@@ -89,11 +84,10 @@ def make_python_patterns(additional_keywords=[], additional_builtins=[]):
     ufstring2 = any("uf_dqstring", [uf_dqstring])
     ufstring3 = any("uf_sq3string", [uf_sq3string])
     ufstring4 = any("uf_dq3string", [uf_dq3string])
-    return "|".join([instance, decorator, kw, builtin, builtin_fct,
-                     comment, ufstring1,
-                     ufstring2,
-                     ufstring3, ufstring4, string, number,
-                     any("SYNC", [r"\n"])])
+    return "|".join([instance, decorator, kw, kw_namespace, builtin,
+                     word_operators, builtin_fct, comment,
+                     ufstring1, ufstring2, ufstring3, ufstring4, string,
+                     number, any("SYNC", [r"\n"])])
 
 
 #
@@ -156,7 +150,8 @@ class PythonSH(BaseSH):
                     end = max([0, end + offset])
                     if key == "uf_sq3string":
                         self.setFormat(start, end - start,
-                                       self.formats["string"])
+                                       self.formats["docstring"])
+                        block.docstring = True
                         state = self.INSIDE_SQ3STRING
                     elif key == "uf_dq3string":
                         self.setFormat(start, end - start,
@@ -177,7 +172,8 @@ class PythonSH(BaseSH):
                         self.setFormat(start, end - start,
                                        self.formats["constant"])
                     else:
-                        if '"""' in value and key != 'comment':
+                        if ('"""' in value or "'''" in value) and \
+                                key != 'comment':
                             # highlight docstring with a different color
                             block.docstring = True
                             self.setFormat(start, end - start,
@@ -203,23 +199,23 @@ class PythonSH(BaseSH):
                                                else 'function')
                                     fmt = self.formats[fmt_key]
                                     self.setFormat(start1, end1 - start1, fmt)
-                            elif value == "import":
-                                import_stmt = text.strip()
-                                # color all the "as" words on same line, except
-                                # if in a comment; cheap approximation to the
-                                # truth
-                                if '#' in text:
-                                    endpos = text.index('#')
-                                else:
-                                    endpos = len(text)
-                                while True:
-                                    match1 = self.ASPROG.match(text, end,
-                                                               endpos)
-                                    if not match1:
-                                        break
-                                    start, end = match1.span(1)
-                                    self.setFormat(start, end - start,
-                                                   self.formats["keyword"])
+                        if key == 'namespace':
+                            import_stmt = text.strip()
+                            # color all the "as" words on same line, except
+                            # if in a comment; cheap approximation to the
+                            # truth
+                            if '#' in text:
+                                endpos = text.index('#')
+                            else:
+                                endpos = len(text)
+                            while True:
+                                match1 = self.ASPROG.match(text, end,
+                                                           endpos)
+                                if not match1:
+                                    break
+                                start, end = match1.span(1)
+                                self.setFormat(start, end - start,
+                                               self.formats["namespace"])
             # next match
             match = self.PROG.search(text, match.end())
         TextBlockHelper.set_state(block, state)

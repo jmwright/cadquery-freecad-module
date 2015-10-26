@@ -57,9 +57,9 @@ class DarculaStyle(Style):
         Name.Variable.Global: '#A9B7C6 bold',
         Name.Variable.Instance: '#A9B7C6',
         Name.Variable: '#A9B7C6',
-        Operator.Word: '#A9B7C6',
-        Operator: '#A9B7C6',
+        Operator: '#808080 bold',
+        Operator.Word: '#CC7832 bold',
         Text: '#A9B7C6',
-        Text.Whitespace: '#2a2a2a',
+        Text.Whitespace: '#656565',
         Punctuation: '#A9B7C6'
     }

@@ -20,7 +20,7 @@ def print_tree(editor, file=sys.stdout, print_blocks=False):
     block = editor.document().firstBlock()
     while block.isValid():
         trigger = TextBlockHelper().is_fold_trigger(block)
-        trigger_state = TextBlockHelper().get_fold_trigger_state(block)
+        trigger_state = TextBlockHelper().is_collapsed(block)
         lvl = TextBlockHelper().get_fold_lvl(block)
         visible = 'V' if block.isVisible() else 'I'
         if trigger:
@@ -112,12 +112,12 @@ class FoldDetector(object):
         if (prev and prev.isValid() and prev.text().strip() == '' and
                 TextBlockHelper.is_fold_trigger(prev)):
             # prev line has the correct trigger fold state
-            TextBlockHelper.set_fold_trigger_state(
-                current_block, TextBlockHelper.get_fold_trigger_state(
+            TextBlockHelper.set_collapsed(
+                current_block, TextBlockHelper.is_collapsed(
                     prev))
             # make empty line not a trigger
             TextBlockHelper.set_fold_trigger(prev, False)
-            TextBlockHelper.set_fold_trigger_state(prev, False)
+            TextBlockHelper.set_collapsed(prev, False)
 
     def detect_fold_level(self, prev_block, block):
         """
@@ -155,6 +155,32 @@ class IndentFoldDetector(FoldDetector):
         return (len(text) - len(text.lstrip())) // self.editor.tab_length
 
 
+class CharBasedFoldDetector(FoldDetector):
+    """
+    Fold detector based on trigger charachters (e.g. a { increase fold level
+    and } decrease fold level).
+    """
+    def __init__(self, open_chars=('{'), close_chars=('}')):
+        super(CharBasedFoldDetector, self).__init__()
+        self.open_chars = open_chars
+        self.close_chars = close_chars
+
+    def detect_fold_level(self, prev_block, block):
+        if prev_block:
+            prev_text = prev_block.text().strip()
+        else:
+            prev_text = ''
+        text = block.text().strip()
+        if text in self.open_chars:
+            return TextBlockHelper.get_fold_lvl(prev_block) + 1
+        if prev_text.endswith(self.open_chars) and prev_text not in \
+                self.open_chars:
+            return TextBlockHelper.get_fold_lvl(prev_block) + 1
+        if self.close_chars in prev_text:
+            return TextBlockHelper.get_fold_lvl(prev_block) - 1
+        return TextBlockHelper.get_fold_lvl(prev_block)
+
+
 class FoldScope(object):
     """
     Utility class for manipulating fold-able code scope (fold/unfold,
@@ -187,7 +213,7 @@ class FoldScope(object):
         Returns True if the block is collasped, False if it is expanded.
 
         """
-        return TextBlockHelper.get_fold_trigger_state(self._trigger)
+        return TextBlockHelper.is_collapsed(self._trigger)
 
     def __init__(self, block):
         """
@@ -238,7 +264,7 @@ class FoldScope(object):
         Folds the region.
         """
         start, end = self.get_range()
-        TextBlockHelper.set_fold_trigger_state(self._trigger, True)
+        TextBlockHelper.set_collapsed(self._trigger, True)
         block = self._trigger.next()
         while block.blockNumber() <= end and block.isValid():
             block.setVisible(False)
@@ -250,7 +276,7 @@ class FoldScope(object):
         """
         # set all direct child blocks which are not triggers to be visible
         self._trigger.setVisible(True)
-        TextBlockHelper.set_fold_trigger_state(self._trigger, False)
+        TextBlockHelper.set_collapsed(self._trigger, False)
         for block in self.blocks(ignore_blank_lines=False):
             block.setVisible(True)
         for region in self.child_regions():
@@ -342,6 +368,10 @@ class FoldScope(object):
 
         :param block: block from which the research will start
         """
+        # if we moved up for more than n lines, just give up otherwise this
+        # would take too much time.
+        limit = 5000
+        counter = 0
         original = block
         if not TextBlockHelper.is_fold_trigger(block):
             # search level of next non blank line
@@ -349,8 +379,14 @@ class FoldScope(object):
                 block = block.next()
             ref_lvl = TextBlockHelper.get_fold_lvl(block) - 1
             block = original
-            while (block.blockNumber() and
+            while (block.blockNumber() and counter < limit and
                    (not TextBlockHelper.is_fold_trigger(block) or
                     TextBlockHelper.get_fold_lvl(block) > ref_lvl)):
+                counter += 1
                 block = block.previous()
-        return block
+        if counter < limit:
+            return block
+        return None
+
+    def __repr__(self):
+        return 'FoldScope(start=%r, end=%d)' % self.get_range()

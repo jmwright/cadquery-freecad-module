@@ -10,7 +10,7 @@ This module contains core code edits:
 import sys
 from pyqode.core.backend import server
 from pyqode.core.api import CodeEdit, Panel, SyntaxHighlighter, \
-    IndentFoldDetector, ColorScheme
+    CharBasedFoldDetector, IndentFoldDetector, ColorScheme
 
 
 class TextCodeEdit(CodeEdit):
@@ -44,16 +44,14 @@ class TextCodeEdit(CodeEdit):
                            reuse=reuse_backend)
 
         # append panels
-        self.panels.append(panels.FoldingPanel())
-        self.panels.append(panels.LineNumberPanel())
         self.panels.append(panels.SearchAndReplacePanel(),
                            Panel.Position.BOTTOM)
-        self.panels.append(panels.EncodingPanel(),
-                           Panel.Position.TOP)
+        self.panels.append(panels.FoldingPanel())
+        self.panels.append(panels.LineNumberPanel())
 
         # append modes
         self.modes.append(modes.AutoCompleteMode())
-        self.add_separator()
+        self.modes.append(modes.ExtendedSelectionMode())
         self.modes.append(modes.CaseConverterMode())
         self.modes.append(modes.FileWatcherMode())
         self.modes.append(modes.CaretLineHighlighterMode())
@@ -66,6 +64,8 @@ class TextCodeEdit(CodeEdit):
         self.modes.append(modes.AutoIndentMode())
         self.modes.append(modes.IndenterMode())
         self.modes.append(modes.SymbolMatcherMode())
+
+        self.panels.append(panels.EncodingPanel(), Panel.Position.TOP)
 
     def clone(self):
         clone = self.__class__(
@@ -86,6 +86,17 @@ class GenericCodeEdit(CodeEdit):
     # generic
     mimetypes = []
 
+    #: the list of mimetypes that use char based fold detector
+    _char_based_mimetypes = [
+        'text/x-php',
+        'text/x-c++hdr',
+        'text/x-c++src',
+        'text/x-chdr',
+        'text/x-csrc',
+        'text/x-csharp',
+        'application/javascript'
+    ]
+
     def __init__(self, parent=None, server_script=server.__file__,
                  interpreter=sys.executable, args=None,
                  create_default_actions=True, color_scheme='qt',
@@ -96,16 +107,14 @@ class GenericCodeEdit(CodeEdit):
         self.backend.start(server_script, interpreter, args,
                            reuse=reuse_backend)
         # append panels
-        self.panels.append(panels.FoldingPanel())
         self.panels.append(panels.LineNumberPanel())
         self.panels.append(panels.SearchAndReplacePanel(),
                            Panel.Position.BOTTOM)
-        self.panels.append(panels.EncodingPanel(),
-                           Panel.Position.TOP)
+        self.panels.append(panels.FoldingPanel())
 
         # append modes
         self.modes.append(modes.AutoCompleteMode())
-        self.add_separator()
+        self.modes.append(modes.ExtendedSelectionMode())
         self.modes.append(modes.CaseConverterMode())
         self.modes.append(modes.FileWatcherMode())
         self.modes.append(modes.CaretLineHighlighterMode())
@@ -119,17 +128,24 @@ class GenericCodeEdit(CodeEdit):
         self.modes.append(modes.SymbolMatcherMode())
         self.modes.append(modes.OccurrencesHighlighterMode())
         self.modes.append(modes.SmartBackSpaceMode())
-        self.modes.append(modes.ExtendedSelectionMode())
-
-        self.syntax_highlighter.fold_detector = IndentFoldDetector()
+        self.panels.append(panels.EncodingPanel(), Panel.Position.TOP)
 
     def setPlainText(self, txt, mime_type='', encoding=''):
         if mime_type is None:
             mime_type = self.file.mimetype
         if encoding is None:
             encoding = self.file.encoding
-        if not self.syntax_highlighter.set_mime_type(mime_type):
-            self.syntax_highlighter.set_lexer_from_filename(self.file.path)
+        self.syntax_highlighter.set_lexer_from_filename(self.file.path)
+        try:
+            mimetype = self.syntax_highlighter._lexer.mimetypes[0]
+        except (AttributeError, IndexError):
+            mimetype = ''
+
+        if mimetype in self._char_based_mimetypes:
+            self.syntax_highlighter.fold_detector = CharBasedFoldDetector()
+        else:
+            self.syntax_highlighter.fold_detector = IndentFoldDetector()
+
         super(GenericCodeEdit, self).setPlainText(txt, mime_type, encoding)
 
     def clone(self):

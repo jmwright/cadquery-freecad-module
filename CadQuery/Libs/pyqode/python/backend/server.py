@@ -18,6 +18,7 @@ for writing your own server.
 
 """
 import argparse
+import logging
 import sys
 
 
@@ -25,6 +26,7 @@ if __name__ == '__main__':
     """
     Server process' entry point
     """
+    logging.basicConfig()
     # setup argument parser and parse command line args
     parser = argparse.ArgumentParser()
     parser.add_argument("port", help="the local tcp port to use to run "

@@ -10,15 +10,16 @@ except:
 import locale
 import logging
 import mimetypes
+import os
+from pyqode.core.api.manager import Manager
+from pyqode.core.api.utils import TextHelper
+from pyqode.qt import QtCore, QtWidgets
+from pyqode.core.cache import Cache
+
+
 # needed on windows
 mimetypes.add_type('text/x-python', '.py')
 mimetypes.add_type('text/xml', '.ui')
-import os
-from pyqode.core.api.decoration import TextDecoration
-from pyqode.core.api.manager import Manager
-from pyqode.core.api.utils import TextHelper
-from pyqode.qt import QtCore, QtGui, QtWidgets
-from pyqode.core.cache import Cache
 
 
 def _logger():
@@ -47,6 +48,34 @@ class FileManager(Manager):
         editor.file.encoding == 'cp1252'
 
     """
+    class EOL:
+        """
+        This class enumerates the possible EOL conventions:
+            - System: apply the system EOL
+            - Linux: force the use of Linux EOL (\n)
+            - Mac: force the use of Macintosh EOL (\r)
+            - Windows: force the use of Windows EOL (\r\n)
+        """
+        #:
+        System = 0
+        #: Linux EOL: \n
+        Linux = 1
+        #: Macintosh EOL: \r
+        Mac = 2
+        #: Windows EOL: \r\n
+        Windows = 3
+
+        _map = {
+            System: os.linesep,
+            Linux: '\n',
+            Mac: '\r',
+            Windows: '\r\n'
+        }
+
+        @classmethod
+        def string(cls, value):
+            return cls._map[value]
+
     @property
     def path(self):
         """ Gets the file path """
@@ -79,6 +108,41 @@ class FileManager(Manager):
         """ Gets the file icon, provided by _get_icon """
         return self._get_icon()
 
+    @property
+    def autodetect_eol(self):
+        return self._autodetect_eol
+
+    @autodetect_eol.setter
+    def autodetect_eol(self, value):
+        self._autodetect_eol = value
+        if not self._autodetect_eol:
+            self._eol = self.EOL.string(self._preferred_eol)
+
+    @property
+    def preferred_eol(self):
+        return self._preferred_eol
+
+    @preferred_eol.setter
+    def preferred_eol(self, eol):
+        self._preferred_eol = eol
+        if not self._autodetect_eol:
+            self._eol = self.EOL.string(self._preferred_eol)
+
+    @property
+    def file_size_limit(self):
+        """
+        Returns the file size limit. If the size of the file to open
+        is superior to the limit, then we disabled syntax highlighting, code
+        folding,... to improve the load time and the runtime performances.
+
+        Default is 10MB.
+        """
+        return self._limit
+
+    @file_size_limit.setter
+    def file_size_limit(self, value):
+        self._limit = value
+
     def _get_icon(self):
         return QtWidgets.QFileIconProvider().icon(QtCore.QFileInfo(self.path))
 
@@ -89,6 +153,7 @@ class FileManager(Manager):
             load/save.
         """
         super(FileManager, self).__init__(editor)
+        self._limit = 10000000
         self._path = ''
         #: File mimetype
         self.mimetype = ''
@@ -109,6 +174,13 @@ class FileManager(Manager):
         #: True to restore cursor position (if the document has already been
         # opened once).
         self.restore_cursor = True
+        #: Preferred EOL convention. This setting will be used for saving the
+        #: document unles autodetect_eol is True.
+        self._preferred_eol = self.EOL.System
+        self._eol = self.EOL.string(self._preferred_eol)
+        #: If true, automatically detects file EOL and use it instead of the
+        #: preferred EOL when saving files.
+        self._autodetect_eol = True
 
     @staticmethod
     def get_mimetype(path):
@@ -164,10 +236,24 @@ class FileManager(Manager):
                 pass
             else:
                 encoding = cached_encoding
+        enable_modes = os.path.getsize(path) < self._limit
+        for m in self.editor.modes:
+            m.enabled = enable_modes
+        if not enable_modes:
+            self.editor.modes.clear()
         # open file and get its content
         try:
-            with open(path, 'r', encoding=encoding) as file:
+            with open(path, 'Ur', encoding=encoding) as file:
                 content = file.read()
+                if self.autodetect_eol:
+                    self._eol = file.newlines
+                    if isinstance(self._eol, tuple):
+                        self._eol = self._eol[0]
+                    if self._eol is None:
+                        # empty file has no newlines
+                        self._eol = self.EOL.string(self.preferred_eol)
+                else:
+                    self._eol = self.EOL.string(self.preferred_eol)
         except (UnicodeDecodeError, UnicodeError) as e:
             try:
                 from pyqode.core.panels import EncodingPanel
@@ -188,6 +274,7 @@ class FileManager(Manager):
                 content, self.get_mimetype(path), self.encoding)
             self.editor.setDocumentTitle(self.editor.file.name)
             ret_val = True
+            _logger().debug('file open: %s', path)
         self.opening = False
         if self.restore_cursor:
             self._restore_cached_pos()
@@ -195,7 +282,9 @@ class FileManager(Manager):
 
     def _restore_cached_pos(self):
         pos = Cache().get_cursor_position(self.path)
-        TextHelper(self.editor).goto_line(pos[0], pos[1])
+        tc = self.editor.textCursor()
+        tc.setPosition(pos)
+        self.editor.setTextCursor(tc)
         QtCore.QTimer.singleShot(1, self.editor.centerCursor)
 
     def reload(self, encoding):
@@ -226,6 +315,25 @@ class FileManager(Manager):
         sel_end = self.editor.textCursor().selectionEnd()
         return sel_end, sel_start
 
+    def _get_text(self, encoding):
+        lines = self.editor.toPlainText().splitlines()
+        if self.clean_trailing_whitespaces:
+            lines = [l.rstrip() for l in lines]
+        # remove emtpy ending lines
+        try:
+            last_line = lines[-1]
+        except IndexError:
+            pass  # empty file
+        else:
+            while last_line == '':
+                try:
+                    lines.pop()
+                    last_line = lines[-1]
+                except IndexError:
+                    last_line = None
+        text = self._eol.join(lines) + self._eol
+        return text.encode(encoding)
+
     def save(self, path=None, encoding=None, fallback_encoding=None):
         """
         Save the editor content to a file.
@@ -238,9 +346,12 @@ class FileManager(Manager):
             error. None to use the locale preferred encoding
 
         """
+        if not self.editor.dirty and \
+                (encoding is None or encoding == self.encoding) and \
+                (path is None or path == self.path):
+            return
         if fallback_encoding is None:
             fallback_encoding = locale.getpreferredencoding()
-        self.saving = True
         _logger().debug(
             "saving %r to %r with %r encoding", self.path, path, encoding)
         if path is None:
@@ -254,13 +365,8 @@ class FileManager(Manager):
         # use cached encoding if None were specified
         if encoding is None:
             encoding = self._encoding
+        self.saving = True
         self.editor.text_saving.emit(str(path))
-        # remember cursor position (clean_document might mess up the
-        # cursor pos)
-        if self.clean_trailing_whitespaces:
-            sel_end, sel_start = self._get_selection()
-            TextHelper(self.editor).clean_document()
-        plain_text = self.editor.toPlainText()
         # perform a safe save: we first save to a temporary file, if the save
         # succeeded we just rename the temporary file to the final file name
         # and remove it.
@@ -270,38 +376,34 @@ class FileManager(Manager):
             tmp_path = path
         try:
             _logger().debug('saving editor content to temp file: %s', path)
-            with open(tmp_path, 'w', encoding=encoding) as file:
-                file.write(plain_text)
+            with open(tmp_path, 'wb') as file:
+                file.write(self._get_text(encoding))
         except UnicodeEncodeError:
             # fallback to utf-8 in case of error.
-            with open(tmp_path, 'w', encoding=fallback_encoding) as file:
-                file.write(plain_text)
+            with open(tmp_path, 'wb') as file:
+                file.write(self._get_text(fallback_encoding))
         except (IOError, OSError) as e:
             self._rm(tmp_path)
             self.saving = False
             self.editor.text_saved.emit(str(path))
             raise e
         else:
-            _logger().debug('save to temp file succeeded')
+            # cache update encoding
             Cache().set_file_encoding(path, encoding)
             self._encoding = encoding
+            # remove path and rename temp file, if safe save is on
             if self.safe_save:
-                # remove path and rename temp file, if safe save is on
                 _logger().debug('rename %s to %s', tmp_path, path)
                 self._rm(path)
                 os.rename(tmp_path, path)
                 self._rm(tmp_path)
             # reset dirty flags
-            self.editor._original_text = plain_text
             self.editor.document().setModified(False)
             # remember path for next save
             self._path = os.path.normpath(path)
-            # reset selection
-            if self.clean_trailing_whitespaces:
-                if sel_start != sel_end:
-                    self._reset_selection(sel_end, sel_start)
-        self.editor.text_saved.emit(str(path))
-        self.saving = False
+            self.editor.text_saved.emit(str(path))
+            self.saving = False
+            _logger().debug('file saved: %s', path)
 
     def close(self, clear=True):
         """
@@ -312,7 +414,7 @@ class FileManager(Manager):
         :param clear: True to clear the editor content. Default is True.
         """
         Cache().set_cursor_position(
-            self.path, TextHelper(self.editor).cursor_position())
+            self.path, self.editor.textCursor().position())
         self.editor._original_text = ''
         if clear:
             self.editor.clear()

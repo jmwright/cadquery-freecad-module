@@ -4,6 +4,7 @@ which use your application's QSettings to store the list of recent files.
 
 """
 import os
+from pyqode.core import icons
 from pyqode.qt import QtCore, QtGui, QtWidgets
 
 
@@ -57,9 +58,14 @@ class RecentFilesManager(QtCore.QObject):
                 seen[marker] = 1
                 result.append(item)
             return result
-
-        return unique([os.path.normpath(pth) for pth in
-                       self._settings.value('recent_files/%s' % key, default)])
+        lst = self._settings.value('recent_files/%s' % key, default)
+        # emtpy list
+        if lst is None:
+            lst = []
+        # single file
+        if isinstance(lst, str):
+            lst = [lst]
+        return unique([os.path.normpath(pth) for pth in lst])
 
     def set_value(self, key, value):
         """
@@ -67,6 +73,8 @@ class RecentFilesManager(QtCore.QObject):
         :param key: value key
         :param value: new value
         """
+        if value is None:
+            value = []
         value = [os.path.normpath(pth) for pth in value]
         self._settings.setValue('recent_files/%s' % key, value)
 
@@ -77,12 +85,6 @@ class RecentFilesManager(QtCore.QObject):
         """
         ret_val = []
         files = self.get_value('list', [])
-        # empty list
-        if files is None:
-            files = []
-        # single file
-        if isinstance(files, str):
-            files = [files]
         # filter files, remove files that do not exist anymore
         for file in files:
             if file is not None and os.path.exists(file):
@@ -113,7 +115,10 @@ class RecentFilesManager(QtCore.QObject):
         Returns the path to the last opened file.
         """
         files = self.get_recent_files()
-        return files[0]
+        try:
+            return files[0]
+        except IndexError:
+            return None
 
 
 class MenuRecentFiles(QtWidgets.QMenu):
@@ -131,7 +136,7 @@ class MenuRecentFiles(QtWidgets.QMenu):
     def __init__(self, parent, recent_files_manager=None,
                  title='Recent files',
                  icon_provider=None,
-                 clear_icon=('edit-clear', '')):
+                 clear_icon=None):
         """
         :param organisation: name of your organisation as used for your own
                              QSettings
@@ -177,9 +182,15 @@ class MenuRecentFiles(QtWidgets.QMenu):
         self.addSeparator()
         action_clear = QtWidgets.QAction('Clear list', self)
         action_clear.triggered.connect(self.clear_recent_files)
-        if self.clear_icon and len(self.clear_icon) == 2:
-            action_clear.setIcon(QtGui.QIcon.fromTheme(
-                self.clear_icon[0], QtGui.QIcon(self.clear_icon[1])))
+        if isinstance(self.clear_icon, QtGui.QIcon):
+            action_clear.setIcon(self.clear_icon)
+        elif self.clear_icon:
+            theme = ''
+            if len(self.clear_icon) == 2:
+                theme, path = self.clear_icon
+            else:
+                path = self.clear_icon
+            icons.icon(theme, path, 'fa.times-circle')
         self.addAction(action_clear)
 
     def clear_recent_files(self):

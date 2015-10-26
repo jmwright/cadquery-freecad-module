@@ -55,6 +55,6 @@ class CaseConverterMode(Mode):
         if state:
             if not self._actions_created:
                 self._create_actions()
-            self.editor.add_menu(self.menu)
+            self.editor.add_action(self.menu.menuAction())
         else:
-            self.editor.remove_menu(self.menu)
+            self.editor.remove_action(self.menu.menuAction())

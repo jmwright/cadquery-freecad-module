@@ -53,8 +53,13 @@ class OutlineMode(Mode, QtCore.QObject):
         self._jobRunner.request_job(self._run_analysis)
 
     def _run_analysis(self):
-        if self.enabled and self.editor and self.editor.toPlainText() and \
-                self.editor.file:
+        try:
+            self.editor.file
+            self.editor.toPlainText()
+        except (RuntimeError, AttributeError):
+            # called by the timer after the editor got deleted
+            return
+        if self.enabled:
             request_data = {
                 'code': self.editor.toPlainText(),
                 'path': self.editor.file.path,

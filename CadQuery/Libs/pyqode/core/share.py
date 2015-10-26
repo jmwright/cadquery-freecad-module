@@ -15,7 +15,8 @@ class Definition(object):
     Definition usually form a tree (a definition may have some child
     definition, e.g. methods of a class).
     """
-    def __init__(self, name, line, column=0, icon=''):
+    def __init__(self, name, line, column=0, icon='', description='',
+                 user_data=None):
         #: Icon resource name associated with the definition, can be None
         self.icon = icon
         #: Definition name (name of the class, method, variable)
@@ -26,6 +27,10 @@ class Definition(object):
         self.column = column
         #: Possible list of children (only classes have children)
         self.children = []
+        #: description (tooltip)
+        self.description = description
+        #: user data
+        self.user_data = user_data
 
     def add_child(self, definition):
         """
@@ -41,7 +46,8 @@ class Definition(object):
         """
         ddict = {'name': self.name, 'icon': self.icon,
                  'line': self.line, 'column': self.column,
-                 'children': []}
+                 'children': [], 'description': self.description,
+                 'user_data': self.user_data}
         for child in self.children:
             ddict['children'].append(child.to_dict())
         return ddict
@@ -51,10 +57,13 @@ class Definition(object):
         """
         Deserializes a definition from a simple dict.
         """
-        d = Definition(ddict['name'], ddict['line'], ddict['column'], ddict['icon'])
+        d = Definition(ddict['name'], ddict['line'], ddict['column'],
+                       ddict['icon'], ddict['description'],
+                       ddict['user_data'])
         for child_dict in ddict['children']:
             d.children.append(Definition.from_dict(child_dict))
         return d
 
     def __repr__(self):
-        return 'Definition(%r, %r, %r, %r)' % (self.name, self.line, self.column, self.icon)
+        return 'Definition(%r, %r, %r, %r)' % (
+            self.name, self.line, self.column, self.icon)

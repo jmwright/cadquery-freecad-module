@@ -53,9 +53,14 @@ class Panel(QtWidgets.QWidget, Mode):
     def scrollable(self, value):
         self._scrollable = value
 
-    def __init__(self):
+    def __init__(self, dynamic=False):
         Mode.__init__(self)
         QtWidgets.QWidget.__init__(self)
+        #: Specifies whether the panel is dynamic. A dynamic panel is a panel
+        #: that will be shown/hidden depending on the context.
+        #: Dynamic panel should not appear in any GUI menu (e.g. no display
+        #: in the panels menu of the notepad example).
+        self.dynamic = dynamic
         #: Panel order into the zone it is installed to. This value is
         #: automatically set when installing the panel but it can be changed
         #: later (negative values can also be used).

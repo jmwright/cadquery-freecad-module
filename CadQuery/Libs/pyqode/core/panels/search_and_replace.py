@@ -4,6 +4,8 @@ This module contains the search and replace panel
 """
 import re
 import sre_constants
+from pyqode.core import icons
+from pyqode.core.api import CodeEdit
 from pyqode.core.api.decoration import TextDecoration
 from pyqode.core.api.panel import Panel
 from pyqode.core.api.utils import DelayJobRunner, TextHelper
@@ -116,7 +118,7 @@ class SearchAndReplacePanel(Panel, Ui_SearchPanel):
                     pass
 
     def __init__(self):
-        Panel.__init__(self)
+        Panel.__init__(self, dynamic=True)
         self.job_runner = DelayJobRunner(delay=500)
         Ui_SearchPanel.__init__(self)
         self.setupUi(self)
@@ -139,40 +141,38 @@ class SearchAndReplacePanel(Panel, Ui_SearchPanel):
             self.checkBoxWholeWords.setDisabled)
 
     def _init_actions(self):
-        def _icon(val):
-            if isinstance(val, tuple):
-                theme, icon = val
-                return QtGui.QIcon.fromTheme(theme, QtGui.QIcon(icon))
-            else:
-                QtGui.QIcon(val)
-
         icon_size = QtCore.QSize(16, 16)
 
-        icon = _icon(('edit-find', ':/pyqode-icons/rc/edit-find.png'))
+        icon = icons.icon('edit-find', ':/pyqode-icons/rc/edit-find.png',
+                          'fa.search')
         self.actionSearch.setIcon(icon)
         self.actionSearch.setShortcut(QtGui.QKeySequence.Find)
         self.labelSearch.setPixmap(icon.pixmap(icon_size))
 
-        icon = _icon(('edit-find-replace',
-                      ':/pyqode-icons/rc/edit-find-replace.png'))
+        icon = icons.icon(
+            'edit-find-replace', ':/pyqode-icons/rc/edit-find-replace.png',
+            'fa.search-plus')
         self.actionActionSearchAndReplace.setShortcut(
             QtGui.QKeySequence.Replace)
         self.actionActionSearchAndReplace.setIcon(icon)
         self.labelReplace.setPixmap(icon.pixmap(icon_size))
 
-        icon = _icon(('go-up', ':/pyqode-icons/rc/go-up.png'))
+        icon = icons.icon('go-up', ':/pyqode-icons/rc/go-up.png',
+                          'fa.arrow-up')
         self.actionFindPrevious.setShortcut(QtGui.QKeySequence.FindPrevious)
         self.actionFindPrevious.setIcon(icon)
         self.toolButtonPrevious.setIcon(icon)
         self.toolButtonPrevious.setIconSize(icon_size)
 
-        icon = _icon(('go-down', ':/pyqode-icons/rc/go-down.png'))
+        icon = icons.icon('go-down', ':/pyqode-icons/rc/go-down.png',
+                          'fa.arrow-down')
         self.actionFindNext.setShortcut(QtGui.QKeySequence.FindNext)
         self.actionFindNext.setIcon(icon)
         self.toolButtonNext.setIcon(icon)
         self.toolButtonNext.setIconSize(icon_size)
 
-        icon = _icon(('window-close', ':/pyqode-icons/rc/close.png'))
+        icon = icons.icon('window-close', ':/pyqode-icons/rc/close.png',
+                          'fa.close')
         self.toolButtonClose.setIcon(icon)
         self.toolButtonClose.setIconSize(icon_size)
 
@@ -193,7 +193,7 @@ class SearchAndReplacePanel(Panel, Ui_SearchPanel):
 
     def _init_style(self):
         self._bg = QtGui.QColor('yellow')
-        self._fg = QtGui.QColor('black')
+        self._outline = QtGui.QPen(QtGui.QColor('gray'), 1)
 
     def on_install(self, editor):
         super(SearchAndReplacePanel, self).on_install(editor)
@@ -204,7 +204,7 @@ class SearchAndReplacePanel(Panel, Ui_SearchPanel):
         for deco in self._decorations:
             self.editor.decorations.remove(deco)
             deco.set_background(QtGui.QBrush(self.background))
-            deco.set_foreground(QtGui.QBrush(self.foreground))
+            deco.set_outline(self._outline)
             self.editor.decorations.append(deco)
 
     def on_state_changed(self, state):
@@ -362,7 +362,7 @@ class SearchAndReplacePanel(Panel, Ui_SearchPanel):
         current_occurences = self._current_occurrence()
         occurrences = self.get_occurences()
         if (current_occurences == -1 or
-                current_occurences == len(occurrences) - 1):
+                current_occurences >= len(occurrences) - 1):
             current_occurences = 0
         else:
             current_occurences += 1
@@ -490,6 +490,8 @@ class SearchAndReplacePanel(Panel, Ui_SearchPanel):
                 self.checkBoxWholeWords.isChecked())
 
     def _exec_search(self, sub, flags):
+        if self.editor is None:
+            return
         regex, case_sensitive, whole_word = flags
         request_data = {
             'string': self.editor.toPlainText(),
@@ -540,7 +542,7 @@ class SearchAndReplacePanel(Panel, Ui_SearchPanel):
         deco = TextDecoration(self.editor.document(), selection_start,
                               selection_end)
         deco.set_background(QtGui.QBrush(self.background))
-        deco.set_foreground(QtGui.QBrush(self.foreground))
+        deco.set_outline(self._outline)
         deco.draw_order = 1
         return deco
 

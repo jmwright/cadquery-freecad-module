@@ -8,9 +8,8 @@ import logging
 import json
 import struct
 import sys
-import threading
 import traceback
-import time
+
 
 try:
     import socketserver
@@ -47,7 +46,7 @@ def import_class(klass):
         return klass
 
 
-class JsonServer(socketserver.ThreadingTCPServer):
+class JsonServer(socketserver.TCPServer):
     """
     A server socket based on a json messaging system.
     """
@@ -125,7 +124,7 @@ class JsonServer(socketserver.ThreadingTCPServer):
                 response = {'request_id': data['request_id'], 'results': []}
                 try:
                     worker = import_class(data['worker'])
-                except ImportError as e:
+                except ImportError:
                     _logger().exception('Failed to import worker class')
                 else:
                     if inspect.isclass(worker):
@@ -135,8 +134,9 @@ class JsonServer(socketserver.ThreadingTCPServer):
                     try:
                         ret_val = worker(data['data'])
                     except Exception:
-                        _logger().exception('something went bad with worker '
-                                            '%r(data=%r)', worker, data['data'])
+                        _logger().exception(
+                            'something went bad with worker %r(data=%r)',
+                            worker, data['data'])
                         ret_val = None
                     if ret_val is None:
                         ret_val = []
@@ -198,18 +198,7 @@ def serve_forever(args=None):
         parser and parse command line arguments.
     """
     server = JsonServer(args=args)
-    server_thread = threading.Thread(target=server.serve_forever)
-    # Exit the server thread when the main thread terminates
-    server_thread.daemon = True
-    server_thread.start()
-    if sys.version_info[0] == 2:
-        raw_input('')
-    else:
-        input('')
-    import time
-    t = time.time()
-    server.shutdown()
-    _logger().debug('SRV SHUTDOWN TIME: %f' % (time.time() - t), sys.stderr)
+    server.serve_forever()
 
 
 # Server script example

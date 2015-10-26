@@ -1,12 +1,15 @@
 """
 This module contains the file system tree view.
 """
+import fnmatch
+import locale
 import logging
 import os
 import platform
 import shutil
 import subprocess
 from pyqode.qt import QtCore, QtGui, QtWidgets
+from pyqode.core import icons
 
 
 def _logger():
@@ -36,11 +39,10 @@ class FileSystemTreeView(QtWidgets.QTreeView):
         """
         def __init__(self):
             super(FileSystemTreeView.FilterProxyModel, self).__init__()
-            #: The list of directories to ignore
-            self.ignored_directories = ['__pycache__']
             #: The list of file extension to exclude
-            self.ignored_extensions = ['.pyc', '.pyd', '.so', '.dll', '.exe',
-                                  '.egg-info', '.coverage', '.DS_Store']
+            self.ignored_patterns = [
+                '*.pyc', '*.pyd', '*.so', '*.dll', '*.exe',
+                '*.egg-info', '*.coverage', '.DS_Store', '__pycache__']
             self._ignored_unused = []
 
         def set_root_path(self, path):
@@ -60,18 +62,15 @@ class FileSystemTreeView(QtWidgets.QTreeView):
             finfo = self.sourceModel().fileInfo(index0)
             fn = finfo.fileName()
             fp = os.path.normpath(finfo.filePath())
-            extension = '.%s' % finfo.suffix()
-
             if fp in self._ignored_unused:
-                _logger().debug('excluding directory (unused): %s',
+                _logger().debug('excluding unused directory: %s',
                                 finfo.filePath())
                 return False
-            if fn in self.ignored_directories:
-                _logger().debug('excluding directory: %s', finfo.filePath())
-                return False
-            if extension in self.ignored_extensions:
-                _logger().debug('excluding file: %s', finfo.filePath())
-                return False
+            for ptrn in self.ignored_patterns:
+                if fnmatch.fnmatch(fn, ptrn):
+                    _logger().debug('ignoring %s (matching pattern: %s',
+                                    finfo.filePath(), ptrn)
+                    return False
             _logger().debug('accepting %s', finfo.filePath())
             return True
 
@@ -92,13 +91,20 @@ class FileSystemTreeView(QtWidgets.QTreeView):
     def __init__(self, parent=None):
         super(FileSystemTreeView, self).__init__(parent)
         self.context_menu = None
-        self.root_path = None
+        self._root_path = None
+        self.root_path = ''
         self.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         self.customContextMenuRequested.connect(self._show_context_menu)
         self.helper = FileSystemHelper(self)
         self.setSelectionMode(self.ExtendedSelection)
-        self._ignored_extensions = []
-        self._ignored_directories = []
+        self._ignored_patterns = []
+        self._icon_provider = QtWidgets.QFileIconProvider()
+        self._hide_extra_colums = True
+        from pyqode.core.widgets import FileIconProvider
+        self.set_icon_provider(FileIconProvider())
+
+    def set_icon_provider(self, icon_provider):
+        self._icon_provider = icon_provider
 
     def ignore_directories(self, *directories):
         """
@@ -106,10 +112,13 @@ class FileSystemTreeView(QtWidgets.QTreeView):
 
         This must be done before calling set_root_path!
 
+        .. deprecated:: 2.6.1
+            Use :func:`add_ignore_pattern` instead.
+
         :param directories: the directories to ignore
         """
         for d in directories:
-            self._ignored_directories.append(d)
+            self.add_ignore_patterns(d)
 
     def ignore_extensions(self, *extensions):
         """
@@ -117,12 +126,39 @@ class FileSystemTreeView(QtWidgets.QTreeView):
 
         This must be done before calling set_root_path!
 
+
+        .. deprecated:: 2.6.1
+            Use :func:`add_ignore_pattern` instead.
+
         :param extensions: the extensions to ignore
 
         .. note:: extension must have the dot: '.py' and not 'py'
         """
-        for d in extensions:
-            self._ignored_extensions.append(d)
+        for ext in extensions:
+            self.add_ignore_patterns('*%s' % ext)
+
+    def clear_ignore_patterns(self):
+        """
+        Clears the list of ignore patterns
+        """
+        self._ignored_patterns[:] = []
+
+    def add_ignore_patterns(self, *patterns):
+        """
+        Adds an ignore pattern to the list for ignore patterns.
+
+        Ignore patterns are used to filter out unwanted files or directories
+        from the file system model.
+
+        A pattern is a Unix shell-style wildcards. See :mod:`fnmatch` for a
+        deeper explanation about the shell-style wildcards.
+        """
+        for ptrn in patterns:
+            if isinstance(ptrn, list):
+                for p in ptrn:
+                    self._ignored_patterns.append(p)
+            else:
+                self._ignored_patterns.append(ptrn)
 
     def set_context_menu(self, context_menu):
         """
@@ -132,6 +168,7 @@ class FileSystemTreeView(QtWidgets.QTreeView):
         """
         self.context_menu = context_menu
         self.context_menu.tree_view = self
+        self.context_menu.init_actions()
         for action in self.context_menu.actions():
             self.addAction(action)
 
@@ -141,26 +178,35 @@ class FileSystemTreeView(QtWidgets.QTreeView):
         :param path: root path - str
         :param hide_extra_columns: Hide extra column (size, paths,...)
         """
+        self._hide_extra_colums = hide_extra_columns
         if os.path.isfile(path):
             path = os.path.abspath(os.path.join(path, os.pardir))
         self._fs_model_source = QtWidgets.QFileSystemModel()
+        self._fs_model_source.setFilter(QtCore.QDir.Dirs | QtCore.QDir.Files |
+                                        QtCore.QDir.NoDotAndDotDot |
+                                        QtCore.QDir.Hidden)
+        self._fs_model_source.setIconProvider(self._icon_provider)
         self._fs_model_proxy = self.FilterProxyModel()
-        for item in self._ignored_directories:
-            self._fs_model_proxy.ignored_directories.append(item)
-        for item in self._ignored_extensions:
-            self._fs_model_proxy.ignored_extensions.append(item)
+        for item in self._ignored_patterns:
+            self._fs_model_proxy.ignored_patterns.append(item)
         self._fs_model_proxy.setSourceModel(self._fs_model_source)
-        self.setModel(self._fs_model_proxy)
         self._fs_model_proxy.set_root_path(path)
-        self.root_path = os.path.dirname(path)
-        file_root_index = self._fs_model_source.setRootPath(self.root_path)
+        # takes parent of the root path, filter will keep only `path`, that
+        # way `path` appear as the top level node of the tree
+        self._root_path = os.path.dirname(path)
+        self.root_path = path
+        self._fs_model_source.directoryLoaded.connect(self._on_path_loaded)
+        self._fs_model_source.setRootPath(self._root_path)
+
+    def _on_path_loaded(self, path):
+        if os.path.normpath(path) != self._root_path:
+            return
+        self.setModel(self._fs_model_proxy)
+        file_root_index = self._fs_model_source.setRootPath(self._root_path)
         root_index = self._fs_model_proxy.mapFromSource(file_root_index)
         self.setRootIndex(root_index)
-        # Expand first entry (project name)
-        file_parent_index = self._fs_model_source.index(path)
-        self.setExpanded(self._fs_model_proxy.mapFromSource(
-            file_parent_index), True)
-        if hide_extra_columns:
+        self.expandToDepth(0)
+        if self._hide_extra_colums:
             self.setHeaderHidden(True)
             for i in range(1, 4):
                 self.hideColumn(i)
@@ -189,6 +235,10 @@ class FileSystemTreeView(QtWidgets.QTreeView):
         if self.context_menu:
             self.context_menu.exec_(self.mapToGlobal(point))
 
+    def select_path(self, path):
+        self.setCurrentIndex(self._fs_model_proxy.mapFromSource(
+            self._fs_model_source.index(path)))
+
 
 class FileSystemHelper:
     """
@@ -206,8 +256,8 @@ class FileSystemHelper:
             """
             lst = []
             for url in urls:
-                lst.append(url)
-            self.setData(self.format(self.copy), '\n'.join(lst))
+                lst.append(bytes(url, encoding=locale.getpreferredencoding()))
+            self.setData(self.format(self.copy), b'\n'.join(lst))
 
         @classmethod
         def list_from(cls, mime_data, copy=True):
@@ -256,7 +306,7 @@ class FileSystemHelper:
         for proxy_index in self.tree_view.selectedIndexes():
             finfo = self.tree_view.fileInfo(proxy_index)
             urls.append(finfo.canonicalFilePath())
-        _logger().info('selected urls %r' % [str(url) for url in urls])
+        _logger().debug('selected urls %r' % [str(url) for url in urls])
         return urls
 
     def paste_from_clipboard(self):
@@ -284,10 +334,18 @@ class FileSystemHelper:
         removed if copy is set to False.
         """
         for src in sources:
-            _logger().info('%s <%s> to <%s>' % (
+            _logger().debug('%s <%s> to <%s>' % (
                 'copying' if copy else 'cutting', src, destination))
             perform_copy = True
-            final_dest = os.path.join(destination, os.path.split(src)[1])
+            ext = os.path.splitext(src)[1]
+            original = os.path.splitext(os.path.split(src)[1])[0]
+            filename, status = QtWidgets.QInputDialog.getText(
+                self.tree_view, 'Copy', 'New name:',
+                QtWidgets.QLineEdit.Normal, original)
+            if filename == '' or not status:
+                return
+            filename = filename + ext
+            final_dest = os.path.join(destination, filename)
             if os.path.exists(final_dest):
                 rep = QtWidgets.QMessageBox.question(
                     self.tree_view, 'File exists',
@@ -300,17 +358,23 @@ class FileSystemHelper:
             if not perform_copy:
                 continue
             try:
-                shutil.copy(src, destination)
+                if os.path.isfile(src):
+                    shutil.copy(src, final_dest)
+                else:
+                    shutil.copytree(src, final_dest)
             except (IOError, OSError) as e:
                 QtWidgets.QMessageBox.warning(
                     self.tree_view, 'Failed to copy file', str(e))
                 _logger().exception('failed to copy %s to %s', src,
                                     destination)
             else:
-                _logger().info('file copied %s', src)
+                _logger().debug('file copied %s', src)
             if not copy:
-                _logger().info('removing source (cut operation)')
-                os.remove(src)
+                _logger().debug('removing source (cut operation)')
+                if os.path.isfile(src):
+                    os.remove(src)
+                else:
+                    shutil.rmtree(src)
 
     @staticmethod
     def _get_files(path):
@@ -334,23 +398,23 @@ class FileSystemHelper:
             QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No,
             QtWidgets.QMessageBox.Yes)
         if rep == QtWidgets.QMessageBox.Yes:
+            deleted_files = []
             for fn in urls:
-                deleted_files = []
                 try:
                     if os.path.isfile(fn):
                         os.remove(fn)
                         deleted_files.append(fn)
                     else:
-                        deleted_files = self._get_files(fn)
+                        files = self._get_files(fn)
                         shutil.rmtree(fn)
+                        deleted_files += files
                 except OSError as e:
                     QtWidgets.QMessageBox.warning(
                         self.tree_view, 'Failed to remove %s' % fn, str(e))
                     _logger().exception('failed to remove %s', fn)
-                else:
-                    for d in deleted_files:
-                        _logger().info('%s removed', d)
-                        self.tree_view.file_deleted.emit(os.path.normpath(d))
+            for d in deleted_files:
+                _logger().debug('%s removed', d)
+                self.tree_view.file_deleted.emit(os.path.normpath(d))
 
     def get_current_path(self):
         """
@@ -369,7 +433,7 @@ class FileSystemHelper:
         """
         path = self.get_current_path()
         QtWidgets.QApplication.clipboard().setText(path)
-        _logger().info('path copied: %s' % path)
+        _logger().debug('path copied: %s' % path)
 
     def rename(self):
         """
@@ -405,7 +469,12 @@ class FileSystemHelper:
 
             if os.path.isfile(src):
                 src = os.path.dirname(src)
-            os.makedirs(os.path.join(src, name), exist_ok=True)
+            try:
+                os.makedirs(os.path.join(src, name), exist_ok=True)
+            except OSError as e:
+                QtWidgets.QMessageBox.warning(
+                    self.tree_view, 'Failed to create directory',
+                    'Failed to create directory: %s', str(e))
 
     def create_file(self):
         """
@@ -426,9 +495,15 @@ class FileSystemHelper:
             if os.path.isfile(src):
                 src = os.path.dirname(src)
             path = os.path.join(src, name)
-            with open(path, 'w'):
-                pass
-            self.tree_view.file_created.emit(os.path.normpath(path))
+            try:
+                with open(path, 'w'):
+                    pass
+            except OSError as e:
+                QtWidgets.QMessageBox.warning(
+                    self.tree_view, 'Failed to create new file',
+                    'Failed to create file: %s' % str(e))
+            else:
+                self.tree_view.file_created.emit(os.path.normpath(path))
 
 
 class FileSystemContextMenu(QtWidgets.QMenu):
@@ -451,27 +526,33 @@ class FileSystemContextMenu(QtWidgets.QMenu):
         super(FileSystemContextMenu, self).__init__()
         #: Reference to the tree view
         self.tree_view = None
-        self._init_actions()
 
-    def _init_actions(self):
-        def _icon(theme, rc_path):
-            return QtGui.QIcon.fromTheme(theme, QtGui.QIcon(rc_path))
+    def addAction(self, *args):
+        action = super(FileSystemContextMenu, self).addAction(*args)
+        if action is None:
+            action = args[0]
+        action.setShortcutContext(QtCore.Qt.WidgetShortcut)
+        self.tree_view.addAction(action)
+        return action
 
+    def init_actions(self):
         # New - submenu
         self.menu_new = self.addMenu("&New")
-        self.menu_new.setIcon(QtGui.QIcon.fromTheme('document-new'))
+        self.menu_new.setIcon(
+            icons.icon('document-new', None, 'fa.plus'))
         # https://github.com/pyQode/pyqode.core/pull/153
         new_user_actions = self.get_new_user_actions()
         if len(new_user_actions) > 0:
             self.menu_new.addSeparator()
-            for user_new_action in self.get_new_user_actions():
+            for user_new_action in new_user_actions:
                 self.menu_new.addAction(user_new_action)
         # New file
         self.action_create_file = QtWidgets.QAction('&File', self)
         self.action_create_file.triggered.connect(
             self._on_create_file_triggered)
-        icon_provider = QtWidgets.QFileIconProvider()
-        self.action_create_file.setIcon(icon_provider.icon(icon_provider.File))
+        icon_provider = self.tree_view._icon_provider
+        self.action_create_file.setIcon(icon_provider.icon(
+            icon_provider.File))
         self.menu_new.addAction(self.action_create_file)
         # New directory
         self.action_create_directory = QtWidgets.QAction('&Directory', self)
@@ -485,15 +566,15 @@ class FileSystemContextMenu(QtWidgets.QMenu):
         # cut
         self.action_cut = QtWidgets.QAction('&Cut', self)
         self.action_cut.setShortcut(QtGui.QKeySequence.Cut)
-        self.action_cut.setIcon(_icon(
-            'edit-cut', ':/pyqode-icons/rc/edit-cut.png'))
+        self.action_cut.setIcon(icons.icon(
+            'edit-cut', ':/pyqode-icons/rc/edit-cut.png', 'fa.cut'))
         self.addAction(self.action_cut)
         self.action_cut.triggered.connect(self._on_cut_triggered)
         # copy
         self.action_copy = QtWidgets.QAction('&Copy', self)
         self.action_copy.setShortcut(QtGui.QKeySequence.Copy)
-        self.action_copy.setIcon(_icon(
-            'edit-copy', ':/pyqode-icons/rc/edit-copy.png'))
+        self.action_copy.setIcon(icons.icon(
+            'edit-copy', ':/pyqode-icons/rc/edit-copy.png', 'fa.copy'))
         self.addAction(self.action_copy)
         self.action_copy.triggered.connect(self._on_copy_triggered)
         # copy path
@@ -504,21 +585,22 @@ class FileSystemContextMenu(QtWidgets.QMenu):
         # Paste
         self.action_paste = QtWidgets.QAction('&Paste', self)
         self.action_paste.setShortcut(QtGui.QKeySequence.Paste)
-        self.action_paste.setIcon(_icon(
-            'edit-paste', ':/pyqode-icons/rc/edit-paste.png'))
+        self.action_paste.setIcon(icons.icon(
+            'edit-paste', ':/pyqode-icons/rc/edit-paste.png', 'fa.paste'))
         self.action_paste.triggered.connect(self._on_paste_triggered)
         self.addAction(self.action_paste)
         self.addSeparator()
         # Rename
         self.action_rename = QtWidgets.QAction('&Rename', self)
-        self.action_rename.setShortcut('Shift+F2')
+        self.action_rename.setShortcut('F2')
         self.action_rename.triggered.connect(self._on_rename_triggered)
+        self.action_rename.setIcon(QtGui.QIcon.fromTheme('edit-rename'))
         self.addAction(self.action_rename)
         # Delete
         self.action_delete = QtWidgets.QAction('&Delete', self)
         self.action_delete.setShortcut(QtGui.QKeySequence.Delete)
-        self.action_delete.setIcon(_icon(
-            'edit-delete', ':/pyqode-icons/rc/edit-delete.png'))
+        self.action_delete.setIcon(icons.icon(
+            'edit-delete', ':/pyqode-icons/rc/edit-delete.png', 'fa.remove'))
         self.action_delete.triggered.connect(self._on_delete_triggered)
         self.addAction(self.action_delete)
         self.addSeparator()
@@ -530,7 +612,8 @@ class FileSystemContextMenu(QtWidgets.QMenu):
             text = 'Open in finder'
         else:
             text = 'Show in %s' % self.get_linux_file_explorer().capitalize()
-        action = self.addAction(text)
+        action = self.action_show_in_explorer = self.addAction(text)
+        action.setIcon(QtGui.QIcon.fromTheme('system-file-manager'))
         action.triggered.connect(self._on_show_in_explorer_triggered)
 
     def get_new_user_actions(self):
@@ -575,12 +658,14 @@ class FileSystemContextMenu(QtWidgets.QMenu):
     def _on_create_file_triggered(self):
         self.tree_view.helper.create_file()
 
-    def get_linux_file_explorer(self):
+    @classmethod
+    def get_linux_file_explorer(cls):
         output = subprocess.check_output(
             ['xdg-mime', 'query', 'default', 'inode/directory']).decode()
         if output:
             explorer = output.splitlines()[0].replace(
-                '.desktop', '').split('.')[-1].lower()
+                '.desktop', '').replace('-folder-handler', '').split(
+                    '.')[-1].lower()
             return explorer
         return 'nautilus'
 
@@ -598,5 +683,4 @@ class FileSystemContextMenu(QtWidgets.QMenu):
         elif system == 'Windows':
             subprocess.Popen(r'explorer /select,"%s"' % os.path.normpath(path))
         elif system == 'Darwin':
-            # todo: need to be tested on OSX
             subprocess.Popen(['open', '-R', path])

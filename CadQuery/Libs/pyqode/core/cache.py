@@ -100,7 +100,11 @@ class Cache(object):
         try:
             pos = map[file_path]
         except KeyError:
-            pos = (0, 0)
+            pos = 0
+        if isinstance(pos, list):
+            # changed in pyqode 2.6.3, now we store the cursor position
+            # instead of the line and column  (faster)
+            pos = 0
         return pos
 
     def set_cursor_position(self, path, position):

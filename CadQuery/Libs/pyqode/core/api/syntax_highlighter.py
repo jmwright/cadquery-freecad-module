@@ -34,6 +34,8 @@ COLOR_SCHEME_KEYS = {
     "normal": Token.Text,
     # any keyword
     "keyword": Token.Keyword,
+    # namespace keywords (from ... import ... as)
+    "namespace": Token.Keyword.Namespace,
     # type keywords
     "type": Token.Keyword.Type,
     # reserved keyword
@@ -66,6 +68,10 @@ COLOR_SCHEME_KEYS = {
     'constant': Token.Name.Constant,
     # function definition
     'function': Token.Name.Function,
+    # operator
+    'operator': Token.Operator,
+    # operator words (and, not)
+    'operator_word': Token.Operator.Word
 }
 
 
@@ -230,12 +236,15 @@ class SyntaxHighlighter(QtGui.QSyntaxHighlighter, Mode):
     @property
     def color_scheme(self):
         """
-        Returns a reference to the current color scheme.
+        Gets/Sets the color scheme of the syntax highlighter, this will trigger
+        a rehighlight automatically.
         """
         return self._color_scheme
 
     @color_scheme.setter
     def color_scheme(self, color_scheme):
+        if isinstance(color_scheme, str):
+            color_scheme = ColorScheme(color_scheme)
         if color_scheme.name != self._color_scheme.name:
             self._color_scheme = color_scheme
             self.refresh_editor(color_scheme)
@@ -284,9 +293,15 @@ class SyntaxHighlighter(QtGui.QSyntaxHighlighter, Mode):
         self.fold_detector = None
         self.WHITESPACES = QtCore.QRegExp(r'\s+')
 
+    def on_state_changed(self, state):
+        if self._on_close:
+            return
+        if state:
+            self.setDocument(self.editor.document())
+        else:
+            self.setDocument(None)
+
     def _highlight_whitespaces(self, text):
-        fmt = QtGui.QTextCharFormat()
-        fmt.setForeground(QtGui.QBrush(self.editor.whitespaces_foreground))
         index = self.WHITESPACES.indexIn(text, 0)
         while index >= 0:
             index = self.WHITESPACES.pos(0)
@@ -312,6 +327,8 @@ class SyntaxHighlighter(QtGui.QSyntaxHighlighter, Mode):
 
         :param text: text to highlight.
         """
+        if not self.enabled:
+            return
         current_block = self.currentBlock()
         previous_block = self._find_prev_non_blank_block(current_block)
         if self.editor:
@@ -346,7 +363,7 @@ class SyntaxHighlighter(QtGui.QSyntaxHighlighter, Mode):
             pass
         QtWidgets.QApplication.restoreOverrideCursor()
         end = time.time()
-        _logger().info('rehighlight duration: %fs' % (end - start))
+        _logger().debug('rehighlight duration: %fs' % (end - start))
 
     def on_install(self, editor):
         super(SyntaxHighlighter, self).on_install(editor)

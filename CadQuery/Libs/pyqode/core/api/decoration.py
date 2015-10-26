@@ -130,7 +130,6 @@ class TextDecoration(QtWidgets.QTextEdit.ExtraSelection):
         self.cursor.movePosition(self.cursor.StartOfBlock)
         text = self.cursor.block().text()
         lindent = len(text) - len(text.lstrip())
-        rindent = len(text) - len(text.rstrip())
         self.cursor.setPosition(self.cursor.block().position() + lindent)
         self.cursor.movePosition(self.cursor.EndOfBlock,
                                  self.cursor.KeepAnchor)
@@ -177,7 +176,7 @@ class TextDecoration(QtWidgets.QTextEdit.ExtraSelection):
         :type color: QtGui.QColor
         """
         self.format.setUnderlineStyle(
-            QtGui.QTextCharFormat.SpellCheckUnderline)
+            QtGui.QTextCharFormat.WaveUnderline)
         self.format.setUnderlineColor(color)
 
     def set_as_warning(self, color=QtGui.QColor("orange")):
@@ -188,5 +187,5 @@ class TextDecoration(QtWidgets.QTextEdit.ExtraSelection):
         :type color: QtGui.QColor
         """
         self.format.setUnderlineStyle(
-            QtGui.QTextCharFormat.SpellCheckUnderline)
+            QtGui.QTextCharFormat.WaveUnderline)
         self.format.setUnderlineColor(color)

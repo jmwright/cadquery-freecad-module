@@ -24,7 +24,7 @@ class PyAutoIndentMode(AutoIndentMode):
 
     def _get_indent(self, cursor):
         ln, column = self._helper.cursor_position()
-        fullline = self._get_full_line(cursor)
+        fullline = self._get_full_line(cursor).rstrip()
         line = fullline[:column]
         pre, post = AutoIndentMode._get_indent(self, cursor)
         if self._at_block_start(cursor, line):
@@ -35,7 +35,7 @@ class PyAutoIndentMode(AutoIndentMode):
             c2.movePosition(c2.Left)
         if (self._helper.is_comment_or_string(
                 c2, formats=['comment', 'docstring']) or
-                fullline.endswith('"""')):
+                fullline.endswith(('"""', "'''"))):
             if line.strip().startswith("#") and column != len(fullline):
                 post += '# '
             return pre, post
@@ -46,6 +46,8 @@ class PyAutoIndentMode(AutoIndentMode):
         else:
             lastword = self._get_last_word(cursor)
             lastwordu = self._get_last_word_unstripped(cursor)
+            end_with_op = fullline.endswith(
+                ('+', '-', '*', '/', '=', ' and', ' or', '%'))
             in_string_def, char = self._is_in_string_def(fullline, column)
             if in_string_def:
                 post, pre = self._handle_indent_inside_string(
@@ -62,12 +64,13 @@ class PyAutoIndentMode(AutoIndentMode):
             elif (fullline.endswith((')', '}', ']')) and
                     lastword.endswith((')', '}', ']'))):
                 post = self._handle_indent_after_paren(cursor, post)
-            elif ("\\" not in fullline and "#" not in fullline and
-                  not self._at_block_end(cursor, fullline)):
+            elif (not fullline.endswith("\\") and
+                    (end_with_op or
+                     not self._at_block_end(cursor, fullline))):
                 post, pre = self._handle_indent_in_statement(
                     fullline, lastwordu, post, pre)
             elif ((self._at_block_end(cursor, fullline) and
-                    fullline.strip().startswith('return ')) or
+                    fullline.strip().startswith('return')) or
                     lastword == "pass"):
                 post = post[:-self.editor.tab_length]
         return pre, post
@@ -89,13 +92,13 @@ class PyAutoIndentMode(AutoIndentMode):
 
     @staticmethod
     def _is_paren_open(paren):
-        return (paren.character == "(" or paren.character == "["
-                or paren.character == '{')
+        return (paren.character == "(" or paren.character == "[" or
+                paren.character == '{')
 
     @staticmethod
     def _is_paren_closed(paren):
-        return (paren.character == ")" or paren.character == "]"
-                or paren.character == '}')
+        return (paren.character == ")" or paren.character == "]" or
+                paren.character == '}')
 
     @staticmethod
     def _get_full_line(tc):
@@ -238,7 +241,7 @@ class PyAutoIndentMode(AutoIndentMode):
         tc2.movePosition(QTextCursor.PreviousCharacter, QTextCursor.KeepAnchor)
         char = tc2.selectedText()
         while char == ' ':
-            tc2.movePosition(QTextCursor.PreviousCharacter, QTextCursor.KeepAnchor)
+            tc2.movePosition(tc2.PreviousCharacter, tc2.KeepAnchor)
             char = tc2.selectedText()
         return char.strip()
 
@@ -332,7 +335,7 @@ class PyAutoIndentMode(AutoIndentMode):
             # e.g indent is None (meaning the line does not ends with ):, ]:
             # or }:
             kw = ["if", "class", "def", "while", "for", "else", "elif",
-                  "except", "finally", "try"]
+                  "except", "finally", "try", "with"]
             l = fullline
             ln = cursor.blockNumber()
 

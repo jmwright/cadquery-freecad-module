@@ -7,8 +7,9 @@ import mimetypes
 import os
 import uuid
 from pyqode.qt import QtCore, QtWidgets, QtGui
-from pyqode.core.api import utils, CodeEdit, ColorScheme
+from pyqode.core.api import utils, CodeEdit
 from pyqode.core.dialogs import DlgUnsavedFiles
+from pyqode.core._forms import popup_open_files_ui
 from .tab_bar import TabBar
 from .code_edits import GenericCodeEdit, TextCodeEdit
 
@@ -33,16 +34,21 @@ class DraggableTabBar(TabBar):
         self._pos = QtCore.QPoint()
         self.setAcceptDrops(True)
         self.setMouseTracking(True)
+        self.setElideMode(QtCore.Qt.ElideNone)
 
     def mousePressEvent(self, event):
         if event.button() == QtCore.Qt.LeftButton:
             self._pos = event.pos()  # _pos is a QPoint defined in the header
         super(DraggableTabBar, self).mousePressEvent(event)
 
-    def mouseMoveEvent(self, event):
-        # update tooltip with the tooltip of the tab under mouse cursor.
+    def widget_under_mouse(self, event):
         index = self.tabAt(event.pos())
         tab = self.parent().widget(index)
+        return tab
+
+    def mouseMoveEvent(self, event):
+        # update tooltip with the tooltip of the tab under mouse cursor.
+        tab = self.widget_under_mouse(event)
         if tab is not None:
             tooltip = tab.toolTip()
             if not tooltip:
@@ -63,10 +69,10 @@ class DraggableTabBar(TabBar):
 
         drag = QtGui.QDrag(self)
         data = QtCore.QMimeData()
-        data.tab = self.parent().currentWidget()
+        data.tab = tab
         data.widget = self
         # a crude way to distinguish tab-reodering drags from other drags
-        data.setData("action", "tab-reordering")
+        data.setData("action", b"tab-reordering")
         drag.setMimeData(data)
         drag.setPixmap(self.tabIcon(self.tabAt(event.pos())).pixmap(32, 32))
         drag.exec_()
@@ -96,14 +102,13 @@ class BaseTabWidget(QtWidgets.QTabWidget):
         - close the current tab
         - close all tabs
         - close all other tabs
-
-    The easiest way to add custom actions to the tab context menu is to
-    override the ``_create_context_menu`` method.
     """
     #: Signal emitted when the last tab has been closed
     last_tab_closed = QtCore.Signal()
+
     #: Signal emitted when a tab has been closed
     tab_closed = QtCore.Signal(QtWidgets.QWidget)
+
     #: Signal emitted when the user clicked on split vertical or split
     #: horizontal
     #: **Parameters**:
@@ -122,8 +127,11 @@ class BaseTabWidget(QtWidgets.QTabWidget):
         tab_bar.customContextMenuRequested.connect(self._show_tab_context_menu)
         tab_bar.tab_move_request.connect(self._on_tab_move_request)
         self.setTabBar(tab_bar)
-        self._context_mnu = self._create_tab_bar_menu()
         self.setAcceptDrops(True)
+        self.setUsesScrollButtons(True)
+
+        #: A list of additional context menu actions
+        self.context_actions = []
 
     def tab_under_menu(self):
         """
@@ -179,28 +187,38 @@ class BaseTabWidget(QtWidgets.QTabWidget):
         return True
 
     def _create_tab_bar_menu(self):
-        _context_mnu = QtWidgets.QMenu()
-        menu = QtWidgets.QMenu('Split', _context_mnu)
-        menu.addAction('Split horizontally').triggered.connect(
-            self._on_split_requested)
-        menu.addAction('Split vertically').triggered.connect(
-            self._on_split_requested)
-        _context_mnu.addMenu(menu)
-        _context_mnu.addSeparator()
+        context_mnu = QtWidgets.QMenu()
+        for action in self.context_actions:
+            context_mnu.addAction(action)
+        if self.context_actions:
+            context_mnu.addSeparator()
+        menu = QtWidgets.QMenu('Split', context_mnu)
+        menu.setIcon(QtGui.QIcon.fromTheme('split'))
+        a = menu.addAction('Split horizontally')
+        a.triggered.connect(self._on_split_requested)
+        a.setIcon(QtGui.QIcon.fromTheme('view-split-left-right'))
+        a = menu.addAction('Split vertically')
+        a.setIcon(QtGui.QIcon.fromTheme('view-split-top-bottom'))
+        a.triggered.connect(self._on_split_requested)
+        context_mnu.addMenu(menu)
+        context_mnu.addSeparator()
         for name, slot in [('Close', self.close),
                            ('Close others', self.close_others),
                            ('Close all', self.close_all)]:
             qaction = QtWidgets.QAction(name, self)
             qaction.triggered.connect(slot)
-            _context_mnu.addAction(qaction)
+            context_mnu.addAction(qaction)
             self.addAction(qaction)
-        return _context_mnu
+        self._context_mnu = context_mnu
+        return context_mnu
 
     def _show_tab_context_menu(self, position):
         if self.count():
             self._menu_pos = position
-            # self._context_mnu.popup(self.mapToGlobal(position))
-            self._context_mnu.popup(self.tabBar().mapToGlobal(position))
+            SplittableTabWidget.tab_under_menu = self.widget(
+                self.tab_under_menu())
+            self._create_tab_bar_menu().popup(self.tabBar().mapToGlobal(
+                position))
 
     def _collect_dirty_tabs(self, skip=None):
         """
@@ -269,10 +287,15 @@ class BaseTabWidget(QtWidgets.QTabWidget):
             if dlg.exec_() == dlg.Accepted:
                 rm = True
                 if not dlg.discarded:
-                    rm = self.save_widget(widget)
+                    try:
+                        rm = self.save_widget(widget)
+                    except OSError:
+                        pass
                 if rm:
                     self.remove_tab(index)
-                    widget.deleteLater()
+                    widget.close()
+                    widget.setParent(None)
+                    del widget
 
     @staticmethod
     def _close_widget(widget):
@@ -384,6 +407,81 @@ class BaseTabWidget(QtWidgets.QTabWidget):
         super(BaseTabWidget, self).addTab(tab, *args)
 
 
+class OpenFilesPopup(QtWidgets.QDialog):
+    triggered = QtCore.Signal(str)
+
+    def __init__(self, *args):
+        super(OpenFilesPopup, self).__init__(*args)
+        self.ui = popup_open_files_ui.Ui_Dialog()
+        self.ui.setupUi(self)
+        self.ui.tableWidget.itemActivated.connect(self._on_item_activated)
+        self.ui.tableWidget.itemDoubleClicked.connect(self._on_item_activated)
+        settings = QtCore.QSettings('pyQode', 'pyqode.core')
+        self.sort_enabled = bool(settings.value(
+            'sortOpenFilesAlphabetically', False))
+        self.ui.checkBox.setChecked(self.sort_enabled)
+        self.ui.checkBox.stateChanged.connect(self._on_sort_changed)
+
+    def set_filenames(self, filenames):
+        def clean(filenames):
+            ret_val = []
+            new_count = 0
+            for filename in filenames:
+                if not filename:
+                    filename = 'New document %d.txt' % (new_count + 1)
+                    new_count += 1
+                ret_val.append(filename)
+            return ret_val
+
+        self._filenames = filenames
+        filenames = clean(filenames)
+        if self.sort_enabled:
+            filenames = sorted(filenames, key=lambda x:
+                               QtCore.QFileInfo(x).fileName().lower())
+        self.ui.tableWidget.clearContents()
+        icon_provider = SplittableCodeEditTabWidget.icon_provider_klass()
+        self.ui.tableWidget.setRowCount(len(filenames))
+        self.ui.tableWidget.horizontalHeader().setSectionResizeMode(
+            QtWidgets.QHeaderView.ResizeToContents)
+        for row, path in enumerate(filenames):
+            finfo = QtCore.QFileInfo(path)
+            filename = finfo.fileName()
+            if finfo.exists():
+                icon = icon_provider.icon(finfo)
+            else:
+                icon = icon_provider.icon(icon_provider.File)
+            # file name
+            item = QtWidgets.QTableWidgetItem()
+            item.setText(filename)
+            item.setIcon(icon)
+            item.setToolTip(path)
+            item.setData(QtCore.Qt.UserRole, bytes(path, 'utf-8'))
+            self.ui.tableWidget.setItem(row, 0, item)
+
+            # path
+            item = QtWidgets.QTableWidgetItem()
+            item.setText(path)
+            item.setToolTip(path)
+            item.setData(QtCore.Qt.UserRole, bytes(path, 'utf-8'))
+            self.ui.tableWidget.setItem(row, 1, item)
+
+    def _on_sort_changed(self, *_):
+        self.sort_enabled = self.ui.checkBox.isChecked()
+        settings = QtCore.QSettings('pyQode', 'pyqode.core')
+        settings.setValue(
+            'sortOpenFilesAlphabetically', self.sort_enabled)
+        self.set_filenames(self._filenames)
+
+    def _on_item_activated(self, item):
+        self.hide()
+        self.triggered.emit(item.data(QtCore.Qt.UserRole).decode('utf-8'))
+
+    def show(self):
+        super(OpenFilesPopup, self).show()
+        self.ui.tableWidget.setFocus()
+        self.ui.tableWidget.selectRow(0)
+
+
 class SplittableTabWidget(QtWidgets.QSplitter):
     """
     A splittable tab widget. The widget is implemented as a splitter which
@@ -408,6 +506,7 @@ class SplittableTabWidget(QtWidgets.QSplitter):
     """
     #: Signal emitted when the last tab has been closed.
     last_tab_closed = QtCore.Signal(QtWidgets.QSplitter)
+
     #: Signal emitted when the active tab changed (takes child tab widgets
     #: into account). Parameter is the new tab widget.
     current_changed = QtCore.Signal(QtWidgets.QWidget)
@@ -415,8 +514,37 @@ class SplittableTabWidget(QtWidgets.QSplitter):
     #: underlying tab widget class
     tab_widget_klass = BaseTabWidget
 
-    def __init__(self, parent=None, root=True):
+    #: Reference to the widget under the tab bar menu
+    tab_under_menu = None
+
+    @property
+    def popup_shortcut(self):
+        """
+        Gets/sets the open files popup shortcut (ctrl+t by default).
+        """
+        if hasattr(self, '_action_popup'):
+            return self._shortcut
+        return None
+
+    @popup_shortcut.setter
+    def popup_shortcut(self, value):
+        if hasattr(self, '_action_popup'):
+            self._shortcut = value
+            self._action_popup.setShortcut(self._shortcut)
+
+    def __init__(self, parent=None, root=True, create_popup=True):
         super(SplittableTabWidget, self).__init__(parent)
+        if root:
+            self._action_popup = QtWidgets.QAction(self)
+            self._action_popup.setShortcutContext(QtCore.Qt.WindowShortcut)
+            self._shortcut = 'Ctrl+T'
+            self._action_popup.setShortcut(self._shortcut)
+            self._action_popup.triggered.connect(self._show_popup)
+            self.addAction(self._action_popup)
+            self.popup = OpenFilesPopup()
+            self.popup.setWindowFlags(
+                QtCore.Qt.Popup | QtCore.Qt.FramelessWindowHint)
+            self.popup.triggered.connect(self._on_popup_triggered)
         self.child_splitters = []
         self.main_tab_widget = self.tab_widget_klass(self)
         self.main_tab_widget.last_tab_closed.connect(
@@ -431,6 +559,16 @@ class SplittableTabWidget(QtWidgets.QSplitter):
                 self._on_focus_changed)
         self._uuid = uuid.uuid1()
         self._tabs = []
+
+    def add_context_action(self, action):
+        """
+        Adds a custom context menu action
+
+        :param action: action to add.
+        """
+        self.main_tab_widget.context_actions.append(action)
+        for child_splitter in self.child_splitters:
+            child_splitter.add_context_action(action)
 
     def add_tab(self, tab, title='', icon=None):
         """
@@ -460,6 +598,36 @@ class SplittableTabWidget(QtWidgets.QSplitter):
         self._tabs.append(tab)
         self._on_focus_changed(None, tab)
 
+    def _on_popup_triggered(self, path):
+        new_count = 0
+        for w in self.widgets():
+            if w.file.path == path:
+                index = w.parent_tab_widget.indexOf(w)
+                w.parent_tab_widget.setCurrentIndex(index)
+                break
+            elif w.file.path == '':
+                # New document
+                fpath = 'New document %d.txt' % (new_count + 1)
+                if fpath == path:
+                    index = w.parent_tab_widget.indexOf(w)
+                    w.parent_tab_widget.setCurrentIndex(index)
+                    break
+                new_count += 1
+
+    def _show_popup(self):
+        parent_pos = self.main_tab_widget.pos()
+        parent_size = self.main_tab_widget.size()
+        size = self.popup.size()
+        x, y = parent_pos.x(), parent_pos.y()
+        pw, ph = parent_size.width(), parent_size.height()
+        w = size.width()
+        x += pw / 2 - w / 2
+        y += ph / 10
+        self.popup.move(self.mapToGlobal(QtCore.QPoint(x, y)))
+        self.popup.set_filenames(
+            [editor.file.path for editor in self.widgets()])
+        self.popup.show()
+
     def _make_splitter(self):
         splitter = None
         for widget in reversed(self.child_splitters):
@@ -469,6 +637,8 @@ class SplittableTabWidget(QtWidgets.QSplitter):
                 break
         if splitter is None:
             splitter = self.__class__(self, root=False)
+            for action in self.main_tab_widget.context_actions:
+                splitter.add_context_action(action)
         return splitter
 
     def split(self, widget, orientation):
@@ -579,7 +749,7 @@ class SplittableTabWidget(QtWidgets.QSplitter):
     def _on_current_changed(self, new):
         old = self._current
         self._current = new
-        _logger().info(
+        _logger().debug(
             'current tab changed (old=%r, new=%r)', old, new)
         self.current_changed.emit(new)
         return old, new
@@ -631,7 +801,9 @@ class CodeEditTabWidget(BaseTabWidget):
         :param mimetype: path from which the filter must be derived.
         :return: Filter string
         """
-        return '%s (*%s)' % (mimetype, mimetypes.guess_extension(mimetype))
+        filters = ' '.join(
+            ['*%s' % ext for ext in mimetypes.guess_all_extensions(mimetype)])
+        return '%s (%s)' % (mimetype, filters)
 
     def addTab(self, widget, *args):
         """
@@ -698,10 +870,10 @@ class CodeEditTabWidget(BaseTabWidget):
                 if len(editor.mimetypes):
                     path += mimetypes.guess_extension(editor.mimetypes[0])
             editor.file._path = path
-        text = os.path.split(editor.file.path)[1]
         editor.file.save()
         tw = editor.parent_tab_widget
-        tw.setTabText(tw.indexOf(editor), text)
+        text = tw.tabText(tw.indexOf(editor))
+        tw.setTabText(tw.indexOf(editor), text.replace('*', ''))
         for clone in [editor] + editor.clones:
             if clone != editor:
                 tw = clone.parent_tab_widget
@@ -710,25 +882,6 @@ class CodeEditTabWidget(BaseTabWidget):
 
     def _get_widget_path(self, editor):
         return editor.file.path
-
-    def _restore_original(self, clones):
-        super(CodeEditTabWidget, self)._restore_original(clones)
-        try:
-            first = clones[0]
-        except (IndexError, TypeError):
-            # empty or None
-            pass
-        else:
-            try:
-                # remove original highlighter (otherwise we get a runtime error
-                # saying the original c++ object has been deleted)
-                new_sh = first.syntax_highlighter.__class__(
-                    first.document(), color_scheme=ColorScheme(
-                        first.syntax_highlighter.color_scheme.name))
-                first.modes.remove(first.syntax_highlighter.name)
-                first.modes.append(new_sh)
-            except (AttributeError, TypeError):
-                pass
 
 
 class SplittableCodeEditTabWidget(SplittableTabWidget):
@@ -741,6 +894,10 @@ class SplittableCodeEditTabWidget(SplittableTabWidget):
     be explicitly registered using ``register_editor``. If there is no
     registered editor for the given mime-type, ``fallback_editor`` is used.
     """
+    #: Signal emitted when a tab bar is double clicked, this should work
+    #: even with child tab bars
+    tab_bar_double_clicked = QtCore.Signal()
+
     #: uses a CodeEditTabWidget which is able to save code editor widgets.
     tab_widget_klass = CodeEditTabWidget
 
@@ -767,6 +924,11 @@ class SplittableCodeEditTabWidget(SplittableTabWidget):
     #: Store the number of new documents created, for internal use.
     _new_count = 0
 
+    def __init__(self, parent=None, root=True):
+        super(SplittableCodeEditTabWidget, self).__init__(parent, root)
+        self.main_tab_widget.tabBar().double_clicked.connect(
+            self.tab_bar_double_clicked.emit)
+
     @classmethod
     def register_code_edit(cls, code_edit_class):
         """
@@ -783,7 +945,7 @@ class SplittableCodeEditTabWidget(SplittableTabWidget):
                 _logger().warn('editor for mimetype already registered, '
                                'skipping')
             cls.editors[mimetype] = code_edit_class
-        _logger().info('registered editors: %r', cls.editors)
+        _logger().debug('registered editors: %r', cls.editors)
 
     def save_current_as(self):
         """
@@ -812,7 +974,10 @@ class SplittableCodeEditTabWidget(SplittableTabWidget):
         Save all editors.
         """
         for w in self.widgets():
-            self.main_tab_widget.save_widget(w)
+            try:
+                self.main_tab_widget.save_widget(w)
+            except OSError:
+                _logger().exception('failed to save %s', w.file.path)
 
     def _create_code_edit(self, mimetype, *args, **kwargs):
         """
@@ -832,8 +997,9 @@ class SplittableCodeEditTabWidget(SplittableTabWidget):
         return self.fallback_editor(*args, parent=self.main_tab_widget,
                                     **kwargs)
 
-    def create_new_document(self, base_name='New Document', extension='.txt',
-                            *args, **kwargs):
+    def create_new_document(self, base_name='New Document',
+                            extension='.txt', preferred_eol=0,
+                            autodetect_eol=True, **kwargs):
         """
         Creates a new document.
 
@@ -843,14 +1009,20 @@ class SplittableCodeEditTabWidget(SplittableTabWidget):
         :param extension: Document extension (dotted)
         :param args: Positional arguments that must be forwarded to the editor
             widget constructor.
+        :param preferred_eol: Preferred EOL convention. This setting will be
+            used for saving the document unless autodetect_eol is True.
+        :param autodetect_eol: If true, automatically detects file EOL and
+            use it instead of the preferred EOL when saving files.
         :param kwargs: Keyworded arguments that must be forwarded to the editor
             widget constructor.
-
         :return: Code editor widget instance.
         """
         SplittableCodeEditTabWidget._new_count += 1
         name = '%s%d%s' % (base_name, self._new_count, extension)
-        tab = self._create_code_edit(self.guess_mimetype(name), *args, **kwargs)
+        tab = self._create_code_edit(
+            self.guess_mimetype(name), **kwargs)
+        tab.file.autodetect_eol = autodetect_eol
+        tab.file.preferred_eol = preferred_eol
         tab.setDocumentTitle(name)
         self.add_tab(tab, title=name, icon=self._icon(name))
         return tab
@@ -862,13 +1034,30 @@ class SplittableCodeEditTabWidget(SplittableTabWidget):
             return mimetypes.guess_type(path)[0]
 
     @utils.with_wait_cursor
-    def open_document(self, path, *args, **kwargs):
+    def open_document(self, path, encoding=None, replace_tabs_by_spaces=True,
+                      clean_trailing_whitespaces=True, safe_save=True,
+                      restore_cursor_position=True, preferred_eol=0,
+                      autodetect_eol=True, show_whitespaces=False, **kwargs):
         """
         Opens a document.
 
-        :type path: Path of the document to open
-
-        :param args: additional args to pass to the widget constructor.
+        :param path: Path of the document to open
+        :param encoding: The encoding to use to open the file. Default is
+            locale.getpreferredencoding().
+        :param replace_tabs_by_spaces: Enable/Disable replace tabs by spaces.
+            Default is true.
+        :param clean_trailing_whitespaces: Enable/Disable clean trailing
+            whitespaces (on save). Default is True.
+        :param safe_save: If True, the file is saved to a temporary file first.
+            If the save went fine, the temporary file is renamed to the final
+            filename.
+        :param restore_cursor_position: If true, last cursor position will be
+            restored. Default is True.
+        :param preferred_eol: Preferred EOL convention. This setting will be
+            used for saving the document unless autodetect_eol is True.
+        :param autodetect_eol: If true, automatically detects file EOL and
+            use it instead of the preferred EOL when saving files.
+        :param show_whitespaces: True to show white spaces.
         :param kwargs: addtional keyword args to pass to the widget
                        constructor.
         :return: The created code editor
@@ -890,9 +1079,31 @@ class SplittableCodeEditTabWidget(SplittableTabWidget):
         else:
             assert os.path.exists(path)
             name = os.path.split(path)[1]
-            tab = self._create_code_edit(self.guess_mimetype(path),
-                                         *args, **kwargs)
-            tab.file.open(path)
+
+            use_parent_dir = False
+            for tab in self.widgets():
+                title = QtCore.QFileInfo(tab.file.path).fileName()
+                if title == name:
+                    tw = tab.parent_tab_widget
+                    new_name = os.path.join(os.path.split(os.path.dirname(
+                        tab.file.path))[1], title)
+                    tw.setTabText(tw.indexOf(tab), new_name)
+                    use_parent_dir = True
+
+            if use_parent_dir:
+                name = os.path.join(
+                    os.path.split(os.path.dirname(path))[1], name)
+                use_parent_dir = False
+
+            tab = self._create_code_edit(self.guess_mimetype(path), **kwargs)
+            tab.file.clean_trailing_whitespaces = clean_trailing_whitespaces
+            tab.file.safe_save = safe_save
+            tab.file.restore_cursor = restore_cursor_position
+            tab.file.replace_tabs_by_spaces = replace_tabs_by_spaces
+            tab.file.autodetect_eol = autodetect_eol
+            tab.file.preferred_eol = preferred_eol
+            tab.show_whitespaces = show_whitespaces
+            tab.file.open(path, encoding=encoding)
             tab.setDocumentTitle(name)
             icon = self._icon(path)
             self.add_tab(tab, title=name, icon=icon)
@@ -987,3 +1198,9 @@ class SplittableCodeEditTabWidget(SplittableTabWidget):
             new.dirty_changed.connect(self.dirty_changed.emit)
         self.dirty_changed.emit(new.dirty)
         return old, new
+
+    def split(self, widget, orientation):
+        splitter = super(SplittableCodeEditTabWidget, self).split(
+            widget, orientation)
+        splitter.tab_bar_double_clicked.connect(
+            self.tab_bar_double_clicked.emit)

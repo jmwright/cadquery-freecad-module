@@ -3,6 +3,7 @@
 Contains the JediCompletionProvider class implementation.
 """
 import logging
+import jedi
 import os
 from pyqode.core.api import Mode, TextHelper
 from pyqode.python.backend import workers
@@ -53,6 +54,14 @@ class CalltipsMode(Mode, QtCore.QObject):
         elif (event.key() in [
                 QtCore.Qt.Key_ParenRight,
                 QtCore.Qt.Key_Return,
+                QtCore.Qt.Key_Left,
+                QtCore.Qt.Key_Right,
+                QtCore.Qt.Key_Up,
+                QtCore.Qt.Key_Down,
+                QtCore.Qt.Key_End,
+                QtCore.Qt.Key_Home,
+                QtCore.Qt.Key_PageDown,
+                QtCore.Qt.Key_PageUp,
                 QtCore.Qt.Key_Backspace, QtCore.Qt.Key_Delete]):
             QtWidgets.QToolTip.hideText()
 
@@ -93,17 +102,19 @@ class CalltipsMode(Mode, QtCore.QObject):
         if not call or self._is_last_chard_end_of_word():
             return
         # create a formatted calltip (current index appear in bold)
-        calltip = "<nobr>{0}.{1}(".format(call['call.module.name'],
-                                          call['call.call_name'])
+        calltip = "<p style='white-space:pre'>{0}.{1}(".format(
+            call['call.module.name'], call['call.call_name'])
         for i, param in enumerate(call['call.params']):
-            if i != 0:
-                calltip += ", "
+            if i < len(call['call.params']) - 1 and not param.endswith(','):
+                param += ", "
+            if param.endswith(','):
+                param += ' '  # pep8 calltip
             if i == call['call.index']:
                 calltip += "<b>"
             calltip += param
             if i == call['call.index']:
                 calltip += "</b>"
-        calltip += ')</nobr>'
+        calltip += ')</p>'
         # set tool tip position at the start of the bracket
         char_width = self.editor.fontMetrics().width('A')
         w_offset = (col - call['call.bracket_start'][1]) * char_width

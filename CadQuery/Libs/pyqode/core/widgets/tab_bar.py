@@ -25,4 +25,5 @@ class TabBar(QtWidgets.QTabBar):
                 self.parentWidget().tabCloseRequested.emit, tab)
 
     def mouseDoubleClickEvent(self, event):
-        self.double_clicked.emit()
+        if event.button() == QtCore.Qt.LeftButton:
+            self.double_clicked.emit()

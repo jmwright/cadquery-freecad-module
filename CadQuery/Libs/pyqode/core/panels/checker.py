@@ -5,7 +5,8 @@ Checker panels:
     - GlobalCheckerPanel: draw all checker markers as colored rectangle to
       offer a global view of all errors
 """
-from pyqode.core.api import DelayJobRunner, TextHelper
+from pyqode.core import icons
+from pyqode.core.api import DelayJobRunner, TextHelper, CodeEdit
 from pyqode.core.api.panel import Panel, _logger
 from pyqode.core.modes.checker import CheckerMessages
 from pyqode.qt import QtCore, QtGui, QtWidgets
@@ -20,15 +21,15 @@ class CheckerPanel(Panel):
         self._job_runner = DelayJobRunner(delay=100)
         self.setMouseTracking(True)
         #: Info icon
-        self.info_icon = QtGui.QIcon.fromTheme(
-            'dialog-info', QtGui.QIcon(':pyqode-icons/rc/dialog-info.png'))
-        #: Warning icon
-        self.warning_icon = QtGui.QIcon.fromTheme(
-            'dialog-warning',
-            QtGui.QIcon(':pyqode-icons/rc/dialog-warning.png'))
-        #: Error icon
-        self.error_icon = QtGui.QIcon.fromTheme(
-            'dialog-error', QtGui.QIcon(':pyqode-icons/rc/dialog-error.png'))
+        self.info_icon = icons.icon(
+            'dialog-info', ':pyqode-icons/rc/dialog-info.png',
+            'fa.info-circle', qta_options={'color': '#4040DD'})
+        self.warning_icon = icons.icon(
+            'dialog-warning', ':pyqode-icons/rc/dialog-warning.png',
+            'fa.exclamation-triangle', qta_options={'color': '#DDDD40'})
+        self.error_icon = icons.icon(
+            'dialog-error', ':pyqode-icons/rc/dialog-error.png',
+            'fa.exclamation-circle', qta_options={'color': '#DD4040'})
 
     def marker_for_line(self, line):
         """

@@ -3,6 +3,7 @@ This document contains the tree widget used to display the editor document
 outline.
 
 """
+from pyqode.core import icons
 from pyqode.core.panels import FoldingPanel
 from pyqode.core.modes.outline import OutlineMode
 from pyqode.qt import QtCore, QtGui, QtWidgets
@@ -40,7 +41,8 @@ class OutlineTreeWidget(QtWidgets.QTreeWidget):
         """
         if self._outline_mode:
             try:
-                self._outline_mode.document_changed.disconnect(self._on_changed)
+                self._outline_mode.document_changed.disconnect(
+                    self._on_changed)
             except (TypeError, RuntimeError):
                 pass
         if self._folding_panel:
@@ -73,7 +75,7 @@ class OutlineTreeWidget(QtWidgets.QTreeWidget):
         block = item.data(0, QtCore.Qt.UserRole).block
         assert isinstance(item, QtWidgets.QTreeWidgetItem)
         item_state = not item.isExpanded()
-        block_state = TextBlockHelper.get_fold_trigger_state(block)
+        block_state = TextBlockHelper.is_collapsed(block)
         if item_state != block_state:
             self._updating = True
             self._folding_panel.toggle_fold_trigger(block)
@@ -117,9 +119,9 @@ class OutlineTreeWidget(QtWidgets.QTreeWidget):
         # no data
         root = QtWidgets.QTreeWidgetItem()
         root.setText(0, 'No data')
-        root.setIcon(0, QtGui.QIcon.fromTheme(
-            'dialog-information',
-            QtGui.QIcon(':/pyqode-icons/rc/dialog-info.png')))
+        root.setIcon(0, icons.icon(
+            'dialog-information', ':/pyqode-icons/rc/dialog-info.png',
+            'fa.info-circle'))
         self.addTopLevelItem(root)
         self._updating = False
 
@@ -144,9 +146,15 @@ class OutlineTreeWidget(QtWidgets.QTreeWidget):
         def convert(name, editor, to_collapse):
             ti = QtWidgets.QTreeWidgetItem()
             ti.setText(0, name.name)
-            ti.setIcon(0, QtGui.QIcon(name.icon))
+            if isinstance(name.icon, list):
+                icon = QtGui.QIcon.fromTheme(
+                    name.icon[0], QtGui.QIcon(name.icon[1]))
+            else:
+                icon = QtGui.QIcon(name.icon)
+            ti.setIcon(0, icon)
             name.block = editor.document().findBlockByNumber(name.line)
             ti.setData(0, QtCore.Qt.UserRole, name)
+            ti.setToolTip(0, name.description)
             block_data = name.block.userData()
             if block_data is None:
                 block_data = TextBlockUserData()
@@ -154,7 +162,7 @@ class OutlineTreeWidget(QtWidgets.QTreeWidget):
             block_data.tree_item = ti
 
             if to_collapse is not None and \
-                    TextBlockHelper.get_fold_trigger_state(name.block):
+                    TextBlockHelper.is_collapsed(name.block):
                 to_collapse.append(ti)
 
             for ch in name.children:

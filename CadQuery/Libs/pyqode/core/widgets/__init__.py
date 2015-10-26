@@ -20,6 +20,7 @@ from pyqode.core.widgets.code_edits import TextCodeEdit, GenericCodeEdit
 from pyqode.core.widgets.encodings import (EncodingsComboBox, EncodingsMenu,
                                            EncodingsContextMenu)
 from pyqode.core.widgets.errors_table import ErrorsTable
+from pyqode.core.widgets.file_icons_provider import FileIconProvider
 from pyqode.core.widgets.interactive import InteractiveConsole
 from pyqode.core.widgets.menu_recents import MenuRecentFiles
 from pyqode.core.widgets.menu_recents import RecentFilesManager
@@ -38,6 +39,7 @@ __all__ = [
     'FileSystemContextMenu',
     'FileSystemTreeView',
     'InteractiveConsole',
+    'FileIconProvider',
     'FileSystemHelper',
     'MenuRecentFiles',
     'RecentFilesManager',

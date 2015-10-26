@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import os
-from pyqode.core import api
+from pyqode.core import api, icons
 from pyqode.qt import QtGui, QtCore, QtWidgets
 
 
@@ -11,6 +11,9 @@ class CommentsMode(api.Mode):
         super(CommentsMode, self).__init__()
         self.action = QtWidgets.QAction("Comment/Uncomment", self.editor)
         self.action.setShortcut("Ctrl+/")
+        icon = icons.icon(qta_name='fa.comment')
+        if icon:
+            self.action.setIcon(icon)
 
     def on_state_changed(self, state):
         """

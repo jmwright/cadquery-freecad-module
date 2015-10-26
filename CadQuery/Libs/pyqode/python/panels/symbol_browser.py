@@ -66,7 +66,7 @@ class SymbolBrowserPanel(Panel):
                 for sub_d in de.children:
                     nd = Definition(
                         sub_d.name, sub_d.line, sub_d.column, sub_d.icon)
-                    nd.name = "  " + nd.name
+                    nd.name = "    " + nd.name
                     ret_val.append(nd)
             return ret_val
 
@@ -80,7 +80,11 @@ class SymbolBrowserPanel(Panel):
         else:
             self.combo_box.addItem("No symbols")
         for d in definitions:
-            self.combo_box.addItem(QtGui.QIcon(d.icon), d.name, d)
+            try:
+                self.combo_box.addItem(QtGui.QIcon(d.icon), d.name, d)
+            except TypeError:
+                self.combo_box.addItem(QtGui.QIcon.fromTheme(
+                    d.icon[0], QtGui.QIcon(d.icon[1])), d.name, d)
         self._definitions = definitions
         self._sync_combo_box(TextHelper(self.editor).current_line_nbr())
 

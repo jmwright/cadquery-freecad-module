@@ -8,6 +8,7 @@ import os
 import tempfile
 import jedi
 from pyqode.core.share import Definition
+from pyflakes import messages
 
 
 def _logger():
@@ -95,7 +96,7 @@ def _extract_def(d):
                 if (d.type == 'function' and sub_d.type == 'function') or \
                         d.type == 'class':
                     definition.add_child(_extract_def(sub_d))
-        except AttributeError:
+        except (AttributeError, IndexError):
             pass
     return definition
 
@@ -162,17 +163,29 @@ def run_pep8(request_data):
     else:
         messages = []
         for line_number, offset, code, text, doc in results:
-            messages.append(('[PEP8] %s' % text, WARNING, line_number - 1))
+            if code in ['W291', 'W292', 'W293', 'W391']:
+                continue
+            messages.append(('[PEP8] %s: %s' % (code, text), WARNING,
+                             line_number - 1))
         return messages
 
 
-def run_frosted(request_data):
+PYFLAKES_ERROR_MESSAGES = [
+    messages.DoctestSyntaxError,
+    messages.ReturnWithArgsInsideGenerator,
+    messages.UndefinedExport,
+    messages.UndefinedName,
+    messages.UndefinedLocal
+]
+
+
+def run_pyflakes(request_data):
     """
     Worker that run a frosted (the fork of pyflakes) code analysis on the
     current editor text.
     """
     global prev_results
-    from frosted import checker
+    from pyflakes import checker
     import _ast
     WARNING = 1
     ERROR = 2
@@ -207,15 +220,25 @@ def run_frosted(request_data):
             # Okay, it's syntactically valid.  Now check it.
             w = checker.Checker(tree, os.path.split(path)[1])
             w.messages.sort(key=lambda m: m.lineno)
-            for warning in w.messages:
-                msg = "[pyFlakes] %s: %s" % (
-                    warning.type.error_code, warning.message.split(':')[-1])
-                line = warning.lineno - 1
-                status = (WARNING if warning.type.error_code.startswith('W')
-                          else ERROR)
+            for message in w.messages:
+                msg = "[pyFlakes] %s" % str(message).split(':')[-1].strip()
+                line = message.lineno - 1
+                status = WARNING \
+                    if message.__class__ not in PYFLAKES_ERROR_MESSAGES \
+                    else ERROR
                 ret_val.append((msg, status, line))
     prev_results = ret_val
     return ret_val
+
+
+ICON_CLASS = ('code-class', ':/pyqode_python_icons/rc/class.png')
+ICON_FUNC = ('code-function', ':/pyqode_python_icons/rc/func.png')
+ICON_FUNC_PRIVATE = ('code-function', ':/pyqode_python_icons/rc/func_priv.png')
+ICON_FUNC_PROTECTED = ('code-function',
+                       ':/pyqode_python_icons/rc/func_prot.png')
+ICON_NAMESPACE = ('code-context', ':/pyqode_python_icons/rc/namespace.png')
+ICON_VAR = ('code-variable', ':/pyqode_python_icons/rc/var.png')
+ICON_KEYWORD = ('quickopen', ':/pyqode_python_icons/rc/keyword.png')
 
 
 def icon_from_typename(name, icon_type):
@@ -228,22 +251,27 @@ def icon_from_typename(name, icon_type):
 
     :returns: The associate icon resource filename or None.
     """
-    ICONS = {'CLASS': ':/pyqode_python_icons/rc/class.png',
-             'IMPORT': ':/pyqode_python_icons/rc/namespace.png',
-             'STATEMENT': ':/pyqode_python_icons/rc/var.png',
-             'FORFLOW': ':/pyqode_python_icons/rc/var.png',
-             'MODULE': ':/pyqode_python_icons/rc/namespace.png',
-             'KEYWORD': ':/pyqode_python_icons/rc/keyword.png',
-             'PARAM': ':/pyqode_python_icons/rc/var.png',
-             'ARRAY': ':/pyqode_python_icons/rc/var.png',
-             'INSTANCEELEMENT': ':/pyqode_python_icons/rc/var.png',
-             'INSTANCE': ':/pyqode_python_icons/rc/var.png',
-             'PARAM-PRIV': ':/pyqode_python_icons/rc/var.png',
-             'PARAM-PROT': ':/pyqode_python_icons/rc/var.png',
-             'FUNCTION': ':/pyqode_python_icons/rc/func.png',
-             'DEF': ':/pyqode_python_icons/rc/func.png',
-             'FUNCTION-PRIV': ':/pyqode_python_icons/rc/func_priv.png',
-             'FUNCTION-PROT': ':/pyqode_python_icons/rc/func_prot.png'}
+    ICONS = {
+        'CLASS': ICON_CLASS,
+        'IMPORT': ICON_NAMESPACE,
+        'STATEMENT': ICON_VAR,
+        'FORFLOW': ICON_VAR,
+        'FORSTMT': ICON_VAR,
+        'WITHSTMT': ICON_VAR,
+        'GLOBALSTMT': ICON_VAR,
+        'MODULE': ICON_NAMESPACE,
+        'KEYWORD': ICON_KEYWORD,
+        'PARAM': ICON_VAR,
+        'ARRAY': ICON_VAR,
+        'INSTANCEELEMENT': ICON_VAR,
+        'INSTANCE': ICON_VAR,
+        'PARAM-PRIV': ICON_VAR,
+        'PARAM-PROT': ICON_VAR,
+        'FUNCTION': ICON_FUNC,
+        'DEF': ICON_FUNC,
+        'FUNCTION-PRIV': ICON_FUNC_PRIVATE,
+        'FUNCTION-PROT': ICON_FUNC_PROTECTED
+    }
     ret_val = None
     icon_type = icon_type.upper()
     # jedi 0.8 introduced NamedPart class, which have a string instead of being

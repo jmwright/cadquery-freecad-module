@@ -55,7 +55,6 @@ We don't currently support these modules, but would like to::
     import dbm.dumb
     import dbm.gnu
     import collections.abc  # on Py33
-    import tkinter
     import pickle     # should (optionally) bring in cPickle on Python 2
 
 """
@@ -197,6 +196,8 @@ MOVES = [('collections', 'UserList', 'UserList', 'UserList'),
          ('math', 'ceil', 'future.backports.misc', 'ceil'),
          ('collections', 'OrderedDict', 'future.backports.misc', 'OrderedDict'),
          ('collections', 'Counter', 'future.backports.misc', 'Counter'),
+         ('itertools', 'count', 'future.backports.misc', 'count'),
+         ('reprlib', 'recursive_repr', 'future.backports.misc', 'recursive_repr'),
 
 # This is no use, since "import urllib.request" etc. still fails:
 #          ('urllib', 'error', 'future.moves.urllib', 'error'),
@@ -461,11 +462,11 @@ def install_aliases():
 
     # Hack for urllib so it appears to have the same structure on Py2 as on Py3
     import urllib
-    from future.moves.urllib import request
-    from future.moves.urllib import response
-    from future.moves.urllib import parse
-    from future.moves.urllib import error
-    from future.moves.urllib import robotparser
+    from future.backports.urllib import request
+    from future.backports.urllib import response
+    from future.backports.urllib import parse
+    from future.backports.urllib import error
+    from future.backports.urllib import robotparser
     urllib.request = request
     urllib.response = response
     urllib.parse = parse

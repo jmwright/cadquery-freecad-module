@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """ Contains the AutoCompleteMode """
 import logging
-from pyqode.qt import QtCore
+from pyqode.qt import QtCore, QtGui
 from pyqode.core.api import TextHelper
 from pyqode.core.api.mode import Mode
 
@@ -41,14 +41,19 @@ class AutoCompleteMode(Mode):
     def _on_post_key_pressed(self, event):
         if not event.isAccepted() and not self._ignore_post:
             txt = event.text()
-            next_char = TextHelper(self.editor).get_right_character()
-            if txt in self.MAPPING:
-                to_insert = self.MAPPING[txt]
-                if (not next_char or next_char in self.MAPPING.keys() or
-                        next_char in self.MAPPING.values() or
-                        next_char.isspace()):
-                    TextHelper(self.editor).insert_text(
-                        self.QUOTES_FORMATS[txt] % to_insert)
+            trav = self.editor.textCursor()
+            assert isinstance(trav, QtGui.QTextCursor)
+            trav.movePosition(trav.Left, trav.MoveAnchor, 2)
+            literal = TextHelper(self.editor).is_comment_or_string(trav)
+            if not literal:
+                next_char = TextHelper(self.editor).get_right_character()
+                if txt in self.MAPPING:
+                    to_insert = self.MAPPING[txt]
+                    if (not next_char or next_char in self.MAPPING.keys() or
+                            next_char in self.MAPPING.values() or
+                            next_char.isspace()):
+                        TextHelper(self.editor).insert_text(
+                            self.QUOTES_FORMATS[txt] % to_insert)
         self._ignore_post = False
 
     def _on_key_pressed(self, event):
@@ -79,7 +84,8 @@ class AutoCompleteMode(Mode):
             tc.movePosition(tc.Left)
             tc.movePosition(tc.Right, tc.KeepAnchor)
             del_char = tc.selectedText()
-            if del_char in self.MAPPING and self.MAPPING[del_char] == next_char:
+            if del_char in self.MAPPING and \
+                    self.MAPPING[del_char] == next_char:
                 tc.beginEditBlock()
                 tc.movePosition(tc.Right, tc.KeepAnchor)
                 tc.insertText('')

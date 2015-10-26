@@ -248,6 +248,7 @@ class InteractiveConsole(QTextEdit):
             self._user_stop = False
             self._write_started()
             self.process.start(process, args)
+            self.process.waitForStarted()
         else:
             _logger().warning('a process is already running')
 
@@ -287,9 +288,15 @@ class InteractiveConsole(QTextEdit):
     def _on_process_finished(self, exit_code, exit_status):
         if not self._user_stop:
             if self._write_app_messages:
-                self._writer(
-                    self, "\nProcess finished with exit code %d" %
-                    exit_code, self._app_msg_col)
+                if exit_status == 0:
+                    # no crash, log exit code
+                    self._writer(
+                        self, "\nProcess finished with exit code %d" %
+                        exit_code, self._app_msg_col)
+                else:
+                    self._writer(
+                        self, "\nProcess finished by crashing "
+                              "(exit code not available)", self._app_msg_col)
         self._running = False
         _logger().debug('process finished (exit_code=%r, exit_status=%r)',
                         exit_code, exit_status)
@@ -309,8 +316,6 @@ class InteractiveConsole(QTextEdit):
             self._writer(self, '\nProcess stopped by the user',
                          self.app_msg_color)
         else:
-            self._writer(self, "Failed to start {0} {1}\n".format(
-                self._process_name, " ".join(self._args)), self.app_msg_color)
             err = PROCESS_ERROR_STRING[error]
             self._writer(self, "Error: %s" % err, self.stderr_color)
             _logger().debug('process error: %s', err)

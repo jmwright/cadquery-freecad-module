@@ -2,14 +2,16 @@
 This module contains the base code editor widget.
 """
 from __future__ import print_function
+import os
 import sys
-
 try:
     from future.builtins import str, super
 except:
+    # not availabe on python 3.2 (but not needed)
     pass
 import logging
 import platform
+from pyqode.core import icons
 from pyqode.core.cache import Cache
 from pyqode.core.api.utils import DelayJobRunner, TextHelper
 from pyqode.core.dialogs.goto import DlgGotoLine
@@ -160,10 +162,12 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
 
     @show_whitespaces.setter
     def show_whitespaces(self, value):
-        self._show_whitespaces = value
-        self._set_whitespaces_flags(value)
-        for c in self.clones:
-            c.show_whitespaces = value
+        if self._show_whitespaces != value:
+            self._show_whitespaces = value
+            self._set_whitespaces_flags(value)
+            for c in self.clones:
+                c.show_whitespaces = value
+            self.rehighlight()
 
     @property
     def font_name(self):
@@ -387,15 +391,33 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
                 return mode
         return None
 
+    @property
+    def show_context_menu(self):
+        """
+        Specifies whether we should display the context menu or not.
+
+        Default is True
+        """
+        return self._show_ctx_mnu
+
+    @show_context_menu.setter
+    def show_context_menu(self, value):
+        self._show_ctx_mnu = value
+
     def __init__(self, parent=None, create_default_actions=True):
         """
         :param parent: Parent widget
 
-        :param create_default_actions: True to create the default context
-            menu actions (copy, paste, edit)
+        :param create_default_actions: True to create the action for the
+            standard shortcuts (copy, paste, delete, undo, redo,...).
+            Non-standard actions will always get created. If you would like
+            to prevent the context menu from showing, just set the
+            :attr:`show_menu_enabled` to False.
         """
         super(CodeEdit, self).__init__(parent)
+        self.installEventFilter(self)
         self.clones = []
+        self._show_ctx_mnu = True
         self._default_font_size = 10
         self._backend = BackendManager(self)
         self._file = FileManager(self)
@@ -441,8 +463,7 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         # setup context menu
         self._actions = []
         self._menus = []
-        if create_default_actions:
-            self._init_actions()
+        self._init_actions(create_default_actions)
         self.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         self.customContextMenuRequested.connect(self._show_context_menu)
         self._mnu = None  # bug with PySide (github #63)
@@ -543,9 +564,9 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         self.panels.clear()
         self.backend.stop()
         Cache().set_cursor_position(
-            self.file.path, TextHelper(self).cursor_position())
+            self.file.path, self.textCursor().position())
         super(CodeEdit, self).close()
-        _logger().info('closed')
+        _logger().debug('closed')
 
     def set_mouse_cursor(self, cursor):
         """
@@ -589,7 +610,7 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         import time
         t = time.time()
         super(CodeEdit, self).setPlainText(txt)
-        _logger().info('setPlainText duration: %fs' % (time.time() - t))
+        _logger().debug('setPlainText duration: %fs' % (time.time() - t))
         self.new_text_set.emit()
         self.redoAvailable.emit(False)
         self.undoAvailable.emit(False)
@@ -610,9 +631,12 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
 
         :param action: action to insert
         :param prev_action: the action after which the new action must be
-            inserted
+            inserted or the insert index
         """
-        index = self._actions.index(prev_action)
+        if isinstance(prev_action, QtWidgets.QAction):
+            index = self._actions.index(prev_action)
+        else:
+            index = prev_action
         action.setShortcutContext(QtCore.Qt.WidgetShortcut)
         self._actions.insert(index, action)
 
@@ -754,10 +778,9 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         cursor.endEditBlock()
         if has_selection:
             pos = cursor.position()
-            cursor.setPosition(end+1)
+            cursor.setPosition(end + 1)
             cursor.setPosition(pos, cursor.KeepAnchor)
         self.setTextCursor(cursor)
-
 
     @QtCore.Slot()
     def indent(self):
@@ -780,6 +803,40 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         perform the actual un-indentation.
         """
         self.unindent_requested.emit()
+
+    def eventFilter(self, obj, event):
+        if obj == self and event.type() == QtCore.QEvent.KeyPress:
+            if event.key() == QtCore.Qt.Key_X and \
+                    int(event.modifiers()) == QtCore.Qt.ControlModifier:
+                self.cut()
+                return True
+            if event.key() == QtCore.Qt.Key_C and \
+                    int(event.modifiers()) == QtCore.Qt.ControlModifier:
+                self.copy()
+                return True
+        return False
+
+    def cut(self):
+        tc = self.textCursor()
+        helper = TextHelper(self)
+        tc.beginEditBlock()
+        no_selection = False
+        if not helper.current_line_text().strip():
+            tc.deleteChar()
+        else:
+            if not self.textCursor().hasSelection():
+                no_selection = True
+                TextHelper(self).select_whole_line()
+            super(CodeEdit, self).cut()
+            if no_selection:
+                tc.deleteChar()
+        tc.endEditBlock()
+        self.setTextCursor(tc)
+
+    def copy(self):
+        if not self.textCursor().hasSelection():
+            TextHelper(self).select_whole_line()
+        super(CodeEdit, self).copy()
 
     def resizeEvent(self, e):
         """
@@ -820,7 +877,8 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
             elif event.key() == QtCore.Qt.Key_Backtab:
                 self.un_indent()
                 event.accept()
-            elif event.key() == QtCore.Qt.Key_Home:
+            elif event.key() == QtCore.Qt.Key_Home and \
+                    int(event.modifiers()) & QtCore.Qt.ControlModifier == 0:
                 self._do_home_key(
                     event, int(event.modifiers()) & QtCore.Qt.ShiftModifier)
             if not event.isAccepted():
@@ -959,6 +1017,7 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         """ Overrides showEvent to update the viewport margins """
         super(CodeEdit, self).showEvent(event)
         _logger().debug('show event: %r' % self)
+        self.panels.refresh()
 
     def get_context_menu(self):
         """
@@ -975,8 +1034,13 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
 
     def _show_context_menu(self, point):
         """ Shows the context menu """
+        tc = self.textCursor()
+        nc = self.cursorForPosition(point)
+        if not nc.position() in range(tc.selectionStart(), tc.selectionEnd()):
+            self.setTextCursor(nc)
         self._mnu = self.get_context_menu()
-        self._mnu.popup(self.mapToGlobal(point))
+        if len(self._mnu.actions()) > 1 and self.show_context_menu:
+            self._mnu.popup(self.mapToGlobal(point))
 
     def _set_whitespaces_flags(self, show):
         """ Sets show white spaces flag """
@@ -986,68 +1050,60 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
             options.setFlags(options.flags() |
                              QtGui.QTextOption.ShowTabsAndSpaces)
         else:
-            options.setFlags(options.flags() &
-                             ~QtGui.QTextOption.ShowTabsAndSpaces)
+            options.setFlags(
+                options.flags() & ~QtGui.QTextOption.ShowTabsAndSpaces)
         doc.setDefaultTextOption(options)
 
-    def _init_actions(self):
-        """ Init default QAction """
-        def _icon(val):
-            if isinstance(val, tuple):
-                theme, icon = val
-                return QtGui.QIcon.fromTheme(theme, QtGui.QIcon(icon))
-            else:
-                QtGui.QIcon(val)
-        # Undo
-        action = QtWidgets.QAction('Undo', self)
-        action.setShortcut(QtGui.QKeySequence.Undo)
-        action.setIcon(_icon(('edit-undo', ':/pyqode-icons/rc/edit-undo.png')))
-        action.triggered.connect(self.undo)
-        self.undoAvailable.connect(action.setEnabled)
-        self.add_action(action)
-        self.action_undo = action
-        # Redo
-        action = QtWidgets.QAction('Redo', self)
-        action.setShortcut(QtGui.QKeySequence.Redo)
-        action.setIcon(_icon(('edit-redo', ':/pyqode-icons/rc/edit-redo.png')))
-        action.triggered.connect(self.redo)
-        self.redoAvailable.connect(action.setEnabled)
-        self.add_action(action)
-        self.action_redo = action
-        # separator
-        self.add_separator()
-        # Copy
-        action = QtWidgets.QAction('Copy', self)
-        action.setShortcut(QtGui.QKeySequence.Copy)
-        action.setIcon(_icon(('edit-copy', ':/pyqode-icons/rc/edit-copy.png')))
-        action.triggered.connect(self.copy)
-        self.copyAvailable.connect(action.setEnabled)
-        self.add_action(action)
-        self.action_copy = action
-        # cut
-        action = QtWidgets.QAction('Cut', self)
-        action.setShortcut(QtGui.QKeySequence.Cut)
-        action.setIcon(_icon(('edit-cut', ':/pyqode-icons/rc/edit-cut.png')))
-        action.triggered.connect(self.cut)
-        self.copyAvailable.connect(action.setEnabled)
-        self.add_action(action)
-        self.action_cut = action
-        # paste
-        action = QtWidgets.QAction('Paste', self)
-        action.setShortcut(QtGui.QKeySequence.Paste)
-        action.setIcon(_icon(('edit-paste',
-                              ':/pyqode-icons/rc/edit-paste.png')))
-        action.triggered.connect(self.paste)
-        self.add_action(action)
-        self.action_paste = action
-        # delete
-        action = QtWidgets.QAction('Delete', self)
-        action.setShortcut(QtGui.QKeySequence.Delete)
-        action.setIcon(_icon(('edit-delete',
-                              ':/pyqode-icons/rc/edit-delete.png')))
-        action.triggered.connect(self.delete)
-        self.add_action(action)
-        self.action_delete = action
+    def _init_actions(self, create_standard_actions):
+        """ Init context menu action """
+        if create_standard_actions:
+            # Undo
+            action = QtWidgets.QAction('Undo', self)
+            action.setShortcut(QtGui.QKeySequence.Undo)
+            action.setIcon(icons.icon(
+                'edit-undo', ':/pyqode-icons/rc/edit-undo.png', 'fa.undo'))
+            action.triggered.connect(self.undo)
+            self.undoAvailable.connect(action.setEnabled)
+            self.add_action(action)
+            self.action_undo = action
+            # Redo
+            action = QtWidgets.QAction('Redo', self)
+            action.setShortcut(QtGui.QKeySequence.Redo)
+            action.setIcon(icons.icon(
+                'edit-redo', ':/pyqode-icons/rc/edit-redo.png', 'fa.repeat'))
+            action.triggered.connect(self.redo)
+            self.redoAvailable.connect(action.setEnabled)
+            self.add_action(action)
+            self.action_redo = action
+            # separator
+            self.add_separator()
+            # Copy
+            action = QtWidgets.QAction('Copy', self)
+            action.setShortcut(QtGui.QKeySequence.Copy)
+            action.setIcon(icons.icon(
+                'edit-copy', ':/pyqode-icons/rc/edit-copy.png', 'fa.copy'))
+            action.triggered.connect(self.copy)
+            self.copyAvailable.connect(action.setEnabled)
+            self.add_action(action)
+            self.action_copy = action
+            # cut
+            action = QtWidgets.QAction('Cut', self)
+            action.setShortcut(QtGui.QKeySequence.Cut)
+            action.setIcon(icons.icon(
+                'edit-cut', ':/pyqode-icons/rc/edit-cut.png', 'fa.cut'))
+            action.triggered.connect(self.cut)
+            self.copyAvailable.connect(action.setEnabled)
+            self.add_action(action)
+            self.action_cut = action
+            # paste
+            action = QtWidgets.QAction('Paste', self)
+            action.setShortcut(QtGui.QKeySequence.Paste)
+            action.setIcon(icons.icon(
+                'edit-paste', ':/pyqode-icons/rc/edit-paste.png',
+                'fa.paste'))
+            action.triggered.connect(self.paste)
+            self.add_action(action)
+            self.action_paste = action
         # duplicate line
         action = QtWidgets.QAction('Duplicate line', self)
         action.setShortcut('Ctrl+D')
@@ -1057,40 +1113,51 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         # select all
         action = QtWidgets.QAction('Select all', self)
         action.setShortcut(QtGui.QKeySequence.SelectAll)
-        action.setIcon(_icon(('edit-select-all',
-                              ':/pyqode-icons/rc/edit-select-all.png')))
         action.triggered.connect(self.selectAll)
-        self.add_action(action)
         self.action_select_all = action
-        # separator
-        self.add_separator()
-        # indent
-        action = QtWidgets.QAction('Indent', self)
-        action.setShortcut('Tab')
-        action.setIcon(_icon(('format-indent-more',
-                              ':/pyqode-icons/rc/format-indent-more.png')))
-        action.triggered.connect(self.indent)
-        self.add_action(action)
-        self.action_indent = action
-        # unindent
-        action = QtWidgets.QAction('Un-indent', self)
-        action.setShortcut('Shift+Tab')
-        action.setIcon(_icon(('format-indent-less',
-                              ':/pyqode-icons/rc/format-indent-less.png')))
-        action.triggered.connect(self.un_indent)
-        self.add_action(action)
-        self.action_un_indent = action
-        # separator
-        self.add_separator()
+        self.addAction(self.action_select_all)
+        if create_standard_actions:
+            # delete
+            action = QtWidgets.QAction('Delete', self)
+            action.setShortcut(QtGui.QKeySequence.Delete)
+            action.setIcon(icons.icon(
+                'edit-delete', ':/pyqode-icons/rc/edit-delete.png',
+                'fa.remove'))
+            action.triggered.connect(self.delete)
+            self.add_action(action)
+            self.action_delete = action
+            self.add_separator()
+            self.add_action(self.action_select_all)
+            # separator
+            self.add_separator()
+            # indent
+            action = QtWidgets.QAction('Indent', self)
+            action.setShortcut('Tab')
+            action.setIcon(icons.icon(
+                'format-indent-more',
+                ':/pyqode-icons/rc/format-indent-more.png', 'fa.indent'))
+            action.triggered.connect(self.indent)
+            self.add_action(action)
+            self.action_indent = action
+            # unindent
+            action = QtWidgets.QAction('Un-indent', self)
+            action.setShortcut('Shift+Tab')
+            action.setIcon(icons.icon(
+                'format-indent-less',
+                ':/pyqode-icons/rc/format-indent-less.png', 'fa.dedent'))
+            action.triggered.connect(self.un_indent)
+            self.add_action(action)
+            self.action_un_indent = action
+            # separator
+            self.add_separator()
         # goto
         action = QtWidgets.QAction('Go to line', self)
         action.setShortcut('Ctrl+G')
-        action.setIcon(_icon(('go-jump',
-                              ':/pyqode-icons/rc/goto-line.png')))
+        action.setIcon(icons.icon(
+            'go-jump', ':/pyqode-icons/rc/goto-line.png', 'fa.share'))
         action.triggered.connect(self.goto_line)
         self.add_action(action)
         self.action_goto_line = action
-        self.add_separator()
 
     def _init_settings(self):
         """ Init setting """
@@ -1143,30 +1210,38 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         """ Resets stylesheet"""
         self.setFont(QtGui.QFont(self._font_family,
                                  self._font_size + self._zoom_level))
-        p = self.palette()
-        p.setColor(QtGui.QPalette.Base, self.background)
-        p.setColor(QtGui.QPalette.Text, self.foreground)
-        p.setColor(QtGui.QPalette.Highlight, self.selection_background)
-        p.setColor(QtGui.QPalette.HighlightedText, self.selection_foreground)
-        if QtWidgets.QApplication.instance().styleSheet() or (
-                hasattr(self, '_flg_stylesheet') and
-                platform.system() == 'Windows'):
-            # on windows, if the application once had a stylesheet, we must
+        flg_stylesheet = hasattr(self, '_flg_stylesheet')
+        if QtWidgets.QApplication.instance().styleSheet() or flg_stylesheet:
+            self._flg_stylesheet = True
+            # On Window, if the application once had a stylesheet, we must
             # keep on using a stylesheet otherwise strange colors appear
             # see https://github.com/OpenCobolIDE/OpenCobolIDE/issues/65
-            self._flg_stylesheet = True
-            self.setStyleSheet('''QPlainTextEdit
-            {
-                background-color: %s;
-                color: %s;
-            }
-            ''' % (self.background.name(), self.foreground.name()))
+            # Also happen on plasma 5
+            try:
+                plasma = os.environ['DESKTOP_SESSION'] == 'plasma'
+            except KeyError:
+                plasma = False
+            if sys.platform == 'win32' or plasma:
+                self.setStyleSheet('''QPlainTextEdit
+                {
+                    background-color: %s;
+                    color: %s;
+                }
+                ''' % (self.background.name(), self.foreground.name()))
+            else:
+                # on linux/osx we just have to set an empty stylesheet to
+                # cancel any previous stylesheet and still keep a correct
+                # style for scrollbars
+                self.setStyleSheet('')
         else:
-            # on linux/osx we just have to set an empty stylesheet to cancel
-            # any previous stylesheet and still keep a correct style for
-            # scrollbars
-            self.setStyleSheet('')
-        self.setPalette(p)
+            p = self.palette()
+            p.setColor(QtGui.QPalette.Base, self.background)
+            p.setColor(QtGui.QPalette.Text, self.foreground)
+            p.setColor(QtGui.QPalette.Highlight,
+                       self.selection_background)
+            p.setColor(QtGui.QPalette.HighlightedText,
+                       self.selection_foreground)
+            self.setPalette(p)
         self.repaint()
 
     def _do_home_key(self, event=None, select=False):

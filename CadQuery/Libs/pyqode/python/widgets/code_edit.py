@@ -36,8 +36,11 @@ class PyCodeEditBase(api.CodeEdit):
         Extends QCodeEdit.setPlainText to allow user to setPlainText without
         mimetype (since the python syntax highlighter does not use it).
         """
-        self.syntax_highlighter.docstrings[:] = []
-        self.syntax_highlighter.import_statements[:] = []
+        try:
+            self.syntax_highlighter.docstrings[:] = []
+            self.syntax_highlighter.import_statements[:] = []
+        except AttributeError:
+            pass
         super(PyCodeEditBase, self).setPlainText(txt, mimetype, encoding)
 
 
@@ -66,19 +69,19 @@ class PyCodeEdit(PyCodeEditBase):
         self.modes.append(modes.OutlineMode(defined_names))
 
         # panels
+        self.panels.append(panels.SearchAndReplacePanel(),
+                           panels.SearchAndReplacePanel.Position.BOTTOM)
         self.panels.append(panels.FoldingPanel())
         self.panels.append(panels.LineNumberPanel())
         self.panels.append(panels.CheckerPanel())
         self.panels.append(panels.GlobalCheckerPanel(),
                            panels.GlobalCheckerPanel.Position.RIGHT)
-        self.panels.append(panels.SearchAndReplacePanel(),
-                           panels.SearchAndReplacePanel.Position.BOTTOM)
-        self.panels.append(panels.EncodingPanel(), api.Panel.Position.TOP)
         self.add_separator()
-        self.panels.append(pypanels.QuickDocPanel(), api.Panel.Position.BOTTOM)
 
         # modes
         # generic
+        self.modes.append(modes.ExtendedSelectionMode())
+        self.modes.append(modes.CaseConverterMode())
         self.modes.append(modes.CaretLineHighlighterMode())
         self.modes.append(modes.FileWatcherMode())
         self.modes.append(modes.RightMarginMode())
@@ -87,12 +90,10 @@ class PyCodeEdit(PyCodeEditBase):
         self.modes.append(modes.CodeCompletionMode())
         self.modes.append(modes.OccurrencesHighlighterMode())
         self.modes.append(modes.SmartBackSpaceMode())
-        self.modes.append(modes.ExtendedSelectionMode())
-        self.modes.append(modes.CaseConverterMode())
         # python specifics
         self.modes.append(pymodes.PyAutoIndentMode())
         self.modes.append(pymodes.PyAutoCompleteMode())
-        self.modes.append(pymodes.FrostedCheckerMode())
+        self.modes.append(pymodes.PyFlakesChecker())
         self.modes.append(pymodes.PEP8CheckerMode())
         self.modes.append(pymodes.CalltipsMode())
         self.modes.append(pymodes.PyIndenterMode())
@@ -101,6 +102,8 @@ class PyCodeEdit(PyCodeEditBase):
         self.modes.append(pymodes.PythonSH(
             self.document(), color_scheme=ColorScheme(color_scheme)))
         self.syntax_highlighter.fold_detector = PythonFoldDetector()
+        self.panels.append(pypanels.QuickDocPanel(), api.Panel.Position.BOTTOM)
+        self.panels.append(panels.EncodingPanel(), api.Panel.Position.TOP)
 
     def clone(self):
         clone = self.__class__(

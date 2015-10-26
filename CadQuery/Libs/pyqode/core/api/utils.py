@@ -140,10 +140,7 @@ class TextHelper(object):
         :return: The new text cursor
         :rtype: QtGui.QTextCursor
         """
-        text_cursor = self._editor.textCursor()
-        text_cursor.movePosition(text_cursor.Start, text_cursor.MoveAnchor)
-        text_cursor.movePosition(text_cursor.Down, text_cursor.MoveAnchor,
-                                 line)
+        text_cursor = self._move_cursor_to(line)
         if column:
             text_cursor.movePosition(text_cursor.Right, text_cursor.MoveAnchor,
                                      column)
@@ -156,10 +153,9 @@ class TextHelper(object):
                 pass
             else:
                 from pyqode.core.api.folding import FoldScope
-                if not block.isVisible() or TextBlockHelper.is_fold_trigger(
-                        block):
+                if not block.isVisible():
                     block = FoldScope.find_parent_scope(block)
-                    if TextBlockHelper.get_fold_trigger_state(block):
+                    if TextBlockHelper.is_collapsed(block):
                         folding_panel.toggle_fold_trigger(block)
             self._editor.setTextCursor(text_cursor)
         return text_cursor
@@ -200,8 +196,8 @@ class TextHelper(object):
                 word_separators = editor.word_separators
                 selected_txt = text_cursor.selectedText()
                 if (selected_txt in word_separators and
-                        (selected_txt != "n" and selected_txt != "t")
-                        or char.isspace()):
+                        (selected_txt != "n" and selected_txt != "t") or
+                        char.isspace()):
                     break  # start boundary found
             except IndexError:
                 break  # nothing selectable
@@ -216,8 +212,8 @@ class TextHelper(object):
                 char = text_cursor.selectedText()[0]
                 selected_txt = text_cursor.selectedText()
                 if (selected_txt in word_separators and
-                        (selected_txt != "n" and selected_txt != "t")
-                        or char.isspace()):
+                        (selected_txt != "n" and selected_txt != "t") or
+                        char.isspace()):
                     break  # end boundary found
                 end_pos = text_cursor.position()
                 text_cursor.setPosition(end_pos)
@@ -310,10 +306,7 @@ class TextHelper(object):
 
         """
         editor = self._editor
-        text_cursor = editor.textCursor()
-        text_cursor.movePosition(text_cursor.Start)
-        text_cursor.movePosition(text_cursor.Down, text_cursor.MoveAnchor,
-                                 line_nbr)
+        text_cursor = self._move_cursor_to(line_nbr)
         text_cursor.select(text_cursor.LineUnderCursor)
         text_cursor.insertText(new_text)
         editor.setTextCursor(text_cursor)
@@ -334,6 +327,8 @@ class TextHelper(object):
         """
         Removes trailing whitespaces and ensure one single blank line at the
         end of the QTextDocument.
+
+        ..deprecated: since pyqode 2.6.3, document is cleaned on disk only.
         """
         editor = self._editor
         value = editor.verticalScrollBar().value()
@@ -374,9 +369,7 @@ class TextHelper(object):
         text_cursor = editor.textCursor()
         doc = editor.document()
         assert isinstance(doc, QtGui.QTextDocument)
-        text_cursor.movePosition(text_cursor.Start)
-        text_cursor.movePosition(text_cursor.Down, text_cursor.MoveAnchor,
-                                 pos[0])
+        text_cursor = self._move_cursor_to(pos[0])
         text_cursor.movePosition(text_cursor.StartOfLine,
                                  text_cursor.MoveAnchor)
         cpos = text_cursor.position()
@@ -399,7 +392,7 @@ class TextHelper(object):
         """
         Selects an entire line.
 
-        :param line: Line to select
+        :param line: Line to select. If None, the current line will be selected
         :param apply_selection: True to apply selection on the text editor
             widget, False to just return the text cursor without setting it
             on the editor.
@@ -408,6 +401,12 @@ class TextHelper(object):
         if line is None:
             line = self.current_line_nbr()
         return self.select_lines(line, line, apply_selection=apply_selection)
+
+    def _move_cursor_to(self, line):
+        cursor = self._editor.textCursor()
+        block = self._editor.document().findBlockByNumber(line)
+        cursor.setPosition(block.position())
+        return cursor
 
     def select_lines(self, start=0, end=-1, apply_selection=True):
         """
@@ -431,10 +430,7 @@ class TextHelper(object):
             end = self.line_count() - 1
         if start < 0:
             start = 0
-        text_cursor = editor.textCursor()
-        text_cursor.movePosition(text_cursor.Start, text_cursor.MoveAnchor)
-        text_cursor.movePosition(text_cursor.Down, text_cursor.MoveAnchor,
-                                 start)
+        text_cursor = self._move_cursor_to(start)
         if end > start:  # Going down
             text_cursor.movePosition(text_cursor.Down,
                                      text_cursor.KeepAnchor, end - start)
@@ -498,14 +494,14 @@ class TextHelper(object):
         Returns the line number from the y_pos
 
         :param y_pos: Y pos in the editor
-        :return: Line number (0 based)
+        :return: Line number (0 based), -1 if out of range
         """
         editor = self._editor
         height = editor.fontMetrics().height()
         for top, line, block in editor.visible_blocks:
             if top <= y_pos <= top + height:
                 return line
-        return 0
+        return -1
 
     def mark_whole_doc_dirty(self):
         """
@@ -573,10 +569,12 @@ class TextHelper(object):
         """
         text_cursor = self._editor.textCursor()
         if keep_position:
-            pos = text_cursor.position()
+            s = text_cursor.selectionStart()
+            e = text_cursor.selectionEnd()
         text_cursor.insertText(text)
         if keep_position:
-            text_cursor.setPosition(pos)
+            text_cursor.setPosition(s)
+            text_cursor.setPosition(e, text_cursor.KeepAnchor)
         self._editor.setTextCursor(text_cursor)
 
     def clear_selection(self):
@@ -604,9 +602,8 @@ class TextHelper(object):
 
     def selected_text_to_lower(self):
         """ Replaces the selected text by its lower version """
-        text_cursor = self._editor.textCursor()
-        text_cursor.insertText(text_cursor.selectedText().lower())
-        self._editor.setTextCursor(text_cursor)
+        txt = self.selected_text()
+        self.insert_text(txt.lower())
 
     def selected_text_to_upper(self):
         """
@@ -962,9 +959,9 @@ class TextBlockHelper(object):
         block.setUserState(state)
 
     @staticmethod
-    def get_fold_trigger_state(block):
+    def is_collapsed(block):
         """
-        Gets the fold trigger state.
+        Checks if the block is expanded or collased.
 
         :param block: QTextBlock
         :return: False for an open trigger, True for for closed trigger
@@ -977,12 +974,12 @@ class TextBlockHelper(object):
         return bool(state & 0x08000000)
 
     @staticmethod
-    def set_fold_trigger_state(block, val):
+    def set_collapsed(block, val):
         """
-        Sets the fold trigger state.
+        Sets the fold trigger state (collapsed or expanded).
 
         :param block: The block to modify
-        :param val: The new trigger state (False = open, True = closed)
+        :param val: The new trigger state (True=collapsed, False=expanded)
         """
         if block is None:
             return

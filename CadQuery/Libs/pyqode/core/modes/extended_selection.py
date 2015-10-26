@@ -61,7 +61,7 @@ class ExtendedSelectionMode(Mode):
         self.action_select_matched.setShortcutContext(
             QtCore.Qt.WidgetShortcut)
 
-        self.line_sel_shortcut = QtGui.QKeySequence('Ctrl+Shift+R')
+        self.line_sel_shortcut = QtGui.QKeySequence('Ctrl+Shift+L')
         self.action_select_line = QtWidgets.QAction(self.editor)
         self.action_select_line.setText('Select line')
         self.action_select_line.setShortcut(self.line_sel_shortcut)
@@ -75,8 +75,8 @@ class ExtendedSelectionMode(Mode):
         """
         # setup menu
         menu = QtWidgets.QMenu(self.editor)
-        menu.setTitle('Selection')
-        menu.menuAction().setIcon(self.editor.action_select_all.icon())
+        menu.setTitle('Select')
+        menu.menuAction().setIcon(QtGui.QIcon.fromTheme('edit-select'))
         # setup actions
         menu.addAction(self.action_select_word)
         menu.addAction(self.action_select_extended_word)
@@ -84,20 +84,22 @@ class ExtendedSelectionMode(Mode):
         menu.addAction(self.action_select_line)
         menu.addSeparator()
         menu.addAction(self.editor.action_select_all)
+        icon = QtGui.QIcon.fromTheme(
+            'edit-select-all', QtGui.QIcon(
+                ':/pyqode-icons/rc/edit-select-all.png'))
+        self.editor.action_select_all.setIcon(icon)
         return menu
 
     def on_install(self, editor):
         super(ExtendedSelectionMode, self).on_install(editor)
         try:
             self.editor.remove_action(self.editor.action_select_all)
-        except ValueError:
+        except (ValueError, AttributeError):
             pass
-        else:
-            self.editor.insert_action(self.create_menu().menuAction(),
-                                      self.editor.action_duplicate_line)
-            self.editor.addActions([
-                self.action_select_extended_word, self.action_select_line,
-                self.action_select_matched, self.action_select_word])
+        self.editor.add_action(self.create_menu().menuAction())
+        self.editor.addActions([
+            self.action_select_extended_word, self.action_select_line,
+            self.action_select_matched, self.action_select_word])
 
     def on_state_changed(self, state):
         if state:

@@ -63,6 +63,7 @@ class Mode(object):
         self.description = self.__doc__
         self._enabled = False
         self._editor = None
+        self._on_close = False
 
     def on_install(self, editor):
         """
@@ -83,6 +84,7 @@ class Mode(object):
         """
         Uninstalls the mode from the editor.
         """
+        self._on_close = True
         self.enabled = False
         self._editor = None
 

@@ -12,6 +12,7 @@ from pygments.formatters.html import HtmlFormatter
 from pygments.lexer import Error
 from pygments.lexer import RegexLexer
 from pygments.lexer import Text
+from pygments.lexers.special import TextLexer
 from pygments.lexers.agile import PythonLexer
 from pygments.lexers.compiled import CLexer, CppLexer
 from pygments.lexers.dotnet import CSharpLexer
@@ -184,9 +185,6 @@ class PygmentsSH(SyntaxHighlighter):
         self._update_style()
         super(PygmentsSH, self).on_install(editor)
 
-    def on_state_changed(self, state):
-        self.enabled = state
-
     def set_mime_type(self, mime_type):
         """
         Update the highlighter lexer based on a mime type.
@@ -195,7 +193,16 @@ class PygmentsSH(SyntaxHighlighter):
         """
         try:
             self.set_lexer_from_mime_type(mime_type)
-        except:
+        except ClassNotFound:
+            _logger().exception('failed to get lexer from mimetype')
+            self._lexer = TextLexer()
+            return False
+        except ImportError:
+            # import error while loading some pygments plugins, the editor
+            # should not crash
+            _logger().warning('failed to get lexer from mimetype (%s)' %
+                              mime_type)
+            self._lexer = TextLexer()
             return False
         else:
             return True
@@ -211,9 +218,19 @@ class PygmentsSH(SyntaxHighlighter):
             filename = filename[0:len(filename) - 1]
         try:
             self._lexer = get_lexer_for_filename(filename)
-            _logger().info('lexer for filename (%s): %r', filename,
-                           self._lexer)
-        except:
+            _logger().debug('lexer for filename (%s): %r', filename,
+                            self._lexer)
+        except ClassNotFound:
+            _logger().warning('failed to get lexer from filename: %s, using '
+                              'plain text instead...', filename)
+            self._lexer = TextLexer()
+            return False
+        except ImportError:
+            # import error while loading some pygments plugins, the editor
+            # should not crash
+            _logger().warning('failed to get lexer from filename: %s, using '
+                              'plain text instead...', filename)
+            self._lexer = TextLexer()
             return False
         else:
             return True
@@ -226,7 +243,7 @@ class PygmentsSH(SyntaxHighlighter):
         :param options: optional addtional options.
         """
         self._lexer = get_lexer_for_mimetype(mime, **options)
-        _logger().info('lexer for mimetype (%s): %r', mime, self._lexer)
+        _logger().debug('lexer for mimetype (%s): %r', mime, self._lexer)
 
     def highlight_block(self, text, block):
         """
@@ -324,7 +341,12 @@ class PygmentsSH(SyntaxHighlighter):
         """ Returns a QTextCharFormat for token by reading a Pygments style.
         """
         result = QtGui.QTextCharFormat()
-        for key, value in list(style.style_for_token(token).items()):
+        try:
+            style = style.style_for_token(token)
+        except KeyError:
+            # fallback to plain text
+            style = style.style_for_token(Text)
+        for key, value in list(style.items()):
             if value:
                 if key == 'color':
                     result.setForeground(self._get_brush(value))
