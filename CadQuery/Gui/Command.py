@@ -146,7 +146,7 @@ class CadQueryExecuteScript:
         return {"MenuText": "Execute Script",
                 "Accel": "F2",
                 "ToolTip": "Executes the CadQuery script",
-                "Pixmap": ":/icons/macro-execute.svg"}
+                "Pixmap": ":/icons/media-playback-start.svg"}
 
     def IsActive(self):
         return True
