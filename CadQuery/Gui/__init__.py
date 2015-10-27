@@ -2,9 +2,9 @@ class PrintHook:
     def __init__(self):
         import sys
 
-        self.origOut = None
-        sys.stdout = self
-        self.origOut = sys.__stdout__
+        #self.origOut = None
+        #sys.stdout = self
+        #self.origOut = sys.__stdout__
 
     def write(self, text):
         import FreeCAD
