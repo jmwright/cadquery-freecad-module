@@ -1,6 +1,6 @@
 __author__ = "Jeremy Wright (jmwright)"
 __copyright__ = "Copyright 2014, Innovations Technology Solutions"
 __license__ = "LGPL v3"
-__version__ = "0.1"
+__version__ = "0.2.0"
 __maintainer__ = "Jeremy Wright"
 __status__ = "Beta"
