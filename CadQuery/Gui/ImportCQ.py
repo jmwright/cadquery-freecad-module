@@ -27,6 +27,6 @@ def open(filename):
             "Opened ",
             None,
             QtGui.QApplication.UnicodeUTF8)
-    FreeCAD.Console.PrintMessage("\r\n" + msg + filename)
+    FreeCAD.Console.PrintMessage(msg + filename + "\r\n")
 
     return

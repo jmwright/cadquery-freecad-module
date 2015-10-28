@@ -163,7 +163,6 @@ class CadQueryExecuteScript:
         tempFile = tempfile.NamedTemporaryFile(delete=False)
         tempFile.write(cqCodePane.toPlainText().encode('utf-8'))
         tempFile.close()
-        FreeCAD.Console.PrintMessage("\r\n")
 
         docname = os.path.splitext(os.path.basename(cqCodePane.file.path))[0]
 
@@ -173,16 +172,15 @@ class CadQueryExecuteScript:
         except:
             FreeCAD.newDocument(docname)
 
-
         #We import this way because using execfile() causes non-standard script execution in some situations
-        imp.load_source('temp.module', tempFile.name)
+        imp.load_source('temp_module', tempFile.name)
 
         msg = QtGui.QApplication.translate(
             "cqCodeWidget",
             "Executed ",
             None,
             QtGui.QApplication.UnicodeUTF8)
-        FreeCAD.Console.PrintMessage("\r\n" + msg + cqCodePane.file.path)
+        FreeCAD.Console.PrintMessage(msg + cqCodePane.file.path + "\r\n")
 
 
 class CadQueryNewScript:
@@ -279,7 +277,7 @@ class CadQuerySaveScript:
         #If the code pane doesn't have a filename, we need to present the save as dialog
         if len(cqCodePane.file.path) == 0 or os.path.basename(cqCodePane.file.path) == 'script_template.py' \
                 or os.path.split(cqCodePane.file.path)[-2].endswith('Examples'):
-            FreeCAD.Console.PrintError("\r\nYou cannot save over a blank file, example file or template file.")
+            FreeCAD.Console.PrintError("You cannot save over a blank file, example file or template file.\r\n")
 
             CadQuerySaveAsScript().Activated()
 

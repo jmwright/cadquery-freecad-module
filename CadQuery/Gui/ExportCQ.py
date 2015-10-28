@@ -28,4 +28,4 @@ def save(filename=None):
             "Saved ",
             None,
             QtGui.QApplication.UnicodeUTF8)
-    FreeCAD.Console.PrintMessage("\r\n" + msg + cqCodePane.file.path)
+    FreeCAD.Console.PrintMessage(msg + cqCodePane.file.path + "\r\n")

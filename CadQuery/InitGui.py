@@ -95,7 +95,7 @@ class CadQueryWorkbench (Workbench):
                 "Please install Python 2.7",
                 None,
                 QtGui.QApplication.UnicodeUTF8)
-            FreeCAD.Console.PrintError("\r\n" + msg)
+            FreeCAD.Console.PrintError(msg + "\r\n")
 
         #The extra version numbers won't work on Windows
         if sys.platform.startswith('win'):
@@ -103,8 +103,6 @@ class CadQueryWorkbench (Workbench):
 
         #Getting the main window will allow us to start setting things up the way we want
         mw = FreeCADGui.getMainWindow()
-
-        # TODO: Fix the extra newline foolishness with the output in the report view
 
         dockWidgets = mw.findChildren(QtGui.QDockWidget)
 
