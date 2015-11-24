@@ -10,8 +10,13 @@ def show(cqObject, rgba=(204, 204, 204, 0.0)):
 
     ad = FreeCAD.activeDocument()
 
-    #Generate a random name for this shape in case we are doing multiple shapes
-    newName = "Shape" + str(random())
+    # If we've got a blank shape name, we have to create a random ID
+    if not cqObject.val().label:
+        #Generate a random name for this shape in case we are doing multiple shapes
+        newName = "Shape" + str(random())
+    else:
+        # We're going to trust the user to keep labels unique between shapes
+        newName = cqObject.val().label
 
     #Set up the feature in the tree so we can manipulate its properties
     newFeature = ad.addObject("Part::Feature", newName)
