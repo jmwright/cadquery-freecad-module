@@ -20,3 +20,4 @@ v0.3.0 (Unreleased)
     * Embedded Pint library for units handling
     * Fixed version number in InitGui.py
     * Added BoundingBox centerOption example (Ex030) (thanks @huskier)
+    * Made change to leave the 3D render in place when switching to another workbench
