@@ -188,8 +188,6 @@ class CadQueryWorkbench (Workbench):
         # #Put the UI back the way we found it
         # FreeCAD.Console.PrintMessage(msg)
 
-        Gui.Command.CadQueryCloseScript().Activated()
-
         #Getting the main window will allow us to start setting things up the way we want
         mw = FreeCADGui.getMainWindow()
 
