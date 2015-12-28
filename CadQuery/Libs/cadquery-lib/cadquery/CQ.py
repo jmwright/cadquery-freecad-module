@@ -1639,6 +1639,57 @@ class Workplane(CQ):
 
         return self.eachpoint(makeCircleWire, useLocalCoordinates=True)
 
+    #ellipse from current point
+    def ellipse(self, width, length, forConstruction=False):
+	"""
+	Make a ellipse for each item on the stack.
+
+	:param width: width of the ellipse
+	:type width: float > 0
+	:param length: length of the ellipse
+	:type length: float > 0
+	:param forConstruction: should the new wires be reference geometry only?
+	:type forConstruction: true if the wires are for reference, false if they are creating
+	    part geometry
+	:return: a new CQ object with the created wires on the stack
+
+	A common use case is to use successive ellipse() calls to create concentric ellipses.
+	This works because the center of a ellipse is its reference point::
+
+	    s = Workplane().ellipse(2.0, 2.5).circle(1.0, 1.5)
+
+	Creates two concentric ellipses, which when extruded will form a elliptical ring.
+
+	Future Enhancements:
+	    better way to handle forConstruction
+	    project points not in the workplane plane onto the workplane plane
+	    add support for pnt translation
+	    fix issues with planar multiple faces
+
+	"""
+	def makeEllipseWire(obj):
+	    # TODO: add support pnt
+	    
+	    # Setup the scaling matrix
+	    import FreeCAD
+	    scale_matrix = FreeCAD.Base.Matrix()
+	    scale_matrix.scale((1.0, length/width, 1.0))
+	    
+	    # Create the 2D ellipse wire
+	    ellipse = self.workplane() \
+		.circle(width/2, forConstruction=True) \
+		.val().transformGeometry(scale_matrix)
+	    ellipse.forConstruction = forConstruction
+	    
+	    # Cast underlying FreeCAD shape from Part.Shape to Part.Wire
+	    import Part
+	    ellipse.wrapped = Part.cast_to_shape(ellipse.wrapped)
+	    
+	    return ellipse
+	
+	# Convert Wire to Workplane
+	return self.eachpoint(makeEllipseWire, useLocalCoordinates=True) 
+
     def polygon(self, nSides, diameter, forConstruction=False):
         """
         Creates a polygon inscribed in a circle of the specified diameter for each point on
