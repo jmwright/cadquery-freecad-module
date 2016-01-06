@@ -138,8 +138,8 @@ class CadQueryWorkbench (Workbench):
         cqCodeWidget.setWidget(codePane)
 
         #Set up the paths to allow us to open and execute our introduction example
-        example_path = os.path.join(module_base_path, 'Examples')
-        example_path = os.path.join(example_path, 'Ex000_Introduction.py')
+        #example_path = os.path.join(module_base_path, 'Examples')
+        #example_path = os.path.join(example_path, 'Ex000_Introduction.py')
 
         # TODO: Enable this for FreeCAD 0.16 or greater
         # Make sure we get the correct MdiArea object
@@ -158,14 +158,18 @@ class CadQueryWorkbench (Workbench):
         # #mw.centralWidget().addSubWindow(sub_window)
         # mdiArea.addSubWindow(sub_window)
 
-        ImportCQ.open(example_path)
-        docname = os.path.splitext(os.path.basename(example_path))[0]
-        FreeCAD.newDocument(docname)
-        Command.CadQueryExecuteScript().Activated()
+        # Set up the paths to allow us to open the template
+        template_path = os.path.join(module_base_path, 'Templates')
+        template_path = os.path.join(template_path, 'script_template.py')
+
+        ImportCQ.open(template_path)
+        docname = os.path.splitext(os.path.basename(template_path))[0]
+        #FreeCAD.newDocument(docname)
+        #Command.CadQueryExecuteScript().Activated()
 
         #Get a nice view of our example
-        FreeCADGui.activeDocument().activeView().viewAxometric()
-        FreeCADGui.SendMsgToActiveView("ViewFit")
+        #FreeCADGui.activeDocument().activeView().viewAxometric()
+        #FreeCADGui.SendMsgToActiveView("ViewFit")
 
     def AutoExecute(self):
         """We should be able to pass the Gui.Commands.CadQueryExecuteScript function directly to the file_reloaded
