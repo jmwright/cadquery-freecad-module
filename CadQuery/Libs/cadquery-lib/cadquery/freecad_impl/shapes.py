@@ -184,8 +184,22 @@ class Shape(object):
     def isValid(self):
         return self.wrapped.isValid()
 
-    def BoundingBox(self):
+    def BoundingBox(self, tolerance=0.1):
+        self.wrapped.tessellate(tolerance)
         return BoundBox(self.wrapped.BoundBox)
+
+    def mirror(self, mirrorPlane="XY", basePointVector=(0, 0, 0)):
+        if mirrorPlane == "XY" or mirrorPlane== "YX":
+            mirrorPlaneNormalVector = FreeCAD.Base.Vector(0, 0, 1)
+        elif mirrorPlane == "XZ" or mirrorPlane == "ZX":
+            mirrorPlaneNormalVector = FreeCAD.Base.Vector(0, 1, 0)
+        elif mirrorPlane == "YZ" or mirrorPlane == "ZY":
+            mirrorPlaneNormalVector = FreeCAD.Base.Vector(1, 0, 0)
+
+        if type(basePointVector) == tuple:
+            basePointVector = Vector(basePointVector)
+
+        return Shape.cast(self.wrapped.mirror(basePointVector.wrapped, mirrorPlaneNormalVector))
 
     def Center(self):
         # A Part.Shape object doesn't have the CenterOfMass function, but it's wrapped Solid(s) does
@@ -223,14 +237,25 @@ class Shape(object):
 
         :param objects: a list of objects with mass
         """
-        total_mass = sum(o.wrapped.Mass for o in objects)
-        weighted_centers = [o.wrapped.CenterOfMass.multiply(o.wrapped.Mass) for o in objects]
+        total_mass = sum(Shape.computeMass(o) for o in objects)
+        weighted_centers = [o.wrapped.CenterOfMass.multiply(Shape.computeMass(o)) for o in objects]
 
         sum_wc = weighted_centers[0]
         for wc in weighted_centers[1:] :
             sum_wc = sum_wc.add(wc)
 
         return Vector(sum_wc.multiply(1./total_mass))
+
+    @staticmethod
+    def computeMass(object):
+        """
+        Calculates the 'mass' of an object. in FreeCAD < 15, all objects had a mass.
+        in FreeCAD >=15, faces no longer have mass, but instead have area.
+        """
+        if object.wrapped.ShapeType == 'Face':
+          return object.wrapped.Area
+        else:
+          return object.wrapped.Mass
 
     @staticmethod
     def CombinedCenterOfBoundBox(objects):
