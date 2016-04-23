@@ -78,7 +78,7 @@ class CadQueryWorkbench (Workbench):
             "CadQuery is a parametric scripting language "
             "for creating and traversing CAD models\r\n"
             "Author: David Cowden\r\n"
-            "License: LGPL\r\n"
+            "License: Apache-2.0\r\n"
             "Website: https://github.com/dcowden/cadquery\r\n",
             None,
             QtGui.QApplication.UnicodeUTF8)
