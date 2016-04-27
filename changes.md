@@ -22,3 +22,8 @@ v0.3.0
     * Added BoundingBox centerOption example (Ex030) (thanks @huskier) #66
     * Made change to leave the 3D render in place when switching to another workbench
     * Now use a user provided CadQuery shape label to label rendered FreeCAD objects
+
+v0.5.1
+-----
+    * Version updates for CadQuery v0.4.0, v0.4.1, v0.5.0-stable and v0.5.1
+    * Updated CadQuery license to Apache 2.0
