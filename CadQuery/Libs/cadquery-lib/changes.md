@@ -84,3 +84,12 @@ v0.5.1
 ------
    * Mirroring fixes (thanks @huskier)
    * Added a mirroring example (thanks @huskier)
+
+v0.5.2
+------
+   * Added the sweep operation #33
+
+v1.0.0 (unreleased)
+------
+   * Added an option to do symmetric extrusion about the workplane (thanks @adam-urbanczyk)
+   * Extended selector syntax to include Nth selector and re-implemented selectors using pyparsing (thanks @adam-urbanczyk)
