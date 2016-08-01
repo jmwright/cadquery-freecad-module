@@ -31,3 +31,4 @@ v0.5.1
 v1.0.0 (Unreleased)
 -----
     * Embedded pyparsing package as a supporting library for new selector syntax
+    * Added a check to remove any disallowed characters from the document name when executing a script
