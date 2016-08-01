@@ -166,7 +166,12 @@ class CadQueryExecuteScript:
 
         docname = os.path.splitext(os.path.basename(cqCodePane.file.path))[0]
 
-        #If the matching 3D view has been closed, we need to open a new one
+        # Make sure we replace any troublesome characters
+        for ch in ['&', '#', '.', '-', '$', '%', ',', ' ']:
+            if ch in docname:
+                docname = docname.replace(ch, "")
+
+        # If the matching 3D view has been closed, we need to open a new one
         try:
            FreeCAD.getDocument(docname)
         except:
