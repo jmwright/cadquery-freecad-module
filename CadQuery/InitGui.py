@@ -1,11 +1,9 @@
 """CadQuery GUI init module for FreeCAD
    This adds a workbench with a scripting editor to FreeCAD's GUI."""
-# (c) 2014-2015 Jeremy Wright LGPL v3
-
+# (c) 2014-2016 Jeremy Wright Apache 2.0 License
 import FreeCAD, FreeCADGui
 from Gui.Command import *
 import CadQuery_rc
-
 
 class CadQueryWorkbench (Workbench):
     """CadQuery workbench for FreeCAD"""
@@ -118,18 +116,18 @@ class CadQueryWorkbench (Workbench):
         # #Put the UI back the way we found it
         # FreeCAD.Console.PrintMessage(msg)
 
-        #Getting the main window will allow us to start setting things up the way we want
-        mw = FreeCADGui.getMainWindow()
-
-        cqCodePane = mw.findChild(QtGui.QPlainTextEdit, "cqCodePane")
-        cqCodePane.close()
-        cqCodePane.setParent(None)
-
-        dockWidgets = mw.findChildren(QtGui.QDockWidget)
-
-        for widget in dockWidgets:
-            if widget.objectName() == "cqCodeView":
-                mw.removeDockWidget(widget)
+        # # Getting the main window will allow us to start setting things up the way we want
+        # mw = FreeCADGui.getMainWindow()
+        #
+        # cqCodePane = mw.findChild(QtGui.QPlainTextEdit, "cqCodePane")
+        # cqCodePane.close()
+        # cqCodePane.setParent(None)
+        #
+        # dockWidgets = mw.findChildren(QtGui.QDockWidget)
+        #
+        # for widget in dockWidgets:
+        #     if widget.objectName() == "cqCodeView":
+        #         mw.removeDockWidget(widget)
 
     @staticmethod
     def ListExamples():

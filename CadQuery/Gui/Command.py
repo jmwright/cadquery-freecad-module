@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """Adds all of the commands that are used for the menus of the CadQuery module"""
-# (c) 2014-2015 Jeremy Wright LGPL v3
+# (c) 2014-2016 Jeremy Wright Apache 2.0 License
 
 import imp, os, sys, tempfile
 import FreeCAD, FreeCADGui
@@ -8,21 +8,12 @@ from PySide import QtGui
 import ExportCQ, ImportCQ
 import module_locator
 import Settings
+import Shared
 
 #Distinguish python built-in open function from the one declared here
 if open.__module__ == '__builtin__':
     pythonopen = open
 
-
-def clearActiveDocument():
-    """Clears the currently active 3D view so that we can re-render"""
-
-    doc = FreeCAD.ActiveDocument
-
-    #Make sure we have an active document to work with
-    if doc is not None:
-        for obj in doc.Objects:
-            doc.removeObject(obj.Name)
 
 class CadQueryClearOutput:
     """Allows the user to clear the reports view when it gets overwhelmed with output"""
@@ -64,7 +55,7 @@ class CadQueryCloseScript:
         cqCodePane = mw.findChild(QtGui.QPlainTextEdit, "cqCodePane")
 
         #If there's nothing open in the code pane, we don't need to close it
-        if len(cqCodePane.file.path) == 0:
+        if cqCodePane is None or len(cqCodePane.file.path) == 0:
             return
 
         #Check to see if we need to save the script
@@ -120,7 +111,7 @@ class CadQueryExecuteExample:
         exs_dir_path = os.path.join(module_base_path, 'Examples')
 
         #We need to close any file that's already open in the editor window
-        CadQueryCloseScript().Activated()
+        # CadQueryCloseScript().Activated()
 
         #Append this script's directory to sys.path
         sys.path.append(os.path.dirname(exs_dir_path))
@@ -153,17 +144,18 @@ class CadQueryExecuteScript:
 
     def Activated(self):
         #Grab our code editor so we can interact with it
-        mw = FreeCADGui.getMainWindow()
-        cqCodePane = mw.findChild(QtGui.QPlainTextEdit, "cqCodePane")
+        cqCodePane = Shared.getActiveCodePane()
 
         #Clear the old render before re-rendering
-        clearActiveDocument()
+        Shared.clearActiveDocument()
 
         #Save our code to a tempfile and render it
         tempFile = tempfile.NamedTemporaryFile(delete=False)
         tempFile.write(cqCodePane.toPlainText().encode('utf-8'))
         tempFile.close()
 
+        #mdi = mw.findChild(QtGui.QMdiArea)
+        #docname = mdi.currentSubWindow().getWindowTitle()
         docname = os.path.splitext(os.path.basename(cqCodePane.file.path))[0]
 
         # Make sure we replace any troublesome characters
@@ -276,8 +268,7 @@ class CadQuerySaveScript:
 
     def Activated(self):
         #Grab our code editor so we can interact with it
-        mw = FreeCADGui.getMainWindow()
-        cqCodePane = mw.findChild(QtGui.QPlainTextEdit, "cqCodePane")
+        cqCodePane = Shared.getActiveCodePane()
 
         #If the code pane doesn't have a filename, we need to present the save as dialog
         if len(cqCodePane.file.path) == 0 or os.path.basename(cqCodePane.file.path) == 'script_template.py' \

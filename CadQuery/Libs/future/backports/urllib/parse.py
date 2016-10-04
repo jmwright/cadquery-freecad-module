@@ -135,7 +135,7 @@ class _ResultMixinBytes(object):
 
 
 class _NetlocResultMixinBase(object):
-    """Shared methods for the parsed result objects containing a netloc element"""
+    """Shared.py methods for the parsed result objects containing a netloc element"""
     __slots__ = ()
 
     @property

@@ -1,8 +1,9 @@
 """Adds the ability to save a script file to the CadQuery module"""
-# (c) 2014 Jeremy Wright LGPL v3
+# (c) 2014-2016 Jeremy Wright Apache 2.0 License
 
 import FreeCAD, FreeCADGui
 from PySide import QtGui
+import Shared
 
 def export(self, filename):
     save(filename)
@@ -14,8 +15,7 @@ def save(filename=None):
     """
 
     #Grab our code editor so we can interact with it
-    mw = FreeCADGui.getMainWindow()
-    cqCodePane = mw.findChild(QtGui.QPlainTextEdit, "cqCodePane")
+    cqCodePane = Shared.getActiveCodePane()
 
     #If we weren't provided a file name, we need to find it from the text field
     if filename is None:

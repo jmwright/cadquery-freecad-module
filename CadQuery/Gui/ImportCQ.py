@@ -1,6 +1,5 @@
 """Adds the ability to open files from disk to the CadQuery FreeCAD module"""
-# (c) 2014 Jeremy Wright LGPL v3
-
+# (c) 2014-2016 Jeremy Wright Apache 2.0 License
 import os
 import sys
 import FreeCAD, FreeCADGui
@@ -59,40 +58,39 @@ def open(filename):
     #Getting the main window will allow us to find the children we need to work with
     mw = FreeCADGui.getMainWindow()
 
-    # The code editor can be displayed as a docked window or as a FreeCAD tab
-    if Settings.tabbed_mode:
-        # Set up the text area for our CQ code
-        server_path = os.path.join(module_base_path, 'cq_server.py')
+    # Grab just the file name from the path/file that's being executed
+    # docname = os.path.splitext(os.path.basename(filename))[0]
+    docname = os.path.basename(filename)
 
-        # Windows needs some extra help with paths
-        if sys.platform.startswith('win'):
-            codePane = PyCodeEdit(server_script=server_path, interpreter=interpreter
-                                  , args=['-s', fc_lib_path, libs_dir_path])
-        else:
-            codePane = PyCodeEdit(server_script=server_path, interpreter=interpreter
-                                  , args=['-s', libs_dir_path])
+    # Set up the text area for our CQ code
+    server_path = os.path.join(module_base_path, 'cq_server.py')
 
-        # Allow easy use of an external editor
-        if Settings.use_external_editor:
-            codePane.modes.append(FileWatcherMode())
-            codePane.modes.get(FileWatcherMode).file_reloaded.connect(AutoExecute)
-            codePane.modes.get(FileWatcherMode).auto_reload = True
-
-        # Set the margin to be at 119 characters instead of 79
-        codePane.modes.get(RightMarginMode).position = Settings.max_line_length
-
-        codePane.setObjectName("cqCodePane")
-
-        mdi = mw.findChild(QtGui.QMdiArea)
-        # add a widget to the mdi area
-        sub = mdi.addSubWindow(codePane)
-        sub.setWindowTitle('script_template')
-        sub.setWindowIcon(QtGui.QIcon(':/icons/applications-python.svg'))
-        sub.show()
-        mw.update()
+    # Windows needs some extra help with paths
+    if sys.platform.startswith('win'):
+        codePane = PyCodeEdit(server_script=server_path, interpreter=interpreter
+                              , args=['-s', fc_lib_path, libs_dir_path])
     else:
-        # We need this so we can load the file into it
-        codePane = mw.findChild(QtGui.QPlainTextEdit, "cqCodePane")
+        codePane = PyCodeEdit(server_script=server_path, interpreter=interpreter
+                              , args=['-s', libs_dir_path])
+
+    # Allow easy use of an external editor
+    if Settings.use_external_editor:
+        codePane.modes.append(FileWatcherMode())
+        codePane.modes.get(FileWatcherMode).file_reloaded.connect(AutoExecute)
+        codePane.modes.get(FileWatcherMode).auto_reload = True
+
+    # Set the margin to be at 119 characters instead of 79
+    codePane.modes.get(RightMarginMode).position = Settings.max_line_length
+
+    codePane.setObjectName("cqCodePane_" + os.path.splitext(os.path.basename(filename))[0])
+
+    mdi = mw.findChild(QtGui.QMdiArea)
+    # add a widget to the mdi area
+    sub = mdi.addSubWindow(codePane)
+    sub.setWindowTitle(docname)
+    sub.setWindowIcon(QtGui.QIcon(':/icons/applications-python.svg'))
+    sub.show()
+    mw.update()
 
     #Pull the text of the CQ script file into our code pane
     codePane.file.open(filename)

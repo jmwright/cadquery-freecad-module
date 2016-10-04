@@ -1,3 +1,5 @@
+# (c) 2014-2016 Jeremy Wright Apache 2.0 License
+
 def show(cqObject, rgba=(204, 204, 204, 0.0)):
     import FreeCAD
     from random import random
