@@ -302,7 +302,7 @@ class CadQuerySaveAsScript:
     def Activated(self):
         #So we can open the save-as dialog
         mw = FreeCADGui.getMainWindow()
-        cqCodePane = mw.findChild(QtGui.QPlainTextEdit, "cqCodePane")
+        cqCodePane = Shared.getActiveCodePane()
 
         #Try to keep track of the previous path used to open as a convenience to the user
         if self.previousPath is None:
@@ -322,6 +322,9 @@ class CadQuerySaveAsScript:
             except:
                 #Assume that there was no 3D view to close
                 pass
+
+            # Change the name of our script window's tab
+            Shared.setActiveWindowTitle(os.path.basename(filename[0]))
 
             #Save the file before closing the original and the re-rendering the new one
             ExportCQ.save(filename[0])
