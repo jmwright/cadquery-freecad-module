@@ -9,7 +9,7 @@ def clearActiveDocument():
     # Grab our code editor so we can interact with it
     mw = FreeCADGui.getMainWindow()
     mdi = mw.findChild(QtGui.QMdiArea)
-    winName = mdi.currentSubWindow().windowTitle().split('.')[0]
+    winName = mdi.currentSubWindow().windowTitle().split(" ")[0].split('.')[0]
 
     try:
         doc = FreeCAD.getDocument(winName)
