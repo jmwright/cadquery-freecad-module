@@ -37,7 +37,6 @@ def getActiveCodePane():
         subList = mdi.subWindowList()
 
         for sub in subList:
-            print(sub.windowTitle())
             if sub.windowTitle() == mdiWin.windowTitle().split(" ")[0] + ".py":
                 mdiWin = sub
 

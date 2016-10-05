@@ -110,24 +110,21 @@ class CadQueryExecuteExample:
         module_base_path = module_locator.module_path()
         exs_dir_path = os.path.join(module_base_path, 'Examples')
 
-        #We need to close any file that's already open in the editor window
-        # CadQueryCloseScript().Activated()
-
         #Append this script's directory to sys.path
         sys.path.append(os.path.dirname(exs_dir_path))
 
         #We've created a library that FreeCAD can use as well to open CQ files
         ImportCQ.open(os.path.join(exs_dir_path, self.exFile))
 
-        docname = os.path.splitext(os.path.basename(self.exFile))[0]
-        FreeCAD.newDocument(docname)
+        # docname = os.path.splitext(os.path.basename(self.exFile))[0]
+        # FreeCAD.newDocument(docname)
 
         #Execute the script
-        CadQueryExecuteScript().Activated()
+        #CadQueryExecuteScript().Activated()
 
         #Get a nice view of our model
-        FreeCADGui.activeDocument().activeView().viewAxometric()
-        FreeCADGui.SendMsgToActiveView("ViewFit")
+        #FreeCADGui.activeDocument().activeView().viewAxometric()
+        #FreeCADGui.SendMsgToActiveView("ViewFit")
 
 
 class CadQueryExecuteScript:
@@ -243,15 +240,15 @@ class CadQueryOpenScript:
             #We've created a library that FreeCAD can use as well to open CQ files
             ImportCQ.open(filename[0])
 
-            docname = os.path.splitext(os.path.basename(filename[0]))[0]
-            FreeCAD.newDocument(docname)
+            # docname = os.path.splitext(os.path.basename(filename[0]))[0]
+            # FreeCAD.newDocument(docname)
 
             #Execute the script
-            CadQueryExecuteScript().Activated()
+            # CadQueryExecuteScript().Activated()
 
             #Get a nice view of our model
-            FreeCADGui.activeDocument().activeView().viewAxometric()
-            FreeCADGui.SendMsgToActiveView("ViewFit")
+            # FreeCADGui.activeDocument().activeView().viewAxometric()
+            # FreeCADGui.SendMsgToActiveView("ViewFit")
 
 
 class CadQuerySaveScript:
