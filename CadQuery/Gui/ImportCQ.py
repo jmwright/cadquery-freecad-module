@@ -45,7 +45,6 @@ def open(filename):
     # Set up so that we can import from our embedded packages
     module_base_path = module_locator.module_path()
     libs_dir_path = os.path.join(module_base_path, 'Libs')
-    sys.path.insert(0, libs_dir_path)
 
     from pyqode.core.modes import FileWatcherMode
     from pyqode.core.modes import RightMarginMode
@@ -59,7 +58,6 @@ def open(filename):
     mw = FreeCADGui.getMainWindow()
 
     # Grab just the file name from the path/file that's being executed
-    # docname = os.path.splitext(os.path.basename(filename))[0]
     docname = os.path.basename(filename)
 
     # Set up the text area for our CQ code

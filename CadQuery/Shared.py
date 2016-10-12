@@ -25,14 +25,13 @@ def clearActiveDocument():
 def getActiveCodePane():
     """Gets the currently active code pane, even if its 3D view is selected."""
 
-    # TODO: Make sure that the code pane is selected, even if the associated 3D view currently has focus
-
     # Grab our code editor so we can interact with it
     mw = FreeCADGui.getMainWindow()
     mdi = mw.findChild(QtGui.QMdiArea)
 
     # If our current subwindow doesn't contain a script, we need to find the one that does
     mdiWin = mdi.currentSubWindow()
+    if mdiWin == None: return None # We need to warn the caller that there is no code pane
     if mdiWin == 0 or ".py" not in mdiWin.windowTitle():
         subList = mdi.subWindowList()
 

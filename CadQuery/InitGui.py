@@ -15,11 +15,6 @@ class CadQueryWorkbench (Workbench):
     closedWidgets = []
 
     def Initialize(self):
-        import os
-
-        #Need to set this for PyQode
-        os.environ['QT_API'] = 'pyside'
-
         #Turn off logging for now
         #import logging
         #logging.basicConfig(filename='C:\\Users\\Jeremy\\Documents\\', level=logging.DEBUG)
@@ -39,31 +34,11 @@ class CadQueryWorkbench (Workbench):
         self.appendMenu('CadQuery', ['Separator', 'CadQueryExecuteScript', 'CadQueryClearOutput'])
 
     def Activated(self):
-        import os, sys
+        import os
         import module_locator
-        from Gui import Command, ImportCQ
-        import Settings
+        from Gui import ImportCQ
 
-        #Set up so that we can import from our embedded packages
         module_base_path = module_locator.module_path()
-        libs_dir_path = os.path.join(module_base_path, 'Libs')
-        sys.path.insert(0, libs_dir_path)
-
-        # Tack on our CadQuery library git subtree
-        cq_lib_path = os.path.join(libs_dir_path, 'cadquery-lib')
-        sys.path.insert(1, cq_lib_path)
-
-        #Make sure we get the right libs under the FreeCAD installation
-        fc_base_path = os.path.dirname(os.path.dirname(module_base_path))
-        fc_lib_path = os.path.join(fc_base_path, 'lib')
-        fc_bin_path = os.path.join(fc_base_path, 'bin')
-
-        #Make sure that the directories exist before we add them to sys.path
-        #This could cause problems or solve them by overriding what CQ is setting for the paths
-        if os.path.exists(fc_lib_path):
-            sys.path.insert(1, fc_lib_path)
-        if os.path.exists(fc_bin_path):
-            sys.path.insert(1, fc_bin_path)
 
         import cadquery
         from PySide import QtGui, QtCore
@@ -71,7 +46,7 @@ class CadQueryWorkbench (Workbench):
         msg = QtGui.QApplication.translate(
             "cqCodeWidget",
             "CadQuery " + cadquery.__version__ + "\r\n"
-            "CadQuery is a parametric scripting language "
+            "CadQuery is a parametric scripting API "
             "for creating and traversing CAD models\r\n"
             "Author: David Cowden\r\n"
             "License: Apache-2.0\r\n"
@@ -104,30 +79,7 @@ class CadQueryWorkbench (Workbench):
         Gui.Command.CadQueryExecuteScript().Activated()
 
     def Deactivated(self):
-        import Gui.Command
-        from PySide import QtGui
-
-        # msg = QtGui.QApplication.translate(
-        #         "cqCodeWidget",
-        #         "\r\nCadQuery Workbench Deactivated\r\n",
-        #         None,
-        #         QtGui.QApplication.UnicodeUTF8)
-        #
-        # #Put the UI back the way we found it
-        # FreeCAD.Console.PrintMessage(msg)
-
-        # # Getting the main window will allow us to start setting things up the way we want
-        # mw = FreeCADGui.getMainWindow()
-        #
-        # cqCodePane = mw.findChild(QtGui.QPlainTextEdit, "cqCodePane")
-        # cqCodePane.close()
-        # cqCodePane.setParent(None)
-        #
-        # dockWidgets = mw.findChildren(QtGui.QDockWidget)
-        #
-        # for widget in dockWidgets:
-        #     if widget.objectName() == "cqCodeView":
-        #         mw.removeDockWidget(widget)
+        pass
 
     @staticmethod
     def ListExamples():
