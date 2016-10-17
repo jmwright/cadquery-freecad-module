@@ -75,18 +75,7 @@ class CadQueryCloseScript:
                 if filename is not None:
                     ExportCQ.save(filename)
 
-        # Close the matching 3D view if it's open
-        if cqCodePane.file.path is not None:
-            docname = os.path.splitext(os.path.basename(cqCodePane.file.path))[0]
-
-            try:
-                FreeCAD.closeDocument(docname)
-            except:
-                # Assume that the document has already been closed
-                pass
-
-        # Clear our script and whatever was rendered by it out
-        cqCodePane.file.close()
+        Shared.closeActiveCodeWindow()
 
 class CadQueryExecuteExample:
     exFile = None
@@ -214,9 +203,6 @@ class CadQueryOpenScript:
 
         # Make sure the user didn't click cancel
         if filename[0]:
-            # We need to close any file that's already open in the editor window
-            CadQueryCloseScript().Activated()
-
             self.previousPath = filename[0]
 
             # Append this script's directory to sys.path

@@ -45,9 +45,7 @@ def getActiveCodePane():
     return cqCodePane
 
 
-def getActiveCodeWindow():
-    """Gets the currently active code window (that holds the pane), even if the associated 3D view window has focus"""
-
+def closeActiveCodeWindow():
     mw = FreeCADGui.getMainWindow()
     mdi = mw.findChild(QtGui.QMdiArea)
 
@@ -59,11 +57,11 @@ def getActiveCodeWindow():
         subList = mdi.subWindowList()
 
         for sub in subList:
-            if sub.windowTitle() == mdiWin.windowTitle() + ".py":
-                mdiWin = sub
+            if sub.windowTitle() == mdiWin.windowTitle().split(" ")[0] + ".py":
+                sub.close()
+                return
 
-    return mdiWin
-
+    mdiWin.close()
 
 def setActiveWindowTitle(title):
     """Sets the title of the currently active MDI window, as long as it is a scripting window"""
