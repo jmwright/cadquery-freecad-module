@@ -120,25 +120,25 @@ class CadQueryExecuteScript:
         cqCodePane = Shared.getActiveCodePane()
 
         # Clear the old render before re-rendering
-        Shared.clearActiveDocument()
+        # Shared.clearActiveDocument()
 
         # Save our code to a tempfile and render it
         tempFile = tempfile.NamedTemporaryFile(delete=False)
         tempFile.write(cqCodePane.toPlainText().encode('utf-8'))
         tempFile.close()
 
-        docname = os.path.splitext(os.path.basename(cqCodePane.file.path))[0]
-
-        # Make sure we replace any troublesome characters
-        for ch in ['&', '#', '.', '-', '$', '%', ',', ' ']:
-            if ch in docname:
-                docname = docname.replace(ch, "")
-
-        # If the matching 3D view has been closed, we need to open a new one
-        try:
-           FreeCAD.getDocument(docname)
-        except:
-            FreeCAD.newDocument(docname)
+        # docname = os.path.splitext(os.path.basename(cqCodePane.file.path))[0]
+        #
+        # # Make sure we replace any troublesome characters
+        # for ch in ['&', '#', '.', '-', '$', '%', ',', ' ']:
+        #     if ch in docname:
+        #         docname = docname.replace(ch, "")
+        #
+        # # If the matching 3D view has been closed, we need to open a new one
+        # try:
+        #    FreeCAD.getDocument(docname)
+        # except:
+        #     FreeCAD.newDocument(docname)
 
         # We import this way because using execfile() causes non-standard script execution in some situations
         imp.load_source('temp_module', tempFile.name)
@@ -163,9 +163,6 @@ class CadQueryNewScript:
         return True
 
     def Activated(self):
-        # We need to close any file that's already open in the editor window
-        CadQueryCloseScript().Activated()
-
         module_base_path = module_locator.module_path()
         templ_dir_path = os.path.join(module_base_path, 'Templates')
 
