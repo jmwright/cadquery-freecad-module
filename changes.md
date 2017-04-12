@@ -33,3 +33,4 @@ v1.0.0 (Unreleased)
     * Embedded pyparsing package as a supporting library for new selector syntax
     * Added a check to remove any disallowed characters from the document name when executing a script
     * Added advanced example of 3D printer extruder support (thanks @adam-urbanczyk)
+    * Made the switch to tabbed editing
