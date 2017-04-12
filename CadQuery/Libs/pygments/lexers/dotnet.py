@@ -408,7 +408,7 @@ class VbNetLexer(RegexLexer):
              r'Operator|Option|Optional|Overloads|Overridable|'
              r'Overrides|ParamArray|Partial|Private|Protected|'
              r'Public|RaiseEvent|ReadOnly|ReDim|RemoveHandler|Resume|'
-             r'Return|Select|Set|Shadows|Shared|Single|'
+             r'Return|Select|Set|Shadows|Shared.py|Single|'
              r'Static|Step|Stop|SyncLock|Then|'
              r'Throw|To|True|Try|TryCast|Wend|'
              r'Using|When|While|Widening|With|WithEvents|'

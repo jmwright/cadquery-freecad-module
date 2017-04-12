@@ -1,3 +1,4 @@
+# (c) 2014-2016 Jeremy Wright Apache 2.0 License
 import os, sys
 
 def we_are_frozen():

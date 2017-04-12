@@ -1,12 +1,40 @@
+# (c) 2014-2016 Jeremy Wright Apache 2.0 License
+
 def show(cqObject, rgba=(204, 204, 204, 0.0)):
     import FreeCAD
     from random import random
+    import os, tempfile
+    import Shared
 
     #Convert our rgba values
     r = rgba[0] / 255.0
     g = rgba[1] / 255.0
     b = rgba[2] / 255.0
     a = int(rgba[3] * 100.0)
+
+    # Grab our code editor so we can interact with it
+    cqCodePane = Shared.getActiveCodePane()
+
+    # Clear the old render before re-rendering
+    Shared.clearActiveDocument()
+
+    # Save our code to a tempfile and render it
+    tempFile = tempfile.NamedTemporaryFile(delete=False)
+    tempFile.write(cqCodePane.toPlainText().encode('utf-8'))
+    tempFile.close()
+
+    docname = os.path.splitext(os.path.basename(cqCodePane.file.path))[0]
+
+    # Make sure we replace any troublesome characters
+    for ch in ['&', '#', '.', '-', '$', '%', ',', ' ']:
+        if ch in docname:
+            docname = docname.replace(ch, "")
+
+    # If the matching 3D view has been closed, we need to open a new one
+    try:
+        FreeCAD.getDocument(docname)
+    except:
+        FreeCAD.newDocument(docname)
 
     ad = FreeCAD.activeDocument()
 
