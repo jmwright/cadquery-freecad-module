@@ -1,7 +1,7 @@
 What is a CadQuery?
 ========================================
 
-[![Travis Build Status](https://travis-ci.org/dcowden/cadquery.svg)](https://travis-ci.org/dcowden/cadquery)
+[![Travis Build Status](https://travis-ci.org/dcowden/cadquery.svg?branch=master)](https://travis-ci.org/dcowden/cadquery?branch=master)
 [![Coverage Status](https://coveralls.io/repos/dcowden/cadquery/badge.svg)](https://coveralls.io/r/dcowden/cadquery)
 [![GitHub version](https://badge.fury.io/gh/dcowden%2Fcadquery.svg)](https://github.com/dcowden/cadquery/releases/tag/v0.3.0)
 [![License](https://img.shields.io/badge/license-Apache2-blue.svg)](https://github.com/dcowden/cadquery/blob/master/LICENSE)
@@ -46,6 +46,7 @@ This resin mold was modeled using cadquery and then created on a CNC machine:
 
 The cadquery script is surprisingly short, and allows easily customizing any of the variables::
 
+```python
 	import cadquery as cq
 	from Helpers import show
 	BS = cq.selectors.BoxSelector
@@ -108,7 +109,7 @@ The cadquery script is surprisingly short, and allows easily customizing any of 
 	    ]).hole(fhd, mw/2.)
 
 	show(r)
-
+```
 
 Thanks go to cadquery contributor hyOzd ( Altu Technology ) for the example!
 
@@ -171,26 +172,30 @@ Use these steps if you would like to write CadQuery scripts as a python API.  In
    preferably one that has virtualenv available.  To use FreeCAD from any python interpreter, just append the FreeCAD
    lib directory to your path. On  (*Nix)::
 
-        import sys
+```python
+		import sys
 		sys.path.append('/usr/lib/freecad/lib')
+```
 
    or on Windows::
 
-	    import sys
+```python
+		import sys
 		sys.path.append('/c/apps/FreeCAD/bin')
+```
 
    *NOTE* FreeCAD on Windows will not work with python 2.7-- you must use pthon 2.6.X!!!!
 
 3. install cadquery::
-
+```bash
 		pip install cadquery
-
+```
 3. test your installation::
-
+```python
 		from cadquery import *
 		box = Workplane("XY").box(1,2,3)
 		exporters.toString(box,'STL')
-
+```
 You're up and running!
 
 Installing -- Using CadQuery from Inside FreeCAD
@@ -204,16 +209,15 @@ It includes a distribution of the latest version of cadquery.
 Roadmap/Future Work
 =======================
 
-Work is underway on two other installation methods for cadquery:
-
-   1. a conda package, which will install CQ and all of its depedencies, if you are using Anaconda
-   2. a Docker image, which comes ready-to-run after you have installed docker.
-
-Work has also begun on Cadquery 2.0, which will feature:
+Work has begun on Cadquery 2.0, which will feature:
  
    1. Feature trees, for more powerful selection
    2. Direct use of OpenCascade Community Edition(OCE), so that it is no longer required to install FreeCAD
    3. https://github.com/jmwright/cadquery-gui, which will allow visualization of workplanes  
+
+The project page can be found here: https://github.com/dcowden/cadquery/projects/1
+
+A more detailed description of the plan for CQ 2.0 is here: https://docs.google.com/document/d/1cXuxBkVeYmGOo34MGRdG7E3ILypQqkrJ26oVf3CUSPQ
 
 Where does the name CadQuery come from?
 ========================================

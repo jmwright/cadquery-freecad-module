@@ -28,7 +28,7 @@ v0.5.1
     * Version updates for CadQuery v0.4.0, v0.4.1, v0.5.0-stable and v0.5.1
     * Updated CadQuery license to Apache 2.0
 
-v1.0.0 (Unreleased)
+v1.0.0
 -----
     * Embedded pyparsing package as a supporting library for new selector syntax
     * Added a check to remove any disallowed characters from the document name when executing a script
