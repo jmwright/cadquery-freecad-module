@@ -34,3 +34,7 @@ v1.0.0
     * Added a check to remove any disallowed characters from the document name when executing a script
     * Added advanced example of 3D printer extruder support (thanks @adam-urbanczyk)
     * Made the switch to tabbed editing
+
+v1.1.0 (Unreleased)
+-----
+    * Added example (Ex033) using logical operators in a string selector (thanks @adam-urbanczyk)
