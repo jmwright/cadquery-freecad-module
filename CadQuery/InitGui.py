@@ -65,10 +65,10 @@ class CadQueryWorkbench (Workbench):
                 widget.setVisible(True)
 
         # Set up the paths to allow us to open the template
-        template_path = os.path.join(module_base_path, 'Templates')
-        template_path = os.path.join(template_path, 'script_template.py')
-
-        ImportCQ.open(template_path)
+        # template_path = os.path.join(module_base_path, 'Templates')
+        # template_path = os.path.join(template_path, 'script_template.py')
+        #
+        # ImportCQ.open(template_path)
 
     def AutoExecute(self):
         """We should be able to pass the Gui.Commands.CadQueryExecuteScript function directly to the file_reloaded
