@@ -119,6 +119,9 @@ class CadQueryExecuteScript:
         # Grab our code editor so we can interact with it
         cqCodePane = Shared.getActiveCodePane()
 
+        # Clear the old render before re-rendering
+        Shared.clearActiveDocument()
+
         # Save our code to a tempfile and render it
         tempFile = tempfile.NamedTemporaryFile(delete=False)
         tempFile.write(cqCodePane.toPlainText().encode('utf-8'))

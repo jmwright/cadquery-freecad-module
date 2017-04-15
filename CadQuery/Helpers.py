@@ -15,26 +15,24 @@ def show(cqObject, rgba=(204, 204, 204, 0.0)):
     # Grab our code editor so we can interact with it
     cqCodePane = Shared.getActiveCodePane()
 
-    # Clear the old render before re-rendering
-    Shared.clearActiveDocument()
+    if cqCodePane != None:
+        # Save our code to a tempfile and render it
+        tempFile = tempfile.NamedTemporaryFile(delete=False)
+        tempFile.write(cqCodePane.toPlainText().encode('utf-8'))
+        tempFile.close()
 
-    # Save our code to a tempfile and render it
-    tempFile = tempfile.NamedTemporaryFile(delete=False)
-    tempFile.write(cqCodePane.toPlainText().encode('utf-8'))
-    tempFile.close()
+        docname = os.path.splitext(os.path.basename(cqCodePane.file.path))[0]
 
-    docname = os.path.splitext(os.path.basename(cqCodePane.file.path))[0]
+        # Make sure we replace any troublesome characters
+        for ch in ['&', '#', '.', '-', '$', '%', ',', ' ']:
+            if ch in docname:
+                docname = docname.replace(ch, "")
 
-    # Make sure we replace any troublesome characters
-    for ch in ['&', '#', '.', '-', '$', '%', ',', ' ']:
-        if ch in docname:
-            docname = docname.replace(ch, "")
-
-    # If the matching 3D view has been closed, we need to open a new one
-    try:
-        FreeCAD.getDocument(docname)
-    except:
-        FreeCAD.newDocument(docname)
+        # If the matching 3D view has been closed, we need to open a new one
+        try:
+            FreeCAD.getDocument(docname)
+        except:
+            FreeCAD.newDocument(docname)
 
     ad = FreeCAD.activeDocument()
 
