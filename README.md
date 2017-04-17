@@ -3,14 +3,27 @@ cadquery-freecad-module
 [![GitHub version](https://badge.fury.io/gh/jmwright%2Fcadquery-freecad-module.svg)](https://github.com/jmwright/cadquery-freecad-module/releases)
 [![License](https://img.shields.io/badge/license-LGPL-lightgrey.svg)](https://github.com/jmwright/cadquery-freecad-module/blob/master/LICENSE)
 
-A module-workbench combo that adds a CadQuery editor to FreeCAD. Please see the [wiki](https://github.com/jmwright/cadquery-freecad-module/wiki) for more detailed information on getting started.
+# Introduction
+
+Module that adds a CadQuery editor to FreeCAD. Please see the [wiki](https://github.com/jmwright/cadquery-freecad-module/wiki) for more detailed information on getting started.
 
 ![alt tag](https://cloud.githubusercontent.com/assets/1015439/7115894/b17536c0-e1ba-11e4-9316-ac66e4e706d9.png)
 
 ## Installation
 **Requires FreeCAD 0.14 or newer**
 
-Download the [latest released version](https://github.com/jmwright/cadquery-freecad-module/releases), extract the archive file, and copy the `CadQuery` directory to FreeCAD's `Mod` directory on your system. The module is implemented completely in Python so it should just work the next time you start FreeCAD. Some typical `Mod` directory locations are as follows.
+Installation is handled slightly differently whether you are installing version 1.0.0.1 and earlier, or a later version.
+
+### Installing v1.0.0.1 and Earlier
+
+Download the [latest released version](https://github.com/jmwright/cadquery-freecad-module/releases), extract the archive file, and copy the `CadQuery` subdirectory to FreeCAD's `Mod` directory on your system. 
+
+### Installing v1.0.0.2 and Later
+
+Download the [latest released version](https://github.com/jmwright/cadquery-freecad-module/releases), extract the archive file, and copy the entire extracted directory to FreeCAD's `Mod` directory on your system. You can optionally rename the directory to something like `CadQuery`.
+
+## Typical Installation Locations
+The module should show up in the 'Workbenches' drop down the next time you start FreeCAD. Some typical `Mod` directory locations are as follows.
 
 ### Linux
 * /usr/lib/freecad/Mod
