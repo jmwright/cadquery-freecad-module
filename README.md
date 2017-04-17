@@ -9,7 +9,15 @@ Module that adds a tabbed CadQuery editor to FreeCAD. Please see the [wiki](http
 
 ![Module User Interface](http://innovationsts.com/images/Version_1_0_0_1_and_Later_Interface.png)
 
-## Installation
+## Install Through FreeCAD-Addons
+
+  1. Follow the instructions [here](https://github.com/FreeCAD/FreeCAD-addons/blob/master/README.md) to install and execute the FreeCAD-Addons macro.
+  2. Choose `cadquery_module` from the list in the datalog box and click Install/Update.
+  3. Restart FreeCAD.
+  
+You can use the Install/Update button periodically to get the latest changes to this module.
+
+## Manual Installation
 **Requires FreeCAD 0.14 or newer**
 
 Installation is handled slightly differently whether you are installing version 1.0.0.1 and earlier, or a later version.
