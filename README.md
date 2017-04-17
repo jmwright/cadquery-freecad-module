@@ -3,11 +3,11 @@ cadquery-freecad-module
 [![GitHub version](https://badge.fury.io/gh/jmwright%2Fcadquery-freecad-module.svg)](https://github.com/jmwright/cadquery-freecad-module/releases)
 [![License](https://img.shields.io/badge/license-LGPL-lightgrey.svg)](https://github.com/jmwright/cadquery-freecad-module/blob/master/LICENSE)
 
-# Introduction
+## Introduction
 
-Module that adds a CadQuery editor to FreeCAD. Please see the [wiki](https://github.com/jmwright/cadquery-freecad-module/wiki) for more detailed information on getting started.
+Module that adds a tabbed CadQuery editor to FreeCAD. Please see the [wiki](https://github.com/jmwright/cadquery-freecad-module/wiki) for more detailed information on getting started.
 
-![alt tag](https://cloud.githubusercontent.com/assets/1015439/7115894/b17536c0-e1ba-11e4-9316-ac66e4e706d9.png)
+![Module User Interface](http://innovationsts.com/images/Version_1_0_0_1_and_Later_Interface.png)
 
 ## Installation
 **Requires FreeCAD 0.14 or newer**
