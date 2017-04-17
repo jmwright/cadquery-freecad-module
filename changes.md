@@ -35,6 +35,8 @@ v1.0.0
     * Added advanced example of 3D printer extruder support (thanks @adam-urbanczyk)
     * Made the switch to tabbed editing
 
-v1.1.0 (Unreleased)
+v1.0.0.1
 -----
     * Added example (Ex033) using logical operators in a string selector (thanks @adam-urbanczyk)
+    * Fixed a bug in Helpers.show() that would clear the 3D view each time it was called
+    * Fixed a bug that required there to be an open script window, disallowing the use of macros
