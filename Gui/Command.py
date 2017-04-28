@@ -127,6 +127,10 @@ class CadQueryExecuteScript:
         tempFile.write(cqCodePane.toPlainText().encode('utf-8'))
         tempFile.close()
 
+        # Set some environment variables that may help the user
+        os.environ["MYSCRIPT_FULL_PATH"] = cqCodePane.file.path
+        os.environ["MYSCRIPT_DIR"] = os.path.dirname(os.path.abspath(cqCodePane.file.path))
+
         # We import this way because using execfile() causes non-standard script execution in some situations
         imp.load_source('temp_module', tempFile.name)
 
