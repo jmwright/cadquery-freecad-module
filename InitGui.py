@@ -2,7 +2,10 @@
    This adds a workbench with a scripting editor to FreeCAD's GUI."""
 # (c) 2014-2016 Jeremy Wright Apache 2.0 License
 import FreeCAD, FreeCADGui
-from CadQuery.Gui.Command import *
+try:
+    from CadQuery.Gui.Command import *
+except:
+    from Gui.Command import *
 import CadQuery_rc
 
 class CadQueryWorkbench (Workbench):
@@ -36,7 +39,10 @@ class CadQueryWorkbench (Workbench):
     def Activated(self):
         import os
         import module_locator
-        from CadQuery.Gui import ImportCQ
+        try:
+            from CadQuery.Gui import ImportCQ
+        except:
+            from Gui import ImportCQ
 
         module_base_path = module_locator.module_path()
 
@@ -74,9 +80,13 @@ class CadQueryWorkbench (Workbench):
         """We should be able to pass the Gui.Commands.CadQueryExecuteScript function directly to the file_reloaded
            connect function, but that causes a segfault in FreeCAD. This function is a work-around for that. This
            function is passed to file_reloaded signal and in turn calls the CadQueryExecuteScript.Activated function."""
-        import CadQuery.Gui.Command
-
-        CadQuery.Gui.Command.CadQueryExecuteScript().Activated()
+        try:
+            import CadQuery.Gui.Command
+            CadQuery.Gui.Command.CadQueryExecuteScript().Activated()
+        except:
+            from Gui import ImportCQ
+            Gui.Command.CadQueryExecuteScript().Activated()
+        
 
     def Deactivated(self):
         pass
