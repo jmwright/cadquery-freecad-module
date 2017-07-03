@@ -16,9 +16,9 @@ def AutoExecute(self):
     """We should be able to pass the Gui.Commands.CadQueryExecuteScript function directly to the file_reloaded
        connect function, but that causes a segfault in FreeCAD. This function is a work-around for that. This
        function is passed to file_reloaded signal and in turn calls the CadQueryExecuteScript.Activated function."""
-    import Gui.Command
+    import CadQuery.Gui.Command
 
-    Gui.Command.CadQueryExecuteScript().Activated()
+    CadQuery.Gui.Command.CadQueryExecuteScript().Activated()
 
 
 def open(filename):
