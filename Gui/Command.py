@@ -9,6 +9,8 @@ import ExportCQ, ImportCQ
 import module_locator
 import Settings
 import Shared
+from cadquery import cqgi
+from Helpers import show
 
 # Distinguish python built-in open function from the one declared here
 if open.__module__ == '__builtin__':
@@ -122,17 +124,42 @@ class CadQueryExecuteScript:
         # Clear the old render before re-rendering
         Shared.clearActiveDocument()
 
-        # Save our code to a tempfile and render it
-        tempFile = tempfile.NamedTemporaryFile(delete=False)
-        tempFile.write(cqCodePane.toPlainText().encode('utf-8'))
-        tempFile.close()
+        # Check to see if we are executig a CQGI compliant script
+        scriptText = cqCodePane.toPlainText().encode('utf-8')
+        if "build_object(" in scriptText and "# build_object(" not in scriptText and "#build_boject(" not in scriptText:
+            FreeCAD.Console.PrintMessage("Executing CQGI-compliant script.\r\n")
 
-        # Set some environment variables that may help the user
-        os.environ["MYSCRIPT_FULL_PATH"] = cqCodePane.file.path
-        os.environ["MYSCRIPT_DIR"] = os.path.dirname(os.path.abspath(cqCodePane.file.path))
+            # A repreentation of the CQ script with all the metadata attached
+            cqModel = cqgi.parse(scriptText)
 
-        # We import this way because using execfile() causes non-standard script execution in some situations
-        imp.load_source('temp_module', tempFile.name)
+            # Allows us to present parameters to users later that they can alter
+            parameters = cqModel.metadata.parameters
+
+            FreeCAD.Console.PrintMessage("Script Variables:\r\n")
+            for key, value in parameters.iteritems():
+                FreeCAD.Console.PrintMessage("variable name: " + key + ", variable value: " + str(value.default_value) + "\r\n")
+
+            build_result = cqgi.parse(scriptText).build()
+
+            # Make sure that the build was successful
+            if build_result.success:
+                # Display all the results that the user requested
+                for result in build_result.results:
+                    show(result)
+            else:
+                FreeCAD.Console.PrintError("Error executing CQGI-compliant script.\r\n")
+        else:
+            # Save our code to a tempfile and render it
+            tempFile = tempfile.NamedTemporaryFile(delete=False)
+            tempFile.write(scriptText)
+            tempFile.close()
+
+            # Set some environment variables that may help the user
+            os.environ["MYSCRIPT_FULL_PATH"] = cqCodePane.file.path
+            os.environ["MYSCRIPT_DIR"] = os.path.dirname(os.path.abspath(cqCodePane.file.path))
+
+            # We import this way because using execfile() causes non-standard script execution in some situations
+            imp.load_source('temp_module', tempFile.name)
 
         msg = QtGui.QApplication.translate(
             "cqCodeWidget",
