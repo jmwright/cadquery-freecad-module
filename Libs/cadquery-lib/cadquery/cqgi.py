@@ -48,7 +48,7 @@ class CQModel(object):
         # TODO: pick up other scirpt metadata:
         # describe
         # pick up validation methods
-	self._find_descriptions()
+        self._find_descriptions()
 
     def _find_vars(self):
         """

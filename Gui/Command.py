@@ -4,7 +4,7 @@
 
 import imp, os, sys, tempfile
 import FreeCAD, FreeCADGui
-from PySide import QtGui
+from PySide import QtGui, QtCore
 import ExportCQ, ImportCQ
 import module_locator
 import Settings
@@ -22,7 +22,9 @@ class CadQueryClearOutput:
 
     def GetResources(self):
         return {"MenuText": "Clear Output",
-                "ToolTip": "Clears the script output from the Reports view"}
+                "Accel": "Shift+Alt+C",
+                "ToolTip": "Clears the script output from the Reports view",
+                "Pixmap": ":/icons/button_invalid.svg"}
 
     def IsActive(self):
         return True
@@ -42,7 +44,8 @@ class CadQueryCloseScript:
 
     def GetResources(self):
         return {"MenuText": "Close Script",
-                "ToolTip": "Closes the CadQuery script"}
+                "ToolTip": "Closes the CadQuery script",
+                "Pixmap": ":/icons/edit_Cancel.svg"}
 
     def IsActive(self):
         return True
@@ -311,3 +314,72 @@ class CadQuerySaveAsScript:
             # Save the file before closing the original and the re-rendering the new one
             ExportCQ.save(filename[0])
             CadQueryExecuteScript().Activated()
+
+
+class ToggleVariablesEditor:
+    """If the user is running a CQGI-compliant script, they can edit variables through this edistor"""
+
+    def GetResources(self):
+        return {"MenuText": "Toggle Variables Editor",
+                "Accel": "Shift+Alt+E",
+                "ToolTip": "Opens a live variables editor editor",
+                "Pixmap": ":/icons/edit-edit.svg"}
+
+    def IsActive(self):
+        return True
+
+    def Activated(self):
+        mw = FreeCADGui.getMainWindow()
+
+        # Tracks whether or not we have already added the variables editor
+        isPresent = False
+
+        # If the widget is open, we need to close it
+        dockWidgets = mw.findChildren(QtGui.QDockWidget)
+        for widget in dockWidgets:
+            if widget.objectName() == "cqVarsEditor":
+                # Toggle the visibility of the widget
+                if widget.visibleRegion().isEmpty():
+                    widget.setVisible(True)
+                else:
+                    widget.setVisible(False)
+
+                isPresent = True
+
+        if not isPresent:
+            cqVariablesEditor = QtGui.QDockWidget("CadQuery Variables Editor")
+            cqVariablesEditor.setObjectName("cqVarsEditor")
+            mw.addDockWidget(QtCore.Qt.LeftDockWidgetArea, cqVariablesEditor)
+
+
+class CadQueryValidateScript:
+    """Checks the script for the user without executing it and populates the variable editor, if needed"""
+
+    def GetResources(self):
+        return {"MenuText": "Validate Script",
+                "Accel": "F4",
+                "ToolTip": "Validates a CadQuery script",
+                "Pixmap": ":/icons/edit_OK.svg"}
+
+    def IsActive(self):
+        return True
+
+    def Activated(self):
+        mw = FreeCADGui.getMainWindow()
+
+        # Tracks whether or not we have already added the variables editor
+        isPresent = False
+
+        # If the widget is open, we need to close it
+        dockWidgets = mw.findChildren(QtGui.QDockWidget)
+        for widget in dockWidgets:
+            if widget.objectName() == "cqVarsEditor":
+                # TODO: Clear and then populate the controls in the widget based on the variables
+
+                # Toggle the visibility of the widget
+                # if widget.visibleRegion().isEmpty():
+                #     widget.setVisible(True)
+                # else:
+                #     widget.setVisible(False)
+
+                isPresent = True
