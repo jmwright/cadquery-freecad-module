@@ -127,8 +127,9 @@ class CadQueryExecuteScript:
         # Clear the old render before re-rendering
         Shared.clearActiveDocument()
 
-        # Check to see if we are executig a CQGI compliant script
         scriptText = cqCodePane.toPlainText().encode('utf-8')
+
+        # Check to see if we are executig a CQGI compliant script
         if "build_object(" in scriptText and "# build_object(" not in scriptText and "#build_boject(" not in scriptText:
             FreeCAD.Console.PrintMessage("Executing CQGI-compliant script.\r\n")
 
@@ -138,11 +139,7 @@ class CadQueryExecuteScript:
             # Allows us to present parameters to users later that they can alter
             parameters = cqModel.metadata.parameters
 
-            FreeCAD.Console.PrintMessage("Script Variables:\r\n")
-            for key, value in parameters.iteritems():
-                FreeCAD.Console.PrintMessage("variable name: " + key + ", variable value: " + str(value.default_value) + "\r\n")
-
-            build_result = cqgi.parse(scriptText).build()
+            build_result = cqModel.build()
 
             # Make sure that the build was successful
             if build_result.success:
@@ -316,11 +313,11 @@ class CadQuerySaveAsScript:
             CadQueryExecuteScript().Activated()
 
 
-class ToggleVariablesEditor:
+class ToggleParametersEditor:
     """If the user is running a CQGI-compliant script, they can edit variables through this edistor"""
 
     def GetResources(self):
-        return {"MenuText": "Toggle Variables Editor",
+        return {"MenuText": "Toggle Parameters Editor",
                 "Accel": "Shift+Alt+E",
                 "ToolTip": "Opens a live variables editor editor",
                 "Pixmap": ":/icons/edit-edit.svg"}
@@ -365,21 +362,27 @@ class CadQueryValidateScript:
         return True
 
     def Activated(self):
-        mw = FreeCADGui.getMainWindow()
+        # Grab our code editor so we can interact with it
+        cqCodePane = Shared.getActiveCodePane()
 
-        # Tracks whether or not we have already added the variables editor
-        isPresent = False
+        # If there is no script to check, ignore this command
+        if cqCodePane is None:
+            FreeCAD.Console.PrintMessage("There is no script to validate.")
+            return
 
-        # If the widget is open, we need to close it
-        dockWidgets = mw.findChildren(QtGui.QDockWidget)
-        for widget in dockWidgets:
-            if widget.objectName() == "cqVarsEditor":
-                # TODO: Clear and then populate the controls in the widget based on the variables
+        # Clear the old render before re-rendering
+        Shared.clearActiveDocument()
 
-                # Toggle the visibility of the widget
-                # if widget.visibleRegion().isEmpty():
-                #     widget.setVisible(True)
-                # else:
-                #     widget.setVisible(False)
+        scriptText = cqCodePane.toPlainText().encode('utf-8')
 
-                isPresent = True
+        if "build_object(" not in scriptText or "# build_object(" in scriptText or "#build_boject(" in scriptText:
+            FreeCAD.Console.PrintError("Script did not call build_object, no output available. Script must be CQGI compliant to get build output, variable editing and validation.\r\n")
+            return
+        
+        # A repreentation of the CQ script with all the metadata attached
+        cqModel = cqgi.parse(scriptText)
+
+        # Allows us to present parameters to users later that they can alter
+        parameters = cqModel.metadata.parameters
+
+        Shared.populateParameterEditor(parameters)

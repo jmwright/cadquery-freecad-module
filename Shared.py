@@ -9,7 +9,10 @@ def clearActiveDocument():
     # Grab our code editor so we can interact with it
     mw = FreeCADGui.getMainWindow()
     mdi = mw.findChild(QtGui.QMdiArea)
-    winName = mdi.currentSubWindow().windowTitle().split(" ")[0].split('.')[0]
+    currentWin = mdi.currentSubWindow()
+    if currentWin == None:
+        return
+    winName = currentWin.windowTitle().split(" ")[0].split('.')[0]
 
     try:
         doc = FreeCAD.getDocument(winName)
@@ -85,3 +88,30 @@ def setActiveWindowTitle(title):
 
         cqCodePane = mdiWin.findChild(QtGui.QPlainTextEdit)
         cqCodePane.setObjectName("cqCodePane_" + title.split('.')[0])
+
+
+def populateParameterEditor(parameters):
+    """Puts the proper controls in the script variable editor pane based on the parameters found"""
+
+    FreeCAD.Console.PrintMessage("Script Variables:\r\n")
+    for key, value in parameters.iteritems():
+        FreeCAD.Console.PrintMessage("variable name: " + key + ", variable value: " + str(value.default_value) + "\r\n")
+
+    mw = FreeCADGui.getMainWindow()
+
+    # Tracks whether or not we have already added the variables editor
+    isPresent = False
+
+    # If the widget is open, we need to close it
+    dockWidgets = mw.findChildren(QtGui.QDockWidget)
+    for widget in dockWidgets:
+        if widget.objectName() == "cqVarsEditor":
+            # TODO: Clear and then populate the controls in the widget based on the variables
+
+            # Toggle the visibility of the widget
+            # if widget.visibleRegion().isEmpty():
+            #     widget.setVisible(True)
+            # else:
+            #     widget.setVisible(False)
+
+            isPresent = True

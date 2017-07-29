@@ -113,7 +113,7 @@ FreeCADGui.addCommand('CadQuerySaveAsScript', CadQuerySaveAsScript())
 FreeCADGui.addCommand('CadQueryExecuteScript', CadQueryExecuteScript())
 FreeCADGui.addCommand('CadQueryValidateScript', CadQueryValidateScript())
 FreeCADGui.addCommand('CadQueryCloseScript', CadQueryCloseScript())
-FreeCADGui.addCommand('ToggleVariablesEditor', ToggleVariablesEditor())
+FreeCADGui.addCommand('ToggleVariablesEditor', ToggleParametersEditor())
 FreeCADGui.addCommand('CadQueryClearOutput', CadQueryClearOutput())
 
 # Step through and add an Examples submenu item for each example
