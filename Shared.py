@@ -94,19 +94,39 @@ def populateParameterEditor(parameters):
     """Puts the proper controls in the script variable editor pane based on the parameters found"""
 
     FreeCAD.Console.PrintMessage("Script Variables:\r\n")
-    for key, value in parameters.iteritems():
-        FreeCAD.Console.PrintMessage("variable name: " + key + ", variable value: " + str(value.default_value) + "\r\n")
 
     mw = FreeCADGui.getMainWindow()
 
     # Tracks whether or not we have already added the variables editor
     isPresent = False
 
+    # TODO: Clear and then populate the controls in the widget based on the variables
+    # https://stackoverflow.com/questions/3940409/how-to-clear-all-the-widgets-in-parent-widgets
+
     # If the widget is open, we need to close it
     dockWidgets = mw.findChildren(QtGui.QDockWidget)
     for widget in dockWidgets:
         if widget.objectName() == "cqVarsEditor":
-            # TODO: Clear and then populate the controls in the widget based on the variables
+            gridLayout = QtGui.QGridLayout()
+
+            line = 1
+            for pKey, pVal in parameters.iteritems():
+                FreeCAD.Console.PrintMessage("variable name: " + pKey + ", variable value: " + str(pVal.default_value) + "\r\n")
+                label = QtGui.QLabel(pKey)
+                value = QtGui.QLineEdit()
+                value.setText(str(pVal.default_value))
+                btn = QtGui.QPushButton("OK")
+                gridLayout.addWidget(label, line, 0)
+                gridLayout.addWidget(value, line, 1)
+                gridLayout.addWidget(btn, line, 2)
+
+                line += 1
+
+            # Create a widget we can put the layout in
+            newWidget = QtGui.QWidget()
+            newWidget.setLayout(gridLayout)
+
+            widget.setWidget(newWidget)
 
             # Toggle the visibility of the widget
             # if widget.visibleRegion().isEmpty():

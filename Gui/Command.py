@@ -346,6 +346,10 @@ class ToggleParametersEditor:
         if not isPresent:
             cqVariablesEditor = QtGui.QDockWidget("CadQuery Variables Editor")
             cqVariablesEditor.setObjectName("cqVarsEditor")
+            # cqVariablesEditor.setAutoFillBackground(True)
+            # p = cqVariablesEditor.palette()
+            # p.setColor(cqVariablesEditor.backgroundRole(), '#FF0000')
+            # cqVariablesEditor.setPalette(p)
             mw.addDockWidget(QtCore.Qt.LeftDockWidgetArea, cqVariablesEditor)
 
 
@@ -378,7 +382,7 @@ class CadQueryValidateScript:
         if "build_object(" not in scriptText or "# build_object(" in scriptText or "#build_boject(" in scriptText:
             FreeCAD.Console.PrintError("Script did not call build_object, no output available. Script must be CQGI compliant to get build output, variable editing and validation.\r\n")
             return
-        
+
         # A repreentation of the CQ script with all the metadata attached
         cqModel = cqgi.parse(scriptText)
 
