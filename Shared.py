@@ -100,9 +100,6 @@ def populateParameterEditor(parameters):
     # Tracks whether or not we have already added the variables editor
     isPresent = False
 
-    # TODO: Clear and then populate the controls in the widget based on the variables
-    # https://stackoverflow.com/questions/3940409/how-to-clear-all-the-widgets-in-parent-widgets
-
     # If the widget is open, we need to close it
     dockWidgets = mw.findChildren(QtGui.QDockWidget)
     for widget in dockWidgets:
@@ -122,11 +119,15 @@ def populateParameterEditor(parameters):
 
                 line += 1
 
-            # Create a widget we can put the layout in
+            # Create a widget we can put the layout in and add a scrollbar
             newWidget = QtGui.QWidget()
             newWidget.setLayout(gridLayout)
+            scrollArea = QtGui.QScrollArea()
+            scrollArea.setBackgroundRole(QtGui.QPalette.Light)
+            scrollArea.setStyleSheet("QLabel { color : black; }");
+            scrollArea.setWidget(newWidget)
 
-            widget.setWidget(newWidget)
+            widget.setWidget(scrollArea)
 
             # Toggle the visibility of the widget
             # if widget.visibleRegion().isEmpty():
