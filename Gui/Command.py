@@ -138,8 +138,34 @@ class CadQueryExecuteScript:
 
             # Allows us to present parameters to users later that they can alter
             parameters = cqModel.metadata.parameters
+            build_parameters = {}
 
-            build_result = cqModel.build()
+            # Collect the build parameters from the Parameters Editor view, if they exist
+            mw = FreeCADGui.getMainWindow()
+
+            # Tracks whether or not we have already added the variables editor
+            isPresent = False
+
+            # If the widget is open, we need to close it
+            dockWidgets = mw.findChildren(QtGui.QDockWidget)
+            for widget in dockWidgets:
+                if widget.objectName() == "cqVarsEditor":
+                    # Toggle the visibility of the widget
+                    if not widget.visibleRegion().isEmpty():
+                        # build_parameters = {'param': 2}
+
+                        # Find all of the controls that will have parameter values in them
+                        valueControls = mw.findChildren(QtGui.QLineEdit)
+                        for valueControl in valueControls:
+                            objectName = valueControl.objectName()
+                            FreeCAD.Console.PrintMessage(objectName + "\r\n")
+                            if objectName != None and objectName != '' and objectName[0] == 'p':
+                                FreeCAD.Console.PrintMessage(objectName.split('_')[1] + "\r\n")
+                                build_parameters[objectName.split('_')[1]] = valueControl.text()
+
+                                FreeCAD.Console.PrintMessage(build_parameters[objectName.split('_')[1]] + "\r\n")
+
+            build_result = cqModel.build(build_parameters=build_parameters)
 
             # Make sure that the build was successful
             if build_result.success:
@@ -346,11 +372,11 @@ class ToggleParametersEditor:
         if not isPresent:
             cqVariablesEditor = QtGui.QDockWidget("CadQuery Variables Editor")
             cqVariablesEditor.setObjectName("cqVarsEditor")
-            # cqVariablesEditor.setAutoFillBackground(True)
-            # p = cqVariablesEditor.palette()
-            # p.setColor(cqVariablesEditor.backgroundRole(), '#FF0000')
-            # cqVariablesEditor.setPalette(p)
+
             mw.addDockWidget(QtCore.Qt.LeftDockWidgetArea, cqVariablesEditor)
+
+        # Go ahead and populate the view if there are variables in the script
+        CadQueryValidateScript().Activated()
 
 
 class CadQueryValidateScript:

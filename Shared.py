@@ -112,10 +112,11 @@ def populateParameterEditor(parameters):
                 label = QtGui.QLabel(pKey)
                 value = QtGui.QLineEdit()
                 value.setText(str(pVal.default_value))
-                btn = QtGui.QPushButton("OK")
+                value.setObjectName("p_" + pKey)
+                # btn = QtGui.QPushButton("OK")
                 gridLayout.addWidget(label, line, 0)
                 gridLayout.addWidget(value, line, 1)
-                gridLayout.addWidget(btn, line, 2)
+                # gridLayout.addWidget(btn, line, 2)
 
                 line += 1
 
