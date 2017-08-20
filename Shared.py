@@ -107,33 +107,32 @@ def populateParameterEditor(parameters):
             gridLayout = QtGui.QGridLayout()
 
             line = 1
+
+            # Add controls for all the parameters so that they can be edited from the GUI
             for pKey, pVal in parameters.iteritems():
-                FreeCAD.Console.PrintMessage("variable name: " + pKey + ", variable value: " + str(pVal.default_value) + "\r\n")
                 label = QtGui.QLabel(pKey)
+
+                # We want to keep track of this parameter value field so that we can pull its value later when executing
                 value = QtGui.QLineEdit()
                 value.setText(str(pVal.default_value))
-                value.setObjectName("p_" + pKey)
-                # btn = QtGui.QPushButton("OK")
+                value.setObjectName("pcontrol_" + pKey)
+
+                # Add the parameter control sets, one set per line
                 gridLayout.addWidget(label, line, 0)
                 gridLayout.addWidget(value, line, 1)
-                # gridLayout.addWidget(btn, line, 2)
 
                 line += 1
 
             # Create a widget we can put the layout in and add a scrollbar
             newWidget = QtGui.QWidget()
             newWidget.setLayout(gridLayout)
+
+            # Add a scroll bar in case there are a lot of variables in the script
             scrollArea = QtGui.QScrollArea()
             scrollArea.setBackgroundRole(QtGui.QPalette.Light)
             scrollArea.setStyleSheet("QLabel { color : black; }");
             scrollArea.setWidget(newWidget)
 
             widget.setWidget(scrollArea)
-
-            # Toggle the visibility of the widget
-            # if widget.visibleRegion().isEmpty():
-            #     widget.setVisible(True)
-            # else:
-            #     widget.setVisible(False)
 
             isPresent = True

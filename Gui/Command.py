@@ -152,18 +152,15 @@ class CadQueryExecuteScript:
                 if widget.objectName() == "cqVarsEditor":
                     # Toggle the visibility of the widget
                     if not widget.visibleRegion().isEmpty():
-                        # build_parameters = {'param': 2}
-
                         # Find all of the controls that will have parameter values in them
                         valueControls = mw.findChildren(QtGui.QLineEdit)
                         for valueControl in valueControls:
                             objectName = valueControl.objectName()
-                            FreeCAD.Console.PrintMessage(objectName + "\r\n")
-                            if objectName != None and objectName != '' and objectName[0] == 'p':
-                                FreeCAD.Console.PrintMessage(objectName.split('_')[1] + "\r\n")
-                                build_parameters[objectName.split('_')[1]] = valueControl.text()
 
-                                FreeCAD.Console.PrintMessage(build_parameters[objectName.split('_')[1]] + "\r\n")
+                            # We only want text fields that will have parameter values in them
+                            if objectName != None and objectName != '' and objectName.find('pcontrol_') >= 0:
+                                # Associate the value in the text field with the variable name in the script
+                                build_parameters[objectName.replace('pcontrol_', '')] = valueControl.text()
 
             build_result = cqModel.build(build_parameters=build_parameters)
 
