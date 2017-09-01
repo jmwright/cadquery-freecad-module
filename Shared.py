@@ -97,9 +97,6 @@ def populateParameterEditor(parameters):
 
     mw = FreeCADGui.getMainWindow()
 
-    # Tracks whether or not we have already added the variables editor
-    isPresent = False
-
     # If the widget is open, we need to close it
     dockWidgets = mw.findChildren(QtGui.QDockWidget)
     for widget in dockWidgets:
@@ -134,5 +131,3 @@ def populateParameterEditor(parameters):
             scrollArea.setWidget(newWidget)
 
             widget.setWidget(scrollArea)
-
-            isPresent = True
