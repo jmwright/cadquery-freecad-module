@@ -57,8 +57,7 @@ class CadQueryWorkbench (Workbench):
             "Author: David Cowden\r\n"
             "License: Apache-2.0\r\n"
             "Website: https://github.com/dcowden/cadquery\r\n",
-            None,
-            QtGui.QApplication.UnicodeUTF8)
+            None)
         FreeCAD.Console.PrintMessage(msg)
 
         #Getting the main window will allow us to start setting things up the way we want

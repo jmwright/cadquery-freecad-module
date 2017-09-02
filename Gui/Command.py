@@ -187,8 +187,7 @@ class CadQueryExecuteScript:
         msg = QtGui.QApplication.translate(
             "cqCodeWidget",
             "Executed ",
-            None,
-            QtGui.QApplication.UnicodeUTF8)
+            None)
         FreeCAD.Console.PrintMessage(msg + cqCodePane.file.path + "\r\n")
 
 

@@ -26,6 +26,5 @@ def save(filename=None):
     msg = QtGui.QApplication.translate(
             "cqCodeWidget",
             "Saved ",
-            None,
-            QtGui.QApplication.UnicodeUTF8)
+            None)
     FreeCAD.Console.PrintMessage(msg + cqCodePane.file.path + "\r\n")
