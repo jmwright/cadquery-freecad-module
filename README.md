@@ -46,12 +46,12 @@ sudo apt-get install python-pyside.qtnetwork
 ### Windows
 * C:\Program Files\FreeCAD 0.14\Mod
 * C:\Program Files (x86)\FreeCAD 0.14\Mod
-* C:\Users\your_user_name\Application Data\FreeCAD\Mod
+* C:\Users\[your_user_name]\Application Data\FreeCAD\Mod
 
 ### Mac
 * /Applications/FreeCAD.app/Contents/Mod
 * /Applications/FreeCAD.app/Mod
-* /Users/<user>/Library/Preferences/FreeCAD/Mod
+* /Users/[your_user_name]/Library/Preferences/FreeCAD/Mod
 * ~/Library/Preferences/FreeCAD/Mod
 
 ## It's Installed, Now What?
