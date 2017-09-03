@@ -1,7 +1,0 @@
-build/
-*.pyc
-doc/_build/*
-dist/*
-.idea/*
-cadquery.egg-info
-target/*

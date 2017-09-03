@@ -168,9 +168,13 @@ class CadQueryExecuteScript:
             if build_result.success:
                 # Display all the results that the user requested
                 for result in build_result.results:
-                    show(result)
+                    # Apply options to the show function if any were provided
+                    if result.options and result.options["rgba"]:
+                        show(result.shape, result.options["rgba"])
+                    else:
+                        show(result.shape)
             else:
-                FreeCAD.Console.PrintError("Error executing CQGI-compliant script.\r\n")
+                FreeCAD.Console.PrintError("Error executing CQGI-compliant script. " + str(build_result.exception) + "\r\n")
         else:
             # Save our code to a tempfile and render it
             tempFile = tempfile.NamedTemporaryFile(delete=False)
