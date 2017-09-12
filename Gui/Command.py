@@ -9,6 +9,7 @@ import ExportCQ, ImportCQ
 import module_locator
 import Settings
 import Shared
+from random import random
 from cadquery import cqgi
 from Helpers import show
 
@@ -130,7 +131,7 @@ class CadQueryExecuteScript:
         scriptText = cqCodePane.toPlainText().encode('utf-8')
 
         # Check to see if we are executig a CQGI compliant script
-        if "build_object(" in scriptText and "# build_object(" not in scriptText and "#build_boject(" not in scriptText:
+        if ("build_object(" in scriptText and "# build_object(" not in scriptText and "#build_boject(" not in scriptText) or ("debug(" in scriptText and "# debug(" not in scriptText and "#debug(" not in scriptText):
             FreeCAD.Console.PrintMessage("Executing CQGI-compliant script.\r\n")
 
             # A repreentation of the CQ script with all the metadata attached
@@ -173,6 +174,16 @@ class CadQueryExecuteScript:
                         show(result.shape, result.options["rgba"])
                     else:
                         show(result.shape)
+
+                for debugObj in build_result.debugObjects:
+                    # Mark this as a debug object
+                    debugObj.shape.val().label = "Debug" + str(random())
+
+                    # Apply options to the show function if any were provided
+                    if debugObj.options and debugObj.options["rgba"]:
+                        show(debugObj.shape, debugObj.options["rgba"])
+                    else:
+                        show(debugObj.shape, (255, 0, 0, 0.80))
             else:
                 FreeCAD.Console.PrintError("Error executing CQGI-compliant script. " + str(build_result.exception) + "\r\n")
         else:
