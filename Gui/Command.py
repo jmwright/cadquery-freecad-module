@@ -90,7 +90,8 @@ class CadQueryExecuteExample:
         self.exFile = str(exFile)
 
     def GetResources(self):
-        return {"MenuText": str(self.exFile)}
+        return {"MenuText": str(self.exFile),
+                "Pixmap": ":/icons/accessories-text-editor.svg"}
 
     def Activated(self):
         FreeCAD.Console.PrintMessage(self.exFile + "\r\n")
