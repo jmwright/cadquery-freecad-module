@@ -14,7 +14,7 @@ libs_dir_path = os.path.join(module_base_path, 'Libs')
 sys.path.insert(0, libs_dir_path)
 
 # Tack on our CadQuery library git subtree
-cq_lib_path = os.path.join(libs_dir_path, 'cadquery-lib')
+cq_lib_path = os.path.join(libs_dir_path, 'cadquery')
 sys.path.insert(1, cq_lib_path)
 
 # Make sure we get the right libs under the FreeCAD installation
