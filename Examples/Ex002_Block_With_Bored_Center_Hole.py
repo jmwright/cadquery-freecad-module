@@ -17,4 +17,4 @@ result = cq.Workplane("XY").box(length, height, thickness) \
     .faces(">Z").workplane().hole(center_hole_dia)
 
 # Displays the result of this script
-build_object(result)
+show_object(result)

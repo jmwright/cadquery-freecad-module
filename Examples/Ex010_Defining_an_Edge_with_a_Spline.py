@@ -1,9 +1,9 @@
-# This example is meant to be used from within the CadQuery module of FreeCAD.
-import cadquery
-from Helpers import show
+import cadquery as cq
 
-# The workplane we want to create the spline on to extrude
-s = cadquery.Workplane("XY")
+# 1.  Establishes a workplane to create the spline on to extrude.
+# 1a. Uses the X and Y origins to define the workplane, meaning that the
+# positive Z direction is "up", and the negative Z direction is "down".
+s = cq.Workplane("XY")
 
 # The points that the spline will pass through
 sPnts = [
@@ -16,11 +16,12 @@ sPnts = [
     (0, 1.0)
 ]
 
-# Generate our plate with the spline feature and make sure it's a closed entity
+# 2.  Generate our plate with the spline feature and make sure it is a
+#     closed entity
 r = s.lineTo(3.0, 0).lineTo(3.0, 1.0).spline(sPnts).close()
 
-# Extrude to turn the wire into a plate
+# 3.  Extrude to turn the wire into a plate
 result = r.extrude(0.5)
 
-# Render the solid
-show(result)
+# Displays the result of this script
+show_object(result)

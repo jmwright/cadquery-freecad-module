@@ -32,4 +32,4 @@ result = result.center(-1.5, 1.5).circle(0.25)
 result = result.extrude(thickness)
 
 # Displays the result of this script
-build_object(result)
+show_object(result)

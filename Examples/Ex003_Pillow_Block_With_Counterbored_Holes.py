@@ -31,4 +31,4 @@ result = cq.Workplane("XY").box(length, height, thickness) \
     .vertices().cboreHole(cbore_hole_diameter, cbore_diameter, cbore_depth)
 
 # Displays the result of this script
-build_object(result)
+show_object(result)

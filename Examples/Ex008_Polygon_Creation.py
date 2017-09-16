@@ -36,4 +36,4 @@ result = cq.Workplane("front").box(width, height, thickness) \
                                     .cutThruAll()
 
 # Displays the result of this script
-build_object(result)
+show_object(result)

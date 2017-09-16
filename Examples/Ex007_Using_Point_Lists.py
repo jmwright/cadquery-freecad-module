@@ -29,4 +29,4 @@ r = r.circle(hole_pattern_radius)
 result = r.extrude(thickness)
 
 # Displays the result of this script
-build_object(result)
+show_object(result)

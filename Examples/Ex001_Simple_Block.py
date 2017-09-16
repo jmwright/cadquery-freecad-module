@@ -16,4 +16,4 @@ result = cq.Workplane("XY").box(length, height, thickness)
 # from Helpers import show
 # show(result)  # Render the result of this script
 
-build_object(result)
+show_object(result)

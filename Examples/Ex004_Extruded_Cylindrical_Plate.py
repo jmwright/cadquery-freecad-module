@@ -26,4 +26,4 @@ result = cq.Workplane("front").circle(circle_radius) \
                               .extrude(thickness)
 
 # Displays the result of this script
-build_object(result)
+show_object(result)

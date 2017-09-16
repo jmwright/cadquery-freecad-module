@@ -29,4 +29,4 @@ result = cq.Workplane("front").lineTo(width, 0) \
                               .close().extrude(thickness)
 
 # Displays the result of this script
-build_object(result)
+show_object(result)

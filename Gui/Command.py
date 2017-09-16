@@ -132,7 +132,7 @@ class CadQueryExecuteScript:
         scriptText = cqCodePane.toPlainText().encode('utf-8')
 
         # Check to see if we are executig a CQGI compliant script
-        if ("build_object(" in scriptText and "# build_object(" not in scriptText and "#build_boject(" not in scriptText) or ("debug(" in scriptText and "# debug(" not in scriptText and "#debug(" not in scriptText):
+        if ("show_object(" in scriptText and "# show_object(" not in scriptText and "#show_boject(" not in scriptText) or ("debug(" in scriptText and "# debug(" not in scriptText and "#debug(" not in scriptText):
             FreeCAD.Console.PrintMessage("Executing CQGI-compliant script.\r\n")
 
             # A repreentation of the CQ script with all the metadata attached
@@ -417,8 +417,8 @@ class CadQueryValidateScript:
 
         scriptText = cqCodePane.toPlainText().encode('utf-8')
 
-        if "build_object(" not in scriptText or "# build_object(" in scriptText or "#build_boject(" in scriptText:
-            FreeCAD.Console.PrintError("Script did not call build_object, no output available. Script must be CQGI compliant to get build output, variable editing and validation.\r\n")
+        if ("show_object(" not in scriptText and "# show_object(" in scriptText and "#show_boject(" in scriptText) or ("debug(" not in scriptText and "# debug(" in scriptText and "#debug(" in scriptText):
+            FreeCAD.Console.PrintError("Script did not call show_object or debug, no output available. Script must be CQGI compliant to get build output, variable editing and validation.\r\n")
             return
 
         # A repreentation of the CQ script with all the metadata attached
