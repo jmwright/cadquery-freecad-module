@@ -1,15 +1,20 @@
-# This example is meant to be used from within the CadQuery module of FreeCAD.
-import cadquery
-from Helpers import show
+import cadquery as cq
 
-# Make a basic prism
-result = cadquery.Workplane("front").box(3, 2, 0.5)
+# 1.  Establishes a workplane that an object can be built on.
+# 1a. Uses the named plane orientation "front" to define the workplane, meaning
+#     that the positive Z direction is "up", and the negative Z direction
+#     is "down".
+# 2.  Creates a 3D box that will have geometry based off it later.
+result = cq.Workplane("front").box(3, 2, 0.5)
 
-# Workplane is offset from the object surface
+# 3.  The lowest face in the X direction is selected with the <X selector.
+# 4. A new wokrplane is created
+# 4a.The workplane is offset from the object surface so that it is not touching
+#    the original box.
 result = result.faces("<X").workplane(offset=0.75)
 
-# Create a disc
+# 5. Creates a thin disc on the offset workplane that is floating near the box.
 result = result.circle(1.0).extrude(0.5)
 
-# Render the solid
-show(result)
+# Displays the result of this script
+show_object(result)
