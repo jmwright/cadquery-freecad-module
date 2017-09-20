@@ -1,6 +1,4 @@
-# This example is meant to be used from within the CadQuery module of FreeCAD.
-import cadquery
-from Helpers import show
+import cadquery as cq
 
 # Parameter definitions
 p_outerWidth = 100.0  # Outer width of box enclosure
@@ -22,7 +20,7 @@ p_countersinkAngle = 90.0  # Countersink angle (complete angle between opposite 
 p_lipHeight = 1.0  # Height of lip on the underside of the lid. Sits inside the box body for a snug fit.
 
 # Outer shell
-oshell = cadquery.Workplane("XY").rect(p_outerWidth, p_outerLength) \
+oshell = cq.Workplane("XY").rect(p_outerWidth, p_outerLength) \
                                  .extrude(p_outerHeight + p_lipHeight)
 
 # Weird geometry happens if we make the fillets in the wrong order
@@ -75,5 +73,5 @@ else:
 # Return the combined result
 result = topOfLid.combineSolids(bottom)
 
-# Render the solid
-show(result)
+# Displays the result of this script
+show_object(result)

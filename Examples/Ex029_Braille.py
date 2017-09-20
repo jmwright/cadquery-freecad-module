@@ -5,7 +5,6 @@ from __future__ import unicode_literals, division
 from collections import namedtuple
 
 import cadquery as cq
-from Helpers import show
 
 # text_lines is a list of text lines.
 # FreeCAD in braille (converted with braille-converter:
@@ -180,4 +179,4 @@ _cell_geometry = BrailleCellGeometry(
 if base_thickness < get_cylinder_radius(_cell_geometry):
     raise ValueError('Base thickness should be at least {}'.format(dot_height))
 
-show(make_embossed_plate(text_lines, _cell_geometry))
+show_object(make_embossed_plate(text_lines, _cell_geometry))

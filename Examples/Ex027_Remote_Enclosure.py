@@ -1,6 +1,4 @@
-# This example is meant to be used from within the CadQuery module of FreeCAD.
 import cadquery as cq
-from Helpers import show
 
 exploded = False        # when true, moves the base away from the top so we see
 showTop = True          # When true, the top is rendered.
@@ -30,12 +28,10 @@ def trapezoid(b1, b2, h):
     y = h / 2
     x1 = b1 / 2
     x2 = b2 / 2
-    return (xyplane
-            .polyline([(-x1,  y),
-                       (x1,  y),
+    return (xyplane.moveTo(-x1,  y)
+            .polyline([(x1,  y),
                        (x2, -y),
-                       (-x2, -y),
-                       (-x1,  y)]))
+                       (-x2, -y)]).close())
 
 
 # Defines our base shape: a box with fillets around the vertical edges.
@@ -54,10 +50,10 @@ top = (base(height)
        .edges(">Z")
        .fillet(yFilletRadius)
        # shell the solid from the bottom face, with a .060" wall thickness
-       .faces("-Z")
+       .faces("<Z")
        .shell(-wallThickness)
        # cut five button holes into the top face in a cross pattern.
-       .faces("+Z")
+       .faces(">Z")
        .workplane()
        .pushPoints([(0,            0),
                     (-xHoleOffset, 0),
@@ -84,6 +80,6 @@ cover = (base(coverThickness)
 
 # Conditionally render the parts
 if showTop:
-    show(top)
+    show_object(top)
 if showCover:
-    show(cover)
+    show_object(cover)

@@ -1,7 +1,5 @@
-# This example is meant to be used from within the CadQuery module of FreeCAD.
 # This script can create any regular rectangular Lego(TM) Brick
-import cadquery
-from Helpers import show
+import cadquery as cq
 
 #####
 # Inputs
@@ -28,7 +26,7 @@ total_length = lbumps*pitch - 2.0*clearance
 total_width = wbumps*pitch - 2.0*clearance
 
 # make the base
-s = cadquery.Workplane("XY").box(total_length, total_width, height)
+s = cq.Workplane("XY").box(total_length, total_width, height)
 
 # shell inwards not outwards
 s = s.faces("<Z").shell(-1.0 * t)
@@ -55,4 +53,4 @@ else:
     tmp = s
 
 # Render the solid
-show(tmp)
+show_object(tmp)

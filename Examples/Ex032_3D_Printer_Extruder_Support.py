@@ -1,7 +1,6 @@
 # 3d printer for mounting hotend to X-carriage inspired by the P3steel Toolson
 # edition - http://www.thingiverse.com/thing:1054909
 import cadquery as cq
-from Helpers import show
 
 
 def move_to_center(cqObject, shape):
@@ -213,4 +212,4 @@ hole_sep = 0.5*face_right.Area()/main_plate_thickness
 res = make_aux_holes(res, hole_sep, 2)
 
 # show the result
-show(res)
+show_object(res)

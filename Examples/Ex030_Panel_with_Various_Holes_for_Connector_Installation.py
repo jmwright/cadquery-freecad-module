@@ -1,6 +1,4 @@
-# This example is meant to be used from within the CadQuery module of FreeCAD.
-import cadquery
-from Helpers import show
+import cadquery as cq
 
 # The dimensions of the model. These can be modified rather than changing the
 # object's code directly.
@@ -9,7 +7,7 @@ height = 500
 thickness = 2
 
 # Create a plate with two polygons cut through it
-result = cadquery.Workplane("front").box(width, height, thickness)
+result = cq.Workplane("front").box(width, height, thickness)
 
 h_sep = 60
 for idx in range(4):
@@ -44,4 +42,4 @@ for idx in range(4):
     result = result.workplane(offset=1, centerOption='CenterOfBoundBox').center(-173,-30-idx*h_sep).moveTo(-2.9176,-5.3).threePointArc((-6.05,0),(-2.9176,5.3)).lineTo(2.9176,5.3).threePointArc((6.05,0),(2.9176,-5.3)).close().cutThruAll()
 
 # Render the solid
-show(result)
+show_object(result)

@@ -8,7 +8,7 @@ import cadquery as cq
 # 3.  Selects the top-most Z face of the box.
 # 4.  Creates a new workplane and then moves and rotates it with the
 #     transformed function.
-# 5.  Creates a for-construction rectangle that only exists to use for plancing
+# 5.  Creates a for-construction rectangle that only exists to use for placing
 #     other geometry.
 # 6.  Selects the vertices of the for-construction rectangle.
 # 7.  Places holes at the center of each selected vertex.
