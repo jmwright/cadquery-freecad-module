@@ -36,6 +36,7 @@ The module should show up in the 'Workbenches' drop down the next time you start
 ### Linux
 * /usr/lib/freecad/Mod
 * /usr/local/lib/freecad/Mod
+* ~/.FreeCAD/Mod
 
 If you are running Ubuntu Linux, be sure to run the following line in a terminal before using this module.
 ```
@@ -45,11 +46,13 @@ sudo apt-get install python-pyside.qtnetwork
 ### Windows
 * C:\Program Files\FreeCAD 0.14\Mod
 * C:\Program Files (x86)\FreeCAD 0.14\Mod
+* C:\Users\[your_user_name]\Application Data\FreeCAD\Mod
 
 ### Mac
 * /Applications/FreeCAD.app/Contents/Mod
 * /Applications/FreeCAD.app/Mod
-* /Users/<user>/Library/Preferences/FreeCAD/Mod
+* /Users/[your_user_name]/Library/Preferences/FreeCAD/Mod
+* ~/Library/Preferences/FreeCAD/Mod
 
 ## It's Installed, Now What?
 For getting started information and troubleshooting steps, please see the [wiki](https://github.com/jmwright/cadquery-freecad-module/wiki)

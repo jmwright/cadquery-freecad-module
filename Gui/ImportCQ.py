@@ -12,7 +12,7 @@ if open.__module__ == '__builtin__':
     pythonopen = open
 
 
-def AutoExecute(self):
+def AutoExecute():
     """We should be able to pass the Gui.Commands.CadQueryExecuteScript function directly to the file_reloaded
        connect function, but that causes a segfault in FreeCAD. This function is a work-around for that. This
        function is passed to file_reloaded signal and in turn calls the CadQueryExecuteScript.Activated function."""
