@@ -101,7 +101,7 @@ class CadQueryExecuteExample:
 
         # Start off defaulting to the Examples directory
         module_base_path = module_locator.module_path()
-        exs_dir_path = os.path.join(module_base_path, 'Examples')
+        exs_dir_path = os.path.join(module_base_path, 'Libs/cadquery/examples/FreeCAD')
 
         # Append this script's directory to sys.path
         sys.path.append(os.path.dirname(exs_dir_path))
@@ -247,7 +247,7 @@ class CadQueryOpenScript:
         if self.previousPath is None:
             # Start off defaulting to the Examples directory
             module_base_path = module_locator.module_path()
-            exs_dir_path = os.path.join(module_base_path, 'Examples')
+            exs_dir_path = os.path.join(module_base_path, 'Libs/cadquery/examples/FreeCAD')
 
             self.previousPath = exs_dir_path
 
@@ -288,7 +288,7 @@ class CadQuerySaveScript:
 
         # If the code pane doesn't have a filename, we need to present the save as dialog
         if len(cqCodePane.file.path) == 0 or os.path.basename(cqCodePane.file.path) == 'script_template.py' \
-                or os.path.split(cqCodePane.file.path)[-2].endswith('Examples'):
+                or os.path.split(cqCodePane.file.path)[0].endswith('FreeCAD'):
             FreeCAD.Console.PrintError("You cannot save over a blank file, example file or template file.\r\n")
 
             CadQuerySaveAsScript().Activated()

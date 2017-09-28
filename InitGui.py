@@ -99,7 +99,7 @@ class CadQueryWorkbench (Workbench):
 
         # List all of the example files in an order that makes sense
         module_base_path = module_locator.module_path()
-        exs_dir_path = os.path.join(module_base_path, 'Examples')
+        exs_dir_path = os.path.join(module_base_path, 'Libs/cadquery/examples/FreeCAD')
         dirs = os.listdir(exs_dir_path)
         dirs.sort()
 
