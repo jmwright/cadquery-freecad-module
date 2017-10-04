@@ -225,6 +225,8 @@ class CadQueryNewScript:
         # Use the library that FreeCAD can use as well to open CQ files
         ImportCQ.open(os.path.join(templ_dir_path, 'script_template.py'))
 
+        FreeCAD.Console.PrintMessage("Please save this template file as another name before creating any others.\r\n")
+
 
 class CadQueryOpenScript:
     """CadQuery's command to open a script file."""
