@@ -4,11 +4,14 @@
 
 import imp, os, sys, tempfile
 import FreeCAD, FreeCADGui
-from PySide import QtGui
+from PySide import QtGui, QtCore
 import ExportCQ, ImportCQ
 import module_locator
 import Settings
 import Shared
+from random import random
+from cadquery import cqgi
+from Helpers import show
 
 # Distinguish python built-in open function from the one declared here
 if open.__module__ == '__builtin__':
@@ -20,7 +23,9 @@ class CadQueryClearOutput:
 
     def GetResources(self):
         return {"MenuText": "Clear Output",
-                "ToolTip": "Clears the script output from the Reports view"}
+                "Accel": "Shift+Alt+C",
+                "ToolTip": "Clears the script output from the Reports view",
+                "Pixmap": ":/icons/button_invalid.svg"}
 
     def IsActive(self):
         return True
@@ -40,7 +45,8 @@ class CadQueryCloseScript:
 
     def GetResources(self):
         return {"MenuText": "Close Script",
-                "ToolTip": "Closes the CadQuery script"}
+                "ToolTip": "Closes the CadQuery script",
+                "Pixmap": ":/icons/edit_Cancel.svg"}
 
     def IsActive(self):
         return True
@@ -84,7 +90,8 @@ class CadQueryExecuteExample:
         self.exFile = str(exFile)
 
     def GetResources(self):
-        return {"MenuText": str(self.exFile)}
+        return {"MenuText": str(self.exFile),
+                "Pixmap": ":/icons/accessories-text-editor.svg"}
 
     def Activated(self):
         FreeCAD.Console.PrintMessage(self.exFile + "\r\n")
@@ -94,7 +101,7 @@ class CadQueryExecuteExample:
 
         # Start off defaulting to the Examples directory
         module_base_path = module_locator.module_path()
-        exs_dir_path = os.path.join(module_base_path, 'Examples')
+        exs_dir_path = os.path.join(module_base_path, 'Libs/cadquery/examples/FreeCAD')
 
         # Append this script's directory to sys.path
         sys.path.append(os.path.dirname(exs_dir_path))
@@ -122,23 +129,81 @@ class CadQueryExecuteScript:
         # Clear the old render before re-rendering
         Shared.clearActiveDocument()
 
-        # Save our code to a tempfile and render it
-        tempFile = tempfile.NamedTemporaryFile(delete=False)
-        tempFile.write(cqCodePane.toPlainText().encode('utf-8'))
-        tempFile.close()
+        scriptText = cqCodePane.toPlainText().encode('utf-8')
 
-        # Set some environment variables that may help the user
-        os.environ["MYSCRIPT_FULL_PATH"] = cqCodePane.file.path
-        os.environ["MYSCRIPT_DIR"] = os.path.dirname(os.path.abspath(cqCodePane.file.path))
+        # Check to see if we are executig a CQGI compliant script
+        if ("show_object(" in scriptText and "# show_object(" not in scriptText and "#show_boject(" not in scriptText) or ("debug(" in scriptText and "# debug(" not in scriptText and "#debug(" not in scriptText):
+            FreeCAD.Console.PrintMessage("Executing CQGI-compliant script.\r\n")
 
-        # We import this way because using execfile() causes non-standard script execution in some situations
-        imp.load_source('temp_module', tempFile.name)
+            # A repreentation of the CQ script with all the metadata attached
+            cqModel = cqgi.parse(scriptText)
+
+            # Allows us to present parameters to users later that they can alter
+            parameters = cqModel.metadata.parameters
+            build_parameters = {}
+
+            # Collect the build parameters from the Parameters Editor view, if they exist
+            mw = FreeCADGui.getMainWindow()
+
+            # Tracks whether or not we have already added the variables editor
+            isPresent = False
+
+            # If the widget is open, we need to close it
+            dockWidgets = mw.findChildren(QtGui.QDockWidget)
+            for widget in dockWidgets:
+                if widget.objectName() == "cqVarsEditor":
+                    # Toggle the visibility of the widget
+                    if not widget.visibleRegion().isEmpty():
+                        # Find all of the controls that will have parameter values in them
+                        valueControls = mw.findChildren(QtGui.QLineEdit)
+                        for valueControl in valueControls:
+                            objectName = valueControl.objectName()
+
+                            # We only want text fields that will have parameter values in them
+                            if objectName != None and objectName != '' and objectName.find('pcontrol_') >= 0:
+                                # Associate the value in the text field with the variable name in the script
+                                build_parameters[objectName.replace('pcontrol_', '')] = valueControl.text()
+
+            build_result = cqModel.build(build_parameters=build_parameters)
+
+            # Make sure that the build was successful
+            if build_result.success:
+                # Display all the results that the user requested
+                for result in build_result.results:
+                    # Apply options to the show function if any were provided
+                    if result.options and result.options["rgba"]:
+                        show(result.shape, result.options["rgba"])
+                    else:
+                        show(result.shape)
+
+                for debugObj in build_result.debugObjects:
+                    # Mark this as a debug object
+                    debugObj.shape.val().label = "Debug" + str(random())
+
+                    # Apply options to the show function if any were provided
+                    if debugObj.options and debugObj.options["rgba"]:
+                        show(debugObj.shape, debugObj.options["rgba"])
+                    else:
+                        show(debugObj.shape, (255, 0, 0, 0.80))
+            else:
+                FreeCAD.Console.PrintError("Error executing CQGI-compliant script. " + str(build_result.exception) + "\r\n")
+        else:
+            # Save our code to a tempfile and render it
+            tempFile = tempfile.NamedTemporaryFile(delete=False)
+            tempFile.write(scriptText)
+            tempFile.close()
+
+            # Set some environment variables that may help the user
+            os.environ["MYSCRIPT_FULL_PATH"] = cqCodePane.file.path
+            os.environ["MYSCRIPT_DIR"] = os.path.dirname(os.path.abspath(cqCodePane.file.path))
+
+            # We import this way because using execfile() causes non-standard script execution in some situations
+            imp.load_source('temp_module', tempFile.name)
 
         msg = QtGui.QApplication.translate(
             "cqCodeWidget",
             "Executed ",
-            None,
-            QtGui.QApplication.UnicodeUTF8)
+            None)
         FreeCAD.Console.PrintMessage(msg + cqCodePane.file.path + "\r\n")
 
 
@@ -182,7 +247,7 @@ class CadQueryOpenScript:
         if self.previousPath is None:
             # Start off defaulting to the Examples directory
             module_base_path = module_locator.module_path()
-            exs_dir_path = os.path.join(module_base_path, 'Examples')
+            exs_dir_path = os.path.join(module_base_path, 'Libs/cadquery/examples/FreeCAD')
 
             self.previousPath = exs_dir_path
 
@@ -223,7 +288,7 @@ class CadQuerySaveScript:
 
         # If the code pane doesn't have a filename, we need to present the save as dialog
         if len(cqCodePane.file.path) == 0 or os.path.basename(cqCodePane.file.path) == 'script_template.py' \
-                or os.path.split(cqCodePane.file.path)[-2].endswith('Examples'):
+                or os.path.split(cqCodePane.file.path)[0].endswith('FreeCAD'):
             FreeCAD.Console.PrintError("You cannot save over a blank file, example file or template file.\r\n")
 
             CadQuerySaveAsScript().Activated()
@@ -284,3 +349,82 @@ class CadQuerySaveAsScript:
             # Save the file before closing the original and the re-rendering the new one
             ExportCQ.save(filename[0])
             CadQueryExecuteScript().Activated()
+
+
+class ToggleParametersEditor:
+    """If the user is running a CQGI-compliant script, they can edit variables through this edistor"""
+
+    def GetResources(self):
+        return {"MenuText": "Toggle Parameters Editor",
+                "Accel": "Shift+Alt+E",
+                "ToolTip": "Opens a live variables editor editor",
+                "Pixmap": ":/icons/edit-edit.svg"}
+
+    def IsActive(self):
+        return True
+
+    def Activated(self):
+        mw = FreeCADGui.getMainWindow()
+
+        # Tracks whether or not we have already added the variables editor
+        isPresent = False
+
+        # If the widget is open, we need to close it
+        dockWidgets = mw.findChildren(QtGui.QDockWidget)
+        for widget in dockWidgets:
+            if widget.objectName() == "cqVarsEditor":
+                # Toggle the visibility of the widget
+                if widget.visibleRegion().isEmpty():
+                    widget.setVisible(True)
+                else:
+                    widget.setVisible(False)
+
+                isPresent = True
+
+        if not isPresent:
+            cqVariablesEditor = QtGui.QDockWidget("CadQuery Variables Editor")
+            cqVariablesEditor.setObjectName("cqVarsEditor")
+
+            mw.addDockWidget(QtCore.Qt.LeftDockWidgetArea, cqVariablesEditor)
+
+        # Go ahead and populate the view if there are variables in the script
+        CadQueryValidateScript().Activated()
+
+
+class CadQueryValidateScript:
+    """Checks the script for the user without executing it and populates the variable editor, if needed"""
+
+    def GetResources(self):
+        return {"MenuText": "Validate Script",
+                "Accel": "F4",
+                "ToolTip": "Validates a CadQuery script",
+                "Pixmap": ":/icons/edit_OK.svg"}
+
+    def IsActive(self):
+        return True
+
+    def Activated(self):
+        # Grab our code editor so we can interact with it
+        cqCodePane = Shared.getActiveCodePane()
+
+        # If there is no script to check, ignore this command
+        if cqCodePane is None:
+            FreeCAD.Console.PrintMessage("There is no script to validate.")
+            return
+
+        # Clear the old render before re-rendering
+        Shared.clearActiveDocument()
+
+        scriptText = cqCodePane.toPlainText().encode('utf-8')
+
+        if ("show_object(" not in scriptText and "# show_object(" in scriptText and "#show_boject(" in scriptText) or ("debug(" not in scriptText and "# debug(" in scriptText and "#debug(" in scriptText):
+            FreeCAD.Console.PrintError("Script did not call show_object or debug, no output available. Script must be CQGI compliant to get build output, variable editing and validation.\r\n")
+            return
+
+        # A repreentation of the CQ script with all the metadata attached
+        cqModel = cqgi.parse(scriptText)
+
+        # Allows us to present parameters to users later that they can alter
+        parameters = cqModel.metadata.parameters
+
+        Shared.populateParameterEditor(parameters)

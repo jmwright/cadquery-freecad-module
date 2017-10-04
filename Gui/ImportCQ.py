@@ -36,8 +36,7 @@ def open(filename):
         msg = QtGui.QApplication.translate(
             "cqCodeWidget",
             "Please install Python 2.7",
-            None,
-            QtGui.QApplication.UnicodeUTF8)
+            None)
         FreeCAD.Console.PrintError(msg + "\r\n")
 
     # The extra version numbers won't work on Windows
@@ -98,8 +97,7 @@ def open(filename):
     msg = QtGui.QApplication.translate(
             "cqCodeWidget",
             "Opened ",
-            None,
-            QtGui.QApplication.UnicodeUTF8)
+            None)
     FreeCAD.Console.PrintMessage(msg + filename + "\r\n")
 
     return

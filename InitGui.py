@@ -34,7 +34,7 @@ class CadQueryWorkbench (Workbench):
         self.appendMenu('CadQuery', ['CadQueryNewScript', 'CadQueryOpenScript', 'CadQuerySaveScript',
                                      'CadQuerySaveAsScript', 'CadQueryCloseScript'])
         self.appendMenu(['CadQuery', 'Examples'], submenu)
-        self.appendMenu('CadQuery', ['Separator', 'CadQueryExecuteScript', 'CadQueryClearOutput'])
+        self.appendMenu('CadQuery', ['Separator', 'CadQueryExecuteScript', 'CadQueryValidateScript', 'ToggleVariablesEditor', 'CadQueryClearOutput'])
 
     def Activated(self):
         import os
@@ -57,8 +57,7 @@ class CadQueryWorkbench (Workbench):
             "Author: David Cowden\r\n"
             "License: Apache-2.0\r\n"
             "Website: https://github.com/dcowden/cadquery\r\n",
-            None,
-            QtGui.QApplication.UnicodeUTF8)
+            None)
         FreeCAD.Console.PrintMessage(msg)
 
         #Getting the main window will allow us to start setting things up the way we want
@@ -100,7 +99,7 @@ class CadQueryWorkbench (Workbench):
 
         # List all of the example files in an order that makes sense
         module_base_path = module_locator.module_path()
-        exs_dir_path = os.path.join(module_base_path, 'Examples')
+        exs_dir_path = os.path.join(module_base_path, 'Libs/cadquery/examples/FreeCAD')
         dirs = os.listdir(exs_dir_path)
         dirs.sort()
 
@@ -111,7 +110,9 @@ FreeCADGui.addCommand('CadQueryOpenScript', CadQueryOpenScript())
 FreeCADGui.addCommand('CadQuerySaveScript', CadQuerySaveScript())
 FreeCADGui.addCommand('CadQuerySaveAsScript', CadQuerySaveAsScript())
 FreeCADGui.addCommand('CadQueryExecuteScript', CadQueryExecuteScript())
+FreeCADGui.addCommand('CadQueryValidateScript', CadQueryValidateScript())
 FreeCADGui.addCommand('CadQueryCloseScript', CadQueryCloseScript())
+FreeCADGui.addCommand('ToggleVariablesEditor', ToggleParametersEditor())
 FreeCADGui.addCommand('CadQueryClearOutput', CadQueryClearOutput())
 
 # Step through and add an Examples submenu item for each example
