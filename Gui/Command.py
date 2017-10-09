@@ -10,12 +10,33 @@ import module_locator
 import Settings
 import Shared
 from random import random
+from contextlib import contextmanager
 from cadquery import cqgi
 from Helpers import show
 
 # Distinguish python built-in open function from the one declared here
 if open.__module__ == '__builtin__':
     pythonopen = open
+
+
+@contextmanager
+def revert_sys_modules():
+    """
+    Remove any new modules after context has exited
+    >>> with revert_sys_modules():
+    ...     import some_module
+    ...     some_module.do_something()
+    >>> some_module.do_something()  # raises NameError: name 'some_module' is not defined
+    """
+    modules_before = set(sys.modules.keys())
+    try:
+        yield
+    finally:
+        # irrespective of the succes of the context's execution, new modules
+        # will be deleted upon exit
+        for mod_name in sys.modules.keys():
+            if mod_name not in modules_before:
+                del sys.modules[mod_name]
 
 
 class CadQueryClearOutput:
@@ -198,7 +219,8 @@ class CadQueryExecuteScript:
             os.environ["MYSCRIPT_DIR"] = os.path.dirname(os.path.abspath(cqCodePane.file.path))
 
             # We import this way because using execfile() causes non-standard script execution in some situations
-            imp.load_source('temp_module', tempFile.name)
+            with revert_sys_modules():
+                imp.load_source('temp_module', tempFile.name)
 
         msg = QtGui.QApplication.translate(
             "cqCodeWidget",
