@@ -104,7 +104,7 @@ class CadQueryCloseScript:
 
         Shared.closeActiveCodeWindow()
 
-class CadQueryExecuteExample:
+class CadQueryOpenExample:
     exFile = None
 
     def __init__(self, exFile):
