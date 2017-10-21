@@ -118,6 +118,6 @@ FreeCADGui.addCommand('CadQueryClearOutput', CadQueryClearOutput())
 # Step through and add an Examples submenu item for each example
 dirs = CadQueryWorkbench.ListExamples()
 for curFile in dirs:
-    FreeCADGui.addCommand(curFile, CadQueryExecuteExample(curFile))
+    FreeCADGui.addCommand(curFile, CadQueryOpenExample(curFile))
 
 FreeCADGui.addWorkbench(CadQueryWorkbench())

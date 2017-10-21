@@ -14,6 +14,10 @@ def clearActiveDocument():
         return
     winName = currentWin.windowTitle().split(" ")[0].split('.')[0]
 
+    # Translate dashes so that they can be safetly used since theyare common
+    if '-' in winName:
+        winName= winName.replace('-', "__")
+
     try:
         doc = FreeCAD.getDocument(winName)
 
@@ -35,11 +39,17 @@ def getActiveCodePane():
     # If our current subwindow doesn't contain a script, we need to find the one that does
     mdiWin = mdi.currentSubWindow()
     if mdiWin == None: return None # We need to warn the caller that there is no code pane
+
+    windowTitle = mdiWin.windowTitle()
+
     if mdiWin == 0 or ".py" not in mdiWin.windowTitle():
+        if '__' in mdiWin.windowTitle():
+            windowTitle = mdiWin.windowTitle().replace("__", '-')
+
         subList = mdi.subWindowList()
 
         for sub in subList:
-            if sub.windowTitle() == mdiWin.windowTitle().split(" ")[0] + ".py":
+            if sub.windowTitle() == windowTitle.split(" ")[0] + ".py":
                 mdiWin = sub
 
     winName = mdiWin.windowTitle().split('.')[0]

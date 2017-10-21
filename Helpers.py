@@ -1,4 +1,5 @@
 # (c) 2014-2016 Jeremy Wright Apache 2.0 License
+import sys
 
 def show(cqObject, rgba=(204, 204, 204, 0.0)):
     import FreeCAD
@@ -24,14 +25,20 @@ def show(cqObject, rgba=(204, 204, 204, 0.0)):
         docname = os.path.splitext(os.path.basename(cqCodePane.file.path))[0]
 
         # Make sure we replace any troublesome characters
-        for ch in ['&', '#', '.', '-', '$', '%', ',', ' ']:
+        for ch in ['&', '#', '.', '$', '%', ',', ' ']:
             if ch in docname:
                 docname = docname.replace(ch, "")
+
+        # Translate dashes so that they can be safetly used since theyare common
+        if '-' in docname:
+            docname = docname.replace('-', "__")
 
         # If the matching 3D view has been closed, we need to open a new one
         try:
             FreeCAD.getDocument(docname)
-        except:
+        except NameError:
+            # FreeCAD.Console.PrintError("Could not find the model document or invalid characters were used in the filename.\r\n")
+
             FreeCAD.newDocument(docname)
 
     ad = FreeCAD.activeDocument()
