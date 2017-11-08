@@ -1,3 +1,0 @@
-[submodule "Libs/cadquery"]
-	path = Libs/cadquery
-	url = https://github.com/dcowden/cadquery.git
