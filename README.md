@@ -1,4 +1,4 @@
-cadquery-freecad-module
+The CadQuery Module for FreeCAD
 =======================
 [![GitHub version](https://badge.fury.io/gh/jmwright%2Fcadquery-freecad-module.svg)](https://github.com/jmwright/cadquery-freecad-module/releases)
 [![License](https://img.shields.io/badge/license-LGPL-lightgrey.svg)](https://github.com/jmwright/cadquery-freecad-module/blob/master/LICENSE)
