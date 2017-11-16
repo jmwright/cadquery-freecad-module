@@ -81,6 +81,9 @@ def open(filename):
     # Set the margin to be at 119 characters instead of 79
     codePane.modes.get(RightMarginMode).position = Settings.max_line_length
 
+    # Set the font size of the Python editor
+    codePane.font_size = Settings.font_size
+
     codePane.setObjectName("cqCodePane_" + os.path.splitext(os.path.basename(filename))[0])
 
     mdi = mw.findChild(QtGui.QMdiArea)
