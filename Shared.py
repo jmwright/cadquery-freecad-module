@@ -103,8 +103,6 @@ def setActiveWindowTitle(title):
 def populateParameterEditor(parameters):
     """Puts the proper controls in the script variable editor pane based on the parameters found"""
 
-    FreeCAD.Console.PrintMessage("Script Variables:\r\n")
-
     mw = FreeCADGui.getMainWindow()
 
     # If the widget is open, we need to close it

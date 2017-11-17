@@ -80,7 +80,7 @@ class AutohotkeyLexer(RegexLexer):
              r'FileRead|FileReadLine|FileRecycle|FileRecycleEmpty|'
              r'FileRemoveDir|FileSelectFile|FileSelectFolder|FileSetAttrib|'
              r'FileSetTime|FormatTime|GetKeyState|Gosub|Goto|GroupActivate|'
-             r'GroupAdd|GroupClose|GroupDeactivate|Gui|GuiControl|'
+             r'GroupAdd|GroupClose|GroupDeactivate|CQGui|GuiControl|'
              r'GuiControlGet|Hotkey|IfEqual|IfExist|IfGreaterOrEqual|IfGreater|'
              r'IfInString|IfLess|IfLessOrEqual|IfMsgBox|IfNotEqual|IfNotExist|'
              r'IfNotInString|IfWinActive|IfWinExist|IfWinNotActive|'

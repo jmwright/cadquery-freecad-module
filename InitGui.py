@@ -3,12 +3,13 @@
 # (c) 2014-2016 Jeremy Wright Apache 2.0 License
 import FreeCAD, FreeCADGui
 try:
-    from CadQuery.Gui.Command import *
+    from CadQuery.CQGui.Command import *
 except:
-    from Gui.Command import *
+    from CQGui.Command import *
 import CadQuery_rc
 
 class CadQueryWorkbench (Workbench):
+    """CadQuery workbench for FreeCAD"""
     """CadQuery workbench for FreeCAD"""
     MenuText = "CadQuery"
     ToolTip = "CadQuery workbench"
@@ -40,9 +41,9 @@ class CadQueryWorkbench (Workbench):
         import os
         import module_locator
         try:
-            from CadQuery.Gui import ImportCQ
+            from CadQuery.CQGui import ImportCQ
         except:
-            from Gui import ImportCQ
+            from CQGui import ImportCQ
 
         module_base_path = module_locator.module_path()
 
@@ -76,15 +77,15 @@ class CadQueryWorkbench (Workbench):
         # ImportCQ.open(template_path)
 
     def AutoExecute(self):
-        """We should be able to pass the Gui.Commands.CadQueryExecuteScript function directly to the file_reloaded
+        """We should be able to pass the CQGui.Commands.CadQueryExecuteScript function directly to the file_reloaded
            connect function, but that causes a segfault in FreeCAD. This function is a work-around for that. This
            function is passed to file_reloaded signal and in turn calls the CadQueryExecuteScript.Activated function."""
         try:
-            import CadQuery.Gui.Command
-            CadQuery.Gui.Command.CadQueryExecuteScript().Activated()
+            import CadQuery.CQGui.Command
+            CadQuery.CQGui.Command.CadQueryExecuteScript().Activated()
         except:
-            from Gui import ImportCQ
-            Gui.Command.CadQueryExecuteScript().Activated()
+            from CQGui import ImportCQ
+            CQGui.Command.CadQueryExecuteScript().Activated()
         
 
     def Deactivated(self):

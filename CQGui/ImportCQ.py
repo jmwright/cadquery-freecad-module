@@ -13,19 +13,19 @@ if open.__module__ == '__builtin__':
 
 
 def AutoExecute():
-    """We should be able to pass the Gui.Commands.CadQueryExecuteScript function directly to the file_reloaded
+    """We should be able to pass the CQGui.Commands.CadQueryExecuteScript function directly to the file_reloaded
        connect function, but that causes a segfault in FreeCAD. This function is a work-around for that. This
        function is passed to file_reloaded signal and in turn calls the CadQueryExecuteScript.Activated function."""
     try:
         import CadQuery.Gui.Command
         CadQuery.Gui.Command.CadQueryExecuteScript().Activated()
     except:
-        import Gui.Command
-        Gui.Command.CadQueryExecuteScript().Activated()
+        import CQGui.Command
+        CQGui.Command.CadQueryExecuteScript().Activated()
 
 def open(filename):
-    #All of the Gui.* calls in the Python console break after opening if we don't do this
-    FreeCADGui.doCommand("import FreeCADGui as Gui")
+    #All of the CQGui.* calls in the Python console break after opening if we don't do this
+    FreeCADGui.doCommand("import FreeCADGui as CQGui")
 
     # Make sure that we enforce a specific version (2.7) of the Python interpreter
     ver = hex(sys.hexversion)
