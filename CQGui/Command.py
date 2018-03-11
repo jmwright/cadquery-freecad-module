@@ -136,7 +136,7 @@ class CadQueryExecuteScript:
 
     def GetResources(self):
         return {"MenuText": "Execute Script",
-                "Accel": "F2",
+                "Accel": Settings.execute_keybinding,
                 "ToolTip": "Executes the CadQuery script",
                 "Pixmap": ":/icons/media-playback-start.svg"}
 

@@ -23,6 +23,8 @@ from cadquery import *
 from cadquery import selectors
 from cadquery import exporters
 
+from copy import copy, deepcopy
+
 
 class CQContext(object):
     """
@@ -75,7 +77,7 @@ class CQ(object):
         Custom plugins and subclasses should use this method to create new CQ objects
         correctly.
         """
-        r = CQ(None)  # create a completely blank one
+        r = type(self)(None)  # create a completely blank one
         r.parent = self
         r.ctx = self.ctx  # context solid remains the same
         r.objects = list(objlist)
@@ -237,7 +239,7 @@ class CQ(object):
         """
         if type(obj) == list:
             self.objects.extend(obj)
-        elif type(obj) == CQ or type(obj) == Workplane:
+        elif isinstance(obj, CQ):
             self.objects.extend(obj.objects)
         else:
             self.objects.append(obj)
@@ -479,9 +481,10 @@ class CQ(object):
         toReturn = self._collectProperty(objType)
 
         if selector is not None:
-            if isinstance(selector, str) or isinstance(selector, str):
+            # if isinstance(selector, str) or isinstance(selector, str):
+            try:
                 selectorObj = selectors.StringSyntaxSelector(selector)
-            else:
+            except:
                 selectorObj = selector
             toReturn = selectorObj.filter(toReturn)
 
@@ -668,7 +671,7 @@ class CQ(object):
         """
         return self._selectObjects('Compounds', selector)
 
-    def toSvg(self, opts=None):
+    def toSvg(self, opts=None, view_vector=(-1.75,1.1,5)):
         """
         Returns svg text that represents the first item on the stack.
 
@@ -676,20 +679,26 @@ class CQ(object):
 
         :param opts: svg formatting options
         :type opts: dictionary, width and height
+
+        :param view_vector: camera's view direction vector
+        :type view_vector: tuple, (x, y, z)
         :return: a string that contains SVG that represents this item.
         """
-        return exporters.getSVG(self.val().wrapped, opts)
+        return exporters.getSVG(self.val().wrapped, opts=opts, view_vector=view_vector)
 
-    def exportSvg(self, fileName):
+    def exportSvg(self, fileName, view_vector=(-1.75,1.1,5)):
         """
         Exports the first item on the stack as an SVG file
 
         For testing purposes mainly.
 
         :param fileName: the filename to export
+
+        :param view_vector: camera's view direction vector
+        :type view_vector: tuple, (x, y, z)
         :type fileName: String, absolute path to the file
         """
-        exporters.exportSVG(self, fileName)
+        exporters.exportSVG(self, fileName, view_vector)
 
     def rotateAboutCenter(self, axisEndPoint, angleDegrees):
         """
@@ -745,7 +754,7 @@ class CQ(object):
     def mirror(self, mirrorPlane="XY", basePointVector=(0, 0, 0)):
         """
         Mirror a single CQ object. This operation is the same as in the FreeCAD PartWB's mirroring
-    
+
         :param mirrorPlane: the plane to mirror about
         :type mirrorPlane: string, one of "XY", "YX", "XZ", "ZX", "YZ", "ZY" the planes
         :param basePointVector: the base point to mirror about
@@ -882,6 +891,12 @@ class CQ(object):
         solid.wrapped = s.wrapped
         return self.newObject([s])
 
+    def __copy__(self):
+        return self.newObject(copy(self.objects))
+
+    def __deepcopy__(self, memo):
+        return self.newObject(deepcopy(self.objects, memo))
+
 
 class Workplane(CQ):
     """
@@ -935,10 +950,11 @@ class Workplane(CQ):
 
         if inPlane.__class__.__name__ == 'Plane':
             tmpPlane = inPlane
-        elif isinstance(inPlane, str) or isinstance(inPlane, str):
-            tmpPlane = Plane.named(inPlane, origin)
         else:
-            tmpPlane = None
+            try:
+                tmpPlane = Plane.named(inPlane, origin)
+            except ValueError:
+                tmpPlane = None
 
         if tmpPlane is None:
             raise ValueError(
@@ -991,7 +1007,7 @@ class Workplane(CQ):
         """
 
         #copy the current state to the new object
-        ns = Workplane("XY")
+        ns = type(self)("XY")
         ns.plane = self.plane
         ns.parent = self
         ns.objects = list(objlist)
@@ -2123,7 +2139,7 @@ class Workplane(CQ):
         """
 
         #first collect all of the items together
-        if type(toUnion) == CQ or type(toUnion) == Workplane:
+        if isinstance(toUnion, CQ):
             solids = toUnion.solids().vals()
             if len(solids) < 1:
                 raise ValueError("CQ object  must have at least one solid on the stack to union!")
