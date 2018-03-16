@@ -660,17 +660,17 @@ class Face(Shape):
 
     def cut(self, faceToCut):
         "Remove a face from another one"
-        return Shape.cast(self.obj.cut(faceToCut.obj))
+        return Shape.cast(self.wrapped.cut(faceToCut.wrapped))
 
     def fuse(self, faceToJoin):
-        return Shape.cast(self.obj.fuse(faceToJoin.obj))
+        return Shape.cast(self.wrapped.fuse(faceToJoin.wrapped))
 
     def intersect(self, faceToIntersect):
         """
         computes the intersection between the face and the supplied one.
         The result could be a face or a compound of faces
         """
-        return Shape.cast(self.obj.common(faceToIntersect.obj))
+        return Shape.cast(self.wrapped.common(faceToIntersect.wrapped))
 
 
 class Shell(Shape):
@@ -750,18 +750,6 @@ class Solid(Shape):
         ,angle1=360 and angle=360'
         """
         return Shape.cast(FreeCADPart.makeTorus(radius1, radius2, pnt, dir, angleDegrees1, angleDegrees2))
-
-    @classmethod
-    def sweep(cls, profileWire, pathWire):
-        """
-        make a solid by sweeping the profileWire along the specified path
-        :param cls:
-        :param profileWire:
-        :param pathWire:
-        :return:
-        """
-        # needs to use freecad wire.makePipe or makePipeShell
-        # needs to allow free-space wires ( those not made from a workplane )
 
     @classmethod
     def makeLoft(cls, listOfWire, ruled=False):
