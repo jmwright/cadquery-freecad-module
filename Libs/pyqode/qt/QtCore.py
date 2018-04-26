@@ -34,4 +34,7 @@ elif os.environ[QT_API] in PYSIDE_API:
         pass
     # use a common __version__
     import PySide.QtCore
-    __version__ = PySide.QtCore.__version__
+    try:
+        __version__ = PySide.QtCore.__version__
+    except:
+        __version__ = PySide.QtCore.qVersion()
