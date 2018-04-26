@@ -12,4 +12,7 @@ if os.environ[QT_API] in PYQT5_API:
 elif os.environ[QT_API] in PYQT4_API:
     from PyQt4.QtNetwork import *
 elif os.environ[QT_API] in PYSIDE_API:
-    from PySide.QtNetwork import *
+    try:
+        from PySide.QtNetwork import *
+    except:
+        from PySide2.QtNetwork import *
