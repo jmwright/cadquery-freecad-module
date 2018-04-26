@@ -47,8 +47,7 @@ class PyFileManager(FileManager):
         return 'UTF-8'
 
     def open(self, path, encoding=None, use_cached_encoding=True):
-        if encoding is None:
-            encoding = self.detect_encoding(path)
+        encoding = self.detect_encoding(path)
         super(PyFileManager, self).open(
             path, encoding=encoding, use_cached_encoding=use_cached_encoding)
         try:

@@ -88,7 +88,6 @@ class SymbolBrowserPanel(Panel):
         self._definitions = definitions
         self._sync_combo_box(TextHelper(self.editor).current_line_nbr())
 
-    @QtCore.Slot(int)
     def _on_definition_activated(self, index):
         definition = self.combo_box.itemData(index)
         if definition:

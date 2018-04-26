@@ -57,6 +57,10 @@ class CheckerPanel(Panel):
             size_hint.setWidth(16)
         return size_hint
 
+    def on_uninstall(self):
+        self._job_runner.cancel_requests()
+        super(CheckerPanel, self).on_uninstall()
+
     def paintEvent(self, event):
         super(CheckerPanel, self).paintEvent(event)
         painter = QtGui.QPainter(self)

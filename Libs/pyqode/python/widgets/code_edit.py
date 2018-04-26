@@ -104,6 +104,7 @@ class PyCodeEdit(PyCodeEditBase):
         self.syntax_highlighter.fold_detector = PythonFoldDetector()
         self.panels.append(pypanels.QuickDocPanel(), api.Panel.Position.BOTTOM)
         self.panels.append(panels.EncodingPanel(), api.Panel.Position.TOP)
+        self.panels.append(panels.ReadOnlyPanel(), api.Panel.Position.TOP)
 
     def clone(self):
         clone = self.__class__(

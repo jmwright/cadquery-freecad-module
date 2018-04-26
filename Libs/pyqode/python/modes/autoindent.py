@@ -143,7 +143,8 @@ class PyAutoIndentMode(AutoIndentMode):
         tc2 = QTextCursor(tc)
         tc2.movePosition(QTextCursor.Left, tc.KeepAnchor, 1)
         tc2.movePosition(QTextCursor.WordLeft, tc.KeepAnchor)
-        return tc2.selectedText().strip()
+        w = tc2.selectedText().strip()
+        return w
 
     @staticmethod
     def _get_last_word_unstripped(tc):
@@ -360,10 +361,11 @@ class PyAutoIndentMode(AutoIndentMode):
         return post
 
     def _handle_indent_in_statement(self, fullline, lastword, post, pre):
-        if lastword and lastword[-1] != " ":
-            pre += " \\"
-        else:
-            pre += '\\'
+        if lastword[-1] != ':':
+            if lastword and lastword[-1] != " ":
+                pre += " \\"
+            else:
+                pre += '\\'
         post += self.editor.tab_length * " "
         if fullline.endswith(':'):
             post += self.editor.tab_length * " "

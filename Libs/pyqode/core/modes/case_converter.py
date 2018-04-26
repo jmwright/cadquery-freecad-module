@@ -22,14 +22,12 @@ class CaseConverterMode(Mode):
         self.action_to_lower = None
         self.action_to_upper = None
 
-    @QtCore.Slot()
     def to_upper(self):
         """
         Converts selected text to upper
         """
         TextHelper(self.editor).selected_text_to_upper()
 
-    @QtCore.Slot()
     def to_lower(self):
         """
         Converts selected text to lower
@@ -42,11 +40,11 @@ class CaseConverterMode(Mode):
         self.action_to_lower.triggered.connect(self.to_lower)
         self.action_to_upper = QtWidgets.QAction(self.editor)
         self.action_to_upper.triggered.connect(self.to_upper)
-        self.action_to_lower.setText('Convert to lower case')
+        self.action_to_lower.setText(_('Convert to lower case'))
         self.action_to_lower.setShortcut('Ctrl+U')
-        self.action_to_upper.setText('Convert to UPPER CASE')
+        self.action_to_upper.setText(_('Convert to UPPER CASE'))
         self.action_to_upper.setShortcut('Ctrl+Shift+U')
-        self.menu = QtWidgets.QMenu('Case', self.editor)
+        self.menu = QtWidgets.QMenu(_('Case'), self.editor)
         self.menu.addAction(self.action_to_lower)
         self.menu.addAction(self.action_to_upper)
         self._actions_created = True

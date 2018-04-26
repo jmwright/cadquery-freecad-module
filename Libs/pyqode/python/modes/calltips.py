@@ -3,11 +3,11 @@
 Contains the JediCompletionProvider class implementation.
 """
 import logging
-import jedi
-import os
+
 from pyqode.core.api import Mode, TextHelper
-from pyqode.python.backend import workers
 from pyqode.qt import QtCore, QtWidgets
+
+from pyqode.python.backend import workers
 
 
 def _logger():
@@ -33,6 +33,8 @@ class CalltipsMode(Mode, QtCore.QObject):
     def on_state_changed(self, state):
         if state:
             self.editor.key_released.connect(self._on_key_released)
+        else:
+            self.editor.key_released.disconnect(self._on_key_released)
 
     def _on_key_released(self, event):
         if (event.key() == QtCore.Qt.Key_ParenLeft or
@@ -46,7 +48,11 @@ class CalltipsMode(Mode, QtCore.QObject):
             # jedi has a bug if the statement has a closing parenthesis
             # remove it!
             lines = source.splitlines()
-            l = lines[line].rstrip()
+            try:
+                l = lines[line].rstrip()
+            except IndexError:
+                # at the beginning of the last line (empty)
+                return
             if l.endswith(")"):
                 lines[line] = l[:-1]
             source = "\n".join(lines)
@@ -68,14 +74,12 @@ class CalltipsMode(Mode, QtCore.QObject):
     def _request_calltip(self, source, line, col, fn, encoding):
         if self.__requestCnt == 0:
             self.__requestCnt += 1
-            _logger().debug("Calltip requested")
             self.editor.backend.send_request(
                 workers.calltips,
                 {'code': source, 'line': line, 'column': col, 'path': None,
                  'encoding': encoding}, on_receive=self._on_results_available)
 
     def _on_results_available(self, results):
-        _logger().debug("Calltip request finished")
         self.__requestCnt -= 1
         if results:
             call = {"call.module.name": results[0],

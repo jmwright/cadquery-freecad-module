@@ -4,6 +4,8 @@ This module contains utility functions/classes.
 """
 import functools
 import logging
+import weakref
+
 from pyqode.qt import QtCore, QtGui, QtWidgets
 
 
@@ -108,6 +110,9 @@ class DelayJobRunner(object):
         Cancels pending requests.
         """
         self._timer.stop()
+        self._job = None
+        self._args = None
+        self._kwargs = None
 
     def _exec_requested_job(self):
         """
@@ -123,11 +128,21 @@ class TextHelper(object):
     Qt text api for an easier usage.
 
     """
+    @property
+    def _editor(self):
+        try:
+            return self._editor_ref()
+        except TypeError:
+            return self._editor_ref
+
     def __init__(self, editor):
         """
         :param editor: The editor to work on.
         """
-        self._editor = editor
+        try:
+            self._editor_ref = weakref.ref(editor)
+        except TypeError:
+            self._editor_ref = editor
 
     def goto_line(self, line, column=0, move=True):
         """
@@ -333,7 +348,6 @@ class TextHelper(object):
         editor = self._editor
         value = editor.verticalScrollBar().value()
         pos = self.cursor_position()
-        _logger().debug('BEGIN edit blocks for cleaning  ')
         editor.textCursor().beginEditBlock()
 
         # cleanup whitespaces
@@ -384,7 +398,6 @@ class TextHelper(object):
         editor.setTextCursor(text_cursor)
         editor.verticalScrollBar().setValue(value)
 
-        _logger().debug('FINISH editing blocks for cleaning')
         text_cursor.endEditBlock()
         editor._cleaning = False
 
@@ -649,8 +662,6 @@ class TextHelper(object):
                                 cursor.selectionEnd()))
             cursor.setPosition(cursor.position() + 1)
             cursor = text_document.find(search_txt, cursor, search_flags)
-        _logger().debug('search occurences: %r', occurrences)
-        _logger().debug('occurence index: %d', index)
         return occurrences, index
 
     def is_comment_or_string(self, cursor_or_block, formats=None):
@@ -885,7 +896,7 @@ class TextBlockHelper(object):
         user_state = block.userState()
         if user_state == -1:
             user_state = 0
-        higher_part = user_state & 0xFFFF0000
+        higher_part = user_state & 0x7FFF0000
         state &= 0x0000FFFF
         state |= higher_part
         block.setUserState(state)
@@ -920,7 +931,7 @@ class TextBlockHelper(object):
             state = 0
         if val >= 0x3FF:
             val = 0x3FF
-        state &= 0xFC00FFFF
+        state &= 0x7C00FFFF
         state |= val << 16
         block.setUserState(state)
 
@@ -954,7 +965,7 @@ class TextBlockHelper(object):
         state = block.userState()
         if state == -1:
             state = 0
-        state &= 0xFBFFFFFF
+        state &= 0x7BFFFFFF
         state |= int(val) << 26
         block.setUserState(state)
 
@@ -986,7 +997,7 @@ class TextBlockHelper(object):
         state = block.userState()
         if state == -1:
             state = 0
-        state &= 0xF7FFFFFF
+        state &= 0x77FFFFFF
         state |= int(val) << 27
         block.setUserState(state)
 

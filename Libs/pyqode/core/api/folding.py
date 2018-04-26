@@ -49,10 +49,16 @@ class FoldDetector(object):
 
         editor.syntax_highlighter.fold_detector = my_fold_detector
     """
+    @property
+    def editor(self):
+        if self._editor:
+            return self._editor()
+        return None
+
     def __init__(self):
         #: Reference to the parent editor, automatically set by the syntax
         #: highlighter before process any block.
-        self.editor = None
+        self._editor = None
         #: Fold level limit, any level greater or equal is skipped.
         #: Default is sys.maxsize (i.e. all levels are accepted)
         self.limit = sys.maxsize
@@ -71,13 +77,15 @@ class FoldDetector(object):
         """
         prev_fold_level = TextBlockHelper.get_fold_lvl(previous_block)
         if text.strip() == '':
-            # blank line always have the same level as the previous line,
+            # blank line always have the same level as the previous line
             fold_level = prev_fold_level
         else:
             fold_level = self.detect_fold_level(
                 previous_block, current_block)
             if fold_level > self.limit:
                 fold_level = self.limit
+
+        prev_fold_level = TextBlockHelper.get_fold_lvl(previous_block)
 
         if fold_level > prev_fold_level:
             # apply on previous blank lines
@@ -87,16 +95,6 @@ class FoldDetector(object):
                 block = block.previous()
             TextBlockHelper.set_fold_trigger(
                 block, True)
-
-        delta_abs = abs(fold_level - prev_fold_level)
-        if delta_abs > 1:
-            if fold_level > prev_fold_level:
-                # try to fix inconsistent fold level
-                _logger().debug(
-                    '(l%d) inconsistent fold level, difference between '
-                    'consecutive blocks cannot be greater than 1 (%d).',
-                    current_block.blockNumber() + 1, delta_abs)
-                fold_level = prev_fold_level + 1
 
         # update block fold level
         if text.strip():
@@ -279,20 +277,8 @@ class FoldScope(object):
         TextBlockHelper.set_collapsed(self._trigger, False)
         for block in self.blocks(ignore_blank_lines=False):
             block.setVisible(True)
-        for region in self.child_regions():
-            if not region.collapsed:
-                region.unfold()
-            else:
-                # leave it closed but open the last blank lines and the
-                # trigger line
-                start, bstart = region.get_range(ignore_blank_lines=True)
-                _, bend = region.get_range(ignore_blank_lines=False)
-                block = self._trigger.document().findBlockByNumber(start)
-                block.setVisible(True)
-                block = self._trigger.document().findBlockByNumber(bend)
-                while block.blockNumber() > bstart:
-                    block.setVisible(True)
-                    block = block.previous()
+            if TextBlockHelper.is_fold_trigger(block):
+                TextBlockHelper.set_collapsed(block, False)
 
     def blocks(self, ignore_blank_lines=True):
         """
@@ -303,12 +289,8 @@ class FoldScope(object):
         """
         start, end = self.get_range(ignore_blank_lines=ignore_blank_lines)
         block = self._trigger.next()
-        ref_lvl = self.scope_level
         while block.blockNumber() <= end and block.isValid():
-            lvl = TextBlockHelper.get_fold_lvl(block)
-            trigger = TextBlockHelper.is_fold_trigger(block)
-            if lvl == ref_lvl and not trigger:
-                yield block
+            yield block
             block = block.next()
 
     def child_regions(self):

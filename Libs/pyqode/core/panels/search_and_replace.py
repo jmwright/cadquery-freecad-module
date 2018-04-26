@@ -4,13 +4,15 @@ This module contains the search and replace panel
 """
 import re
 import sre_constants
+
+from pyqode.qt import QtCore, QtGui, QtWidgets
+
 from pyqode.core import icons
-from pyqode.core.api import CodeEdit
+from pyqode.core._forms.search_panel_ui import Ui_SearchPanel
 from pyqode.core.api.decoration import TextDecoration
 from pyqode.core.api.panel import Panel
 from pyqode.core.api.utils import DelayJobRunner, TextHelper
-from pyqode.core._forms.search_panel_ui import Ui_SearchPanel
-from pyqode.qt import QtCore, QtGui, QtWidgets
+from pyqode.core.backend import NotRunning
 from pyqode.core.backend.workers import findall
 
 
@@ -81,6 +83,13 @@ class SearchAndReplacePanel(Panel, Ui_SearchPanel):
     #: Signal emitted when a search operation finished
     search_finished = QtCore.Signal()
 
+    #: Define the maximum number of occurences that can be highlighted
+    #: in the document.
+    #:
+    #: .. note:: The search operation itself is fast but the creation of all
+    #:    the extra selection used to highlight search result can be slow.
+    MAX_HIGHLIGHTED_OCCURENCES = 500
+
     @property
     def background(self):
         """ Text decoration background """
@@ -122,14 +131,17 @@ class SearchAndReplacePanel(Panel, Ui_SearchPanel):
         self.job_runner = DelayJobRunner(delay=500)
         Ui_SearchPanel.__init__(self)
         self.setupUi(self)
-        self.lineEditReplace.prompt_text = ' Replace'
+        self.toolButtonClose.clicked.connect(self.on_close)
+        self.actionSearch.triggered.connect(self.on_search)
+        self.actionActionSearchAndReplace.triggered.connect(self.on_search_and_replace)
+        self.lineEditReplace.prompt_text = _(' Replace')
         #: Occurrences counter
         self.cpt_occurences = 0
         self._previous_stylesheet = ""
         self._separator = None
         self._decorations = []
         self._occurrences = []
-        self._current_occurrence_index = -1
+        self._current_occurrence_index = 0
         self._bg = None
         self._fg = None
         self._update_buttons(txt="")
@@ -146,27 +158,27 @@ class SearchAndReplacePanel(Panel, Ui_SearchPanel):
         icon = icons.icon('edit-find', ':/pyqode-icons/rc/edit-find.png',
                           'fa.search')
         self.actionSearch.setIcon(icon)
-        self.actionSearch.setShortcut(QtGui.QKeySequence.Find)
+        self.actionSearch.setShortcut('Ctrl+F')
         self.labelSearch.setPixmap(icon.pixmap(icon_size))
 
         icon = icons.icon(
             'edit-find-replace', ':/pyqode-icons/rc/edit-find-replace.png',
             'fa.search-plus')
         self.actionActionSearchAndReplace.setShortcut(
-            QtGui.QKeySequence.Replace)
+            'Ctrl+H')
         self.actionActionSearchAndReplace.setIcon(icon)
         self.labelReplace.setPixmap(icon.pixmap(icon_size))
 
         icon = icons.icon('go-up', ':/pyqode-icons/rc/go-up.png',
                           'fa.arrow-up')
-        self.actionFindPrevious.setShortcut(QtGui.QKeySequence.FindPrevious)
+        self.actionFindPrevious.setShortcut('Shift+F3')
         self.actionFindPrevious.setIcon(icon)
         self.toolButtonPrevious.setIcon(icon)
         self.toolButtonPrevious.setIconSize(icon_size)
 
         icon = icons.icon('go-down', ':/pyqode-icons/rc/go-down.png',
                           'fa.arrow-down')
-        self.actionFindNext.setShortcut(QtGui.QKeySequence.FindNext)
+        self.actionFindNext.setShortcut('F3')
         self.actionFindNext.setIcon(icon)
         self.toolButtonNext.setIcon(icon)
         self.toolButtonNext.setIconSize(icon_size)
@@ -177,7 +189,7 @@ class SearchAndReplacePanel(Panel, Ui_SearchPanel):
         self.toolButtonClose.setIconSize(icon_size)
 
         self.menu = QtWidgets.QMenu(self.editor)
-        self.menu.setTitle('Search')
+        self.menu.setTitle(_('Search'))
         self.menu.menuAction().setIcon(self.actionSearch.icon())
         self.menu.addAction(self.actionSearch)
         self.actionSearch.setShortcutContext(QtCore.Qt.WidgetShortcut)
@@ -218,6 +230,7 @@ class SearchAndReplacePanel(Panel, Ui_SearchPanel):
             self.checkBoxCase.stateChanged.connect(self.request_search)
             self.checkBoxWholeWords.stateChanged.connect(self.request_search)
             self.checkBoxRegex.stateChanged.connect(self.request_search)
+            self.checkBoxInSelection.stateChanged.connect(self.request_search)
             # navigation slots
             self.toolButtonNext.clicked.connect(self.select_next)
             self.actionFindNext.triggered.connect(self.select_next)
@@ -238,6 +251,8 @@ class SearchAndReplacePanel(Panel, Ui_SearchPanel):
             self.checkBoxWholeWords.stateChanged.disconnect(
                 self.request_search)
             self.checkBoxRegex.stateChanged.disconnect(self.request_search)
+            self.checkBoxInSelection.stateChanged.disconnect(
+                self.request_search)
             # navigation slots
             self.toolButtonNext.clicked.disconnect(self.select_next)
             self.actionFindNext.triggered.disconnect(self.select_next)
@@ -247,7 +262,7 @@ class SearchAndReplacePanel(Panel, Ui_SearchPanel):
             self.toolButtonReplaceAll.clicked.disconnect(self.replace_all)
             # internal updates slots
             self.lineEditReplace.textChanged.disconnect(self._update_buttons)
-            self.search_finished.connect(self._on_search_finished)
+            self.search_finished.disconnect(self._on_search_finished)
 
     def close_panel(self):
         """
@@ -257,12 +272,10 @@ class SearchAndReplacePanel(Panel, Ui_SearchPanel):
         self.lineEditReplace.clear()
         self.lineEditSearch.clear()
 
-    @QtCore.Slot()
-    def on_toolButtonClose_clicked(self):
+    def on_close(self):
         self.close_panel()
 
-    @QtCore.Slot()
-    def on_actionSearch_triggered(self):
+    def on_search(self):
         self.widgetSearch.show()
         self.widgetReplace.hide()
         self.show()
@@ -276,8 +289,7 @@ class SearchAndReplacePanel(Panel, Ui_SearchPanel):
         if not text_changed:
             self.request_search(new_text)
 
-    @QtCore.Slot()
-    def on_actionActionSearchAndReplace_triggered(self):
+    def on_search_and_replace(self):
         self.widgetSearch.show()
         self.widgetReplace.show()
         self.show()
@@ -359,18 +371,31 @@ class SearchAndReplacePanel(Panel, Ui_SearchPanel):
         :return: True in case of success, false if no occurrence could be
                  selected.
         """
-        current_occurences = self._current_occurrence()
+        current_occurence = self._current_occurrence()
         occurrences = self.get_occurences()
-        if (current_occurences == -1 or
-                current_occurences >= len(occurrences) - 1):
-            current_occurences = 0
+        if not occurrences:
+            return
+        current = self._occurrences[current_occurence]
+        cursor_pos = self.editor.textCursor().position()
+        if cursor_pos not in range(current[0], current[1] + 1) or \
+                current_occurence == -1:
+            # search first occurrence that occurs after the cursor position
+            current_occurence = 0
+            for i, (start, end) in enumerate(self._occurrences):
+                if end > cursor_pos:
+                    current_occurence = i
+                    break
         else:
-            current_occurences += 1
-        self._set_current_occurrence(current_occurences)
+            if (current_occurence == -1 or
+                    current_occurence >= len(occurrences) - 1):
+                current_occurence = 0
+            else:
+                current_occurence += 1
+        self._set_current_occurrence(current_occurence)
         try:
             cursor = self.editor.textCursor()
-            cursor.setPosition(occurrences[current_occurences][0])
-            cursor.setPosition(occurrences[current_occurences][1],
+            cursor.setPosition(occurrences[current_occurence][0])
+            cursor.setPosition(occurrences[current_occurence][1],
                                cursor.KeepAnchor)
             self.editor.setTextCursor(cursor)
             return True
@@ -384,18 +409,31 @@ class SearchAndReplacePanel(Panel, Ui_SearchPanel):
         :return: True in case of success, false if no occurrence could be
                  selected.
         """
-        current_occurences = self._current_occurrence()
+        current_occurence = self._current_occurrence()
         occurrences = self.get_occurences()
-        if (current_occurences == -1 or
-                current_occurences == 0):
-            current_occurences = len(occurrences) - 1
+        if not occurrences:
+            return
+        current = self._occurrences[current_occurence]
+        cursor_pos = self.editor.textCursor().position()
+        if cursor_pos not in range(current[0], current[1] + 1) or \
+                current_occurence == -1:
+            # search first occurrence that occurs before the cursor position
+            current_occurence = len(self._occurrences) - 1
+            for i, (start, end) in enumerate(self._occurrences):
+                if end >= cursor_pos:
+                    current_occurence = i - 1
+                    break
         else:
-            current_occurences -= 1
-        self._set_current_occurrence(current_occurences)
+            if (current_occurence == -1 or
+                    current_occurence == 0):
+                current_occurence = len(occurrences) - 1
+            else:
+                current_occurence -= 1
+        self._set_current_occurrence(current_occurence)
         try:
             cursor = self.editor.textCursor()
-            cursor.setPosition(occurrences[current_occurences][0])
-            cursor.setPosition(occurrences[current_occurences][1],
+            cursor.setPosition(occurrences[current_occurence][0])
+            cursor.setPosition(occurrences[current_occurence][1],
                                cursor.KeepAnchor)
             self.editor.setTextCursor(cursor)
             return True
@@ -475,10 +513,13 @@ class SearchAndReplacePanel(Panel, Ui_SearchPanel):
                     else:
                         self.replace()
                 elif obj == self.lineEditSearch:
-                    self.select_next()
+                    if event.modifiers() & QtCore.Qt.ShiftModifier:
+                        self.select_previous()
+                    else:
+                        self.select_next()
                 return True
             elif event.key() == QtCore.Qt.Key_Escape:
-                self.on_toolButtonClose_clicked()
+                self.on_close()
         return Panel.eventFilter(self, obj, event)
 
     def _search_flags(self):
@@ -487,28 +528,43 @@ class SearchAndReplacePanel(Panel, Ui_SearchPanel):
         """
         return (self.checkBoxRegex.isChecked(),
                 self.checkBoxCase.isChecked(),
-                self.checkBoxWholeWords.isChecked())
+                self.checkBoxWholeWords.isChecked(),
+                self.checkBoxInSelection.isChecked())
 
     def _exec_search(self, sub, flags):
         if self.editor is None:
             return
-        regex, case_sensitive, whole_word = flags
+        regex, case_sensitive, whole_word, in_selection = flags
+        tc = self.editor.textCursor()
+        assert isinstance(tc, QtGui.QTextCursor)
+        if in_selection and tc.hasSelection():
+            text = tc.selectedText()
+            self._offset = tc.selectionStart()
+        else:
+            text = self.editor.toPlainText()
+            self._offset = 0
         request_data = {
-            'string': self.editor.toPlainText(),
+            'string': text,
             'sub': sub,
             'regex': regex,
             'whole_word': whole_word,
             'case_sensitive': case_sensitive
         }
-        self.editor.backend.send_request(findall, request_data,
-                                         self._on_results_available)
+        try:
+            self.editor.backend.send_request(findall, request_data,
+                                             self._on_results_available)
+        except AttributeError:
+            self._on_results_available(findall(request_data))
+        except NotRunning:
+            QtCore.QTimer.singleShot(100, self.request_search)
 
     def _on_results_available(self, results):
-        self._occurrences = results
+        self._occurrences = [(start + self._offset, end + self._offset)
+                             for start, end in results]
         self._on_search_finished()
 
     def _update_label_matches(self):
-        self.labelMatches.setText("{0} matches".format(self.cpt_occurences))
+        self.labelMatches.setText(_("{0} matches").format(self.cpt_occurences))
         color = "#DD0000"
         if self.cpt_occurences:
             color = "#00DD00"
@@ -518,14 +574,17 @@ class SearchAndReplacePanel(Panel, Ui_SearchPanel):
 
     def _on_search_finished(self):
         self._clear_decorations()
-        occurrences = self.get_occurences()
-        for occurrence in occurrences:
+        all_occurences = self.get_occurences()
+        occurrences = all_occurences[:self.MAX_HIGHLIGHTED_OCCURENCES]
+        for i, occurrence in enumerate(occurrences):
             deco = self._create_decoration(occurrence[0],
                                            occurrence[1])
             self._decorations.append(deco)
             self.editor.decorations.append(deco)
-        self.cpt_occurences = len(occurrences)
+        self.cpt_occurences = len(all_occurences)
         if not self.cpt_occurences:
+            self._current_occurrence_index = -1
+        else:
             self._current_occurrence_index = -1
         self._update_label_matches()
         self._update_buttons(txt=self.lineEditReplace.text())
@@ -543,6 +602,7 @@ class SearchAndReplacePanel(Panel, Ui_SearchPanel):
                               selection_end)
         deco.set_background(QtGui.QBrush(self.background))
         deco.set_outline(self._outline)
+        deco.set_foreground(QtCore.Qt.black)
         deco.draw_order = 1
         return deco
 

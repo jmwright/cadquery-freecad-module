@@ -192,7 +192,6 @@ class FileManager(Manager):
         :return: the corresponding mime type.
         """
         filename = os.path.split(path)[1]
-        _logger().debug('detecting mimetype for %s', filename)
         mimetype = mimetypes.guess_type(filename)[0]
         if mimetype is None:
             mimetype = 'text/x-plain'
@@ -231,16 +230,16 @@ class FileManager(Manager):
         # get encoding from cache
         if use_cached_encoding:
             try:
-                cached_encoding = settings.get_file_encoding(path)
+                cached_encoding = settings.get_file_encoding(
+                    path, preferred_encoding=encoding)
             except KeyError:
                 pass
             else:
                 encoding = cached_encoding
         enable_modes = os.path.getsize(path) < self._limit
         for m in self.editor.modes:
-            m.enabled = enable_modes
-        if not enable_modes:
-            self.editor.modes.clear()
+            if m.enabled:
+                m.enabled = enable_modes
         # open file and get its content
         try:
             with open(path, 'Ur', encoding=encoding) as file:
@@ -278,10 +277,18 @@ class FileManager(Manager):
         self.opening = False
         if self.restore_cursor:
             self._restore_cached_pos()
+        self._check_for_readonly()
         return ret_val
+
+    def _check_for_readonly(self):
+        self.read_only = not os.access(self.path, os.W_OK)
+        self.editor.setReadOnly(self.read_only)
 
     def _restore_cached_pos(self):
         pos = Cache().get_cursor_position(self.path)
+        max_pos = self.editor.document().characterCount()
+        if pos > max_pos:
+            pos = max_pos - 1
         tc = self.editor.textCursor()
         tc.setPosition(pos)
         self.editor.setTextCursor(tc)
@@ -299,10 +306,8 @@ class FileManager(Manager):
 
     @staticmethod
     def _rm(tmp_path):
-        try:
+        if os.path.exists(tmp_path):
             os.remove(tmp_path)
-        except OSError:
-            pass
 
     def _reset_selection(self, sel_end, sel_start):
         text_cursor = self.editor.textCursor()
@@ -347,13 +352,15 @@ class FileManager(Manager):
 
         """
         if not self.editor.dirty and \
-                (encoding is None or encoding == self.encoding) and \
-                (path is None or path == self.path):
+                (encoding is None and encoding == self.encoding) and \
+                (path is None and path == self.path):
+            # avoid saving if editor not dirty or if encoding or path did not
+            # change
             return
         if fallback_encoding is None:
             fallback_encoding = locale.getpreferredencoding()
-        _logger().debug(
-            "saving %r to %r with %r encoding", self.path, path, encoding)
+        _logger().log(
+            5, "saving %r with %r encoding", path, encoding)
         if path is None:
             if self.path:
                 path = self.path
@@ -367,6 +374,13 @@ class FileManager(Manager):
             encoding = self._encoding
         self.saving = True
         self.editor.text_saving.emit(str(path))
+
+        # get file persmission on linux
+        try:
+            st_mode = os.stat(path).st_mode
+        except (ImportError, TypeError, AttributeError, OSError):
+            st_mode = None
+
         # perform a safe save: we first save to a temporary file, if the save
         # succeeded we just rename the temporary file to the final file name
         # and remove it.
@@ -375,7 +389,6 @@ class FileManager(Manager):
         else:
             tmp_path = path
         try:
-            _logger().debug('saving editor content to temp file: %s', path)
             with open(tmp_path, 'wb') as file:
                 file.write(self._get_text(encoding))
         except UnicodeEncodeError:
@@ -387,23 +400,29 @@ class FileManager(Manager):
             self.saving = False
             self.editor.text_saved.emit(str(path))
             raise e
-        else:
-            # cache update encoding
-            Cache().set_file_encoding(path, encoding)
-            self._encoding = encoding
-            # remove path and rename temp file, if safe save is on
-            if self.safe_save:
-                _logger().debug('rename %s to %s', tmp_path, path)
-                self._rm(path)
-                os.rename(tmp_path, path)
-                self._rm(tmp_path)
-            # reset dirty flags
-            self.editor.document().setModified(False)
-            # remember path for next save
-            self._path = os.path.normpath(path)
-            self.editor.text_saved.emit(str(path))
-            self.saving = False
-            _logger().debug('file saved: %s', path)
+        # cache update encoding
+        Cache().set_file_encoding(path, encoding)
+        self._encoding = encoding
+        # remove path and rename temp file, if safe save is on
+        if self.safe_save:
+            self._rm(path)
+            os.rename(tmp_path, path)
+            self._rm(tmp_path)
+        # reset dirty flags
+        self.editor.document().setModified(False)
+        # remember path for next save
+        self._path = os.path.normpath(path)
+        self.editor.text_saved.emit(str(path))
+        self.saving = False
+        _logger().debug('file saved: %s', path)
+        self._check_for_readonly()
+
+        # restore file permission
+        if st_mode:
+            try:
+                os.chmod(path, st_mode)
+            except (ImportError, TypeError, AttributeError):
+                pass
 
     def close(self, clear=True):
         """

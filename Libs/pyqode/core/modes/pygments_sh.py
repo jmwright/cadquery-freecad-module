@@ -6,26 +6,24 @@ on pygments.
 .. note: This code is taken and adapted from the IPython project.
 """
 import logging
+import mimetypes
 import sys
-from pygments.util import ClassNotFound
+
 from pygments.formatters.html import HtmlFormatter
-from pygments.lexer import Error
-from pygments.lexer import RegexLexer
-from pygments.lexer import Text
-from pygments.lexers.special import TextLexer
+from pygments.lexer import Error, RegexLexer, Text, _TokenType
+from pygments.lexers import get_lexer_for_filename, get_lexer_for_mimetype
 from pygments.lexers.agile import PythonLexer
 from pygments.lexers.compiled import CLexer, CppLexer
 from pygments.lexers.dotnet import CSharpLexer
-from pygments.styles import get_style_by_name
+from pygments.lexers.special import TextLexer
+from pygments.styles import get_style_by_name, get_all_styles
 from pygments.token import Whitespace, Comment, Token
-from pygments.styles import get_all_styles
-from pygments.lexer import _TokenType
-from pygments.lexers import get_lexer_for_filename, get_lexer_for_mimetype
-from pyqode.core.api.syntax_highlighter import SyntaxHighlighter
-from pyqode.core.api.syntax_highlighter import ColorScheme
-from pyqode.core.api.syntax_highlighter import TextBlockUserData
+from pygments.util import ClassNotFound
 from pyqode.qt import QtGui
 from pyqode.qt.QtCore import QRegExp
+
+from pyqode.core.api.syntax_highlighter import (
+    SyntaxHighlighter, ColorScheme, TextBlockUserData)
 
 
 def _logger():
@@ -163,7 +161,6 @@ class PygmentsSH(SyntaxHighlighter):
     def __init__(self, document, lexer=None, color_scheme=None):
         super(PygmentsSH, self).__init__(document, color_scheme=color_scheme)
         self._pygments_style = self.color_scheme.name
-        self._document = document
         self._style = None
         self._formatter = HtmlFormatter(nowrap=True)
         self._lexer = lexer if lexer else PythonLexer()
@@ -214,26 +211,23 @@ class PygmentsSH(SyntaxHighlighter):
 
         :param filename: Filename or extension
         """
+        self._lexer = None
         if filename.endswith("~"):
             filename = filename[0:len(filename) - 1]
         try:
             self._lexer = get_lexer_for_filename(filename)
-            _logger().debug('lexer for filename (%s): %r', filename,
-                            self._lexer)
-        except ClassNotFound:
+        except (ClassNotFound, ImportError):
+            print('class not found for url', filename)
+            try:
+                m = mimetypes.guess_type(filename)
+                print(m)
+                self._lexer = get_lexer_for_mimetype(m[0])
+            except (ClassNotFound, IndexError, ImportError):
+                self._lexer = get_lexer_for_mimetype('text/plain')
+        if self._lexer is None:
             _logger().warning('failed to get lexer from filename: %s, using '
                               'plain text instead...', filename)
             self._lexer = TextLexer()
-            return False
-        except ImportError:
-            # import error while loading some pygments plugins, the editor
-            # should not crash
-            _logger().warning('failed to get lexer from filename: %s, using '
-                              'plain text instead...', filename)
-            self._lexer = TextLexer()
-            return False
-        else:
-            return True
 
     def set_lexer_from_mime_type(self, mime, **options):
         """

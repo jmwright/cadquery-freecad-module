@@ -43,7 +43,8 @@ class QuickDocPanel(Panel):
         layout.addLayout(child_layout)
 
         # Action
-        self.action_quick_doc = QtWidgets.QAction('Show documentation', self)
+        self.action_quick_doc = QtWidgets.QAction(
+            _('Show documentation'), self)
         self.action_quick_doc.setShortcut('Alt+Q')
         icon = icons.icon(qta_name='fa.book')
         if icon:
@@ -59,9 +60,9 @@ class QuickDocPanel(Panel):
     def on_state_changed(self, state):
         super(QuickDocPanel, self).on_state_changed(state)
         if state:
-            self.editor.add_action(self.action_quick_doc)
+            self.editor.add_action(self.action_quick_doc, sub_menu='Python')
         else:
-            self.editor.remove_action(self.action_quick_doc)
+            self.editor.remove_action(self.action_quick_doc, sub_menu='Python')
 
     def _on_action_quick_doc_triggered(self):
         tc = TextHelper(self.editor).word_under_cursor(select_whole_word=True)
@@ -104,4 +105,4 @@ class QuickDocPanel(Panel):
                 self.text_edit.setText('\n'.join(lines))
                 return
         else:
-            self.text_edit.setText('Documentation not found')
+            self.text_edit.setText(_('Documentation not found'))

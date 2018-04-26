@@ -19,7 +19,14 @@ better handled at the application level.
 """
 import json
 import locale
+import logging
 from pyqode.qt import QtCore
+
+try:
+    from future.builtins import open
+    from future.builtins import str
+except:
+    pass  # python 3.2 not supported
 
 
 class Cache(object):
@@ -28,8 +35,11 @@ class Cache(object):
     over QSettings.
 
     """
-    def __init__(self, suffix=''):
-        self._settings = QtCore.QSettings('pyQode', 'pyqode.core%s' % suffix)
+    def __init__(self, suffix='', qsettings=None):
+        if qsettings is None:
+            self._settings = QtCore.QSettings('pyQode', 'pyqode.core%s' % suffix)
+        else:
+            self._settings = qsettings
 
     def clear(self):
         """
@@ -44,10 +54,13 @@ class Cache(object):
         menu/combobox.
 
         """
-        from pyqode.core.api import encodings
+        default_encodings = [
+            locale.getpreferredencoding().lower().replace('-', '_')]
+        if 'utf_8' not in default_encodings:
+            default_encodings.append('utf_8')
+        default_encodings = list(set(default_encodings))
         return json.loads(self._settings.value(
-            'userDefinedEncodings', '["%s"]' % encodings.convert_to_codec_key(
-                locale.getpreferredencoding())))
+            'userDefinedEncodings', json.dumps(default_encodings)))
 
     @preferred_encodings.setter
     def preferred_encodings(self, value):
@@ -56,7 +69,7 @@ class Cache(object):
         self._settings.setValue('userDefinedEncodings',
                                 json.dumps(list(set(lst))))
 
-    def get_file_encoding(self, file_path):
+    def get_file_encoding(self, file_path, preferred_encoding=None):
         """
         Gets an eventual cached encoding for file_path.
 
@@ -66,11 +79,27 @@ class Cache(object):
         :param file_path: path of the file to look up
         :returns: The cached encoding.
         """
+        _logger().debug('getting encoding for %s', file_path)
         try:
             map = json.loads(self._settings.value('cachedFileEncodings'))
         except TypeError:
             map = {}
-        return map[file_path]
+        try:
+            return map[file_path]
+        except KeyError:
+            encodings = self.preferred_encodings
+            if preferred_encoding:
+                encodings.insert(0, preferred_encoding)
+            for encoding in encodings:
+                _logger().debug('trying encoding: %s', encoding)
+                try:
+                    with open(file_path, encoding=encoding) as f:
+                        f.read()
+                except (UnicodeDecodeError, IOError, OSError):
+                    pass
+                else:
+                    return encoding
+            raise KeyError(file_path)
 
     def set_file_encoding(self, path, encoding):
         """
@@ -120,3 +149,7 @@ class Cache(object):
             map = {}
         map[path] = position
         self._settings.setValue('cachedCursorPosition', json.dumps(map))
+
+
+def _logger():
+    return logging.getLogger(__name__)

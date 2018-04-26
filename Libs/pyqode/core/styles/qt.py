@@ -53,7 +53,7 @@ class QtStyle(Style):
         Name.Function: '#800000 bold',
         Name.Label: '#800000',
         Name.Namespace: '#000000',
-        Name.Tag: '#0000FE bold',
+        Name.Tag: '#2984C6 bold',
         Name.Variable.Class: '#800080',
         Name.Variable.Global: '#000000',
         Name.Variable.Instance: '#800000',

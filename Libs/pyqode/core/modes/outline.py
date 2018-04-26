@@ -80,5 +80,5 @@ class OutlineMode(Mode, QtCore.QObject):
             results = [Definition.from_dict(ddict) for ddict in results]
         self._results = results
         if self._results is not None:
-            _logger().debug("Document structure changed")
+            _logger().log(5, "Document structure changed")
             self.document_changed.emit()

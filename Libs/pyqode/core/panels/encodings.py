@@ -122,12 +122,15 @@ class EncodingPanel(Panel):
         self.enable_caret_line(False)
         self.ui.comboBoxEncodings.current_encoding = encoding
         self.ui.lblDescription.setText(
-            self._description % ('There was a problem opening the file %r' %
+            self._description % (_('There was a problem opening the file %r') %
                                  path))
         # load text as binary and mark it as red, user might make use the
         # binary to recognize the original encoding
-        with open(path, 'rb') as file:
-            content = str(file.read(16))
+        try:
+            with open(path, 'rb') as file:
+                content = str(file.read(16))
+        except OSError:
+            content = ''
         # set plain text
         self.editor.setPlainText(
             content, self.editor.file.get_mimetype(path),
@@ -188,6 +191,9 @@ class EncodingPanel(Panel):
     def cancel(self):
         if self.sender():
             self.editor.clear()
+        self.close_panel()
+
+    def close_panel(self):
         self._rm_deco()
         self.enable_caret_line(True)
         self.cancel_requested.emit(self.editor)

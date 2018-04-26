@@ -28,7 +28,7 @@ class ErrorsTable(QtWidgets.QTableWidget):
     msg_activated = QtCore.Signal(CheckerMessage)
 
     ICONS = {
-        CheckerMessages.INFO: ':/ide-icons/rc/accept.png',
+        CheckerMessages.INFO: ':pyqode-icons/rc/dialog-info.png',
         CheckerMessages.WARNING: ':pyqode-icons/rc/dialog-warning.png',
         CheckerMessages.ERROR: ':pyqode-icons/rc/dialog-error.png',
     }
@@ -57,9 +57,9 @@ class ErrorsTable(QtWidgets.QTableWidget):
         self.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         self.customContextMenuRequested.connect(self._show_context_menu)
         self.context_mnu = QtWidgets.QMenu()
-        self.action_details = QtWidgets.QAction('View details', self)
+        self.action_details = QtWidgets.QAction(_('View details'), self)
         self.action_details.triggered.connect(self.showDetails)
-        self.action_copy = QtWidgets.QAction('Copy error', self)
+        self.action_copy = QtWidgets.QAction(_('Copy error'), self)
         self.action_copy.triggered.connect(self._copy_cell_text)
         self.context_mnu.addAction(self.action_details)
         self.context_mnu.addAction(self.action_copy)
@@ -98,6 +98,8 @@ class ErrorsTable(QtWidgets.QTableWidget):
                 icon[0], QtGui.QIcon(icon[1]))
         elif isinstance(icon, str):
             return QtGui.QIcon(icon)
+        elif isinstance(icon, QtGui.QIcon):
+            return icon
         else:
             return None
 
@@ -126,7 +128,7 @@ class ErrorsTable(QtWidgets.QTableWidget):
         self.setItem(row, COL_FILE_NAME, item)
 
         # line
-        if msg.line <= 0:
+        if msg.line < 0:
             item = QtWidgets.QTableWidgetItem("-")
         else:
             item = QtWidgets.QTableWidgetItem(str(msg.line + 1))
@@ -152,9 +154,12 @@ class ErrorsTable(QtWidgets.QTableWidget):
         Shows the error details.
         """
         msg = self.currentItem().data(QtCore.Qt.UserRole)
+        desc = msg.description
+        desc = desc.replace('\r\n', '\n').replace('\r', '\n')
+        desc = desc.replace('\n', '<br/>')
         QtWidgets.QMessageBox.information(
-            self, 'Message details',
-            """<p><b>Description:</b><br/>%s</p>
-            <i><p><b>File:</b><br/>%s</p>
-            <p><b>Line: </b>%d</p></i>
-            """ % (msg.description, msg.path, msg.line + 1, ))
+            self, _('Message details'),
+            _("""<p><b>Description:</b><br/>%s</p>
+<p><b>File:</b><br/>%s</p>
+<p><b>Line:</b><br/>%d</p>
+            """) % (desc, msg.path, msg.line + 1, ))

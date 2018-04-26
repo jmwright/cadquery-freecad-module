@@ -33,12 +33,16 @@ class TextCodeEdit(CodeEdit):
 
     mimetypes = ['text/x-plain', 'text/x-log', 'text/plain']
 
-    def __init__(self, parent=None, server_script=server.__file__,
+    DEFAULT_SERVER = server.__file__
+
+    def __init__(self, parent=None, server_script=None,
                  interpreter=sys.executable, args=None,
                  create_default_actions=True, color_scheme='qt',
                  reuse_backend=False):
         from pyqode.core import panels
         from pyqode.core import modes
+        if server_script is None:
+            server_script = TextCodeEdit.DEFAULT_SERVER
         super(TextCodeEdit, self).__init__(parent, create_default_actions)
         self.backend.start(server_script, interpreter, args,
                            reuse=reuse_backend)
@@ -66,6 +70,7 @@ class TextCodeEdit(CodeEdit):
         self.modes.append(modes.SymbolMatcherMode())
 
         self.panels.append(panels.EncodingPanel(), Panel.Position.TOP)
+        self.panels.append(panels.ReadOnlyPanel(), Panel.Position.TOP)
 
     def clone(self):
         clone = self.__class__(
@@ -97,13 +102,18 @@ class GenericCodeEdit(CodeEdit):
         'application/javascript'
     ]
 
-    def __init__(self, parent=None, server_script=server.__file__,
+    DEFAULT_SERVER = server.__file__
+
+    def __init__(self, parent=None, server_script=None,
                  interpreter=sys.executable, args=None,
                  create_default_actions=True, color_scheme='qt',
                  reuse_backend=False):
         super(GenericCodeEdit, self).__init__(parent, create_default_actions)
         from pyqode.core import panels
         from pyqode.core import modes
+        if server_script is None:
+            server_script = GenericCodeEdit.DEFAULT_SERVER
+
         self.backend.start(server_script, interpreter, args,
                            reuse=reuse_backend)
         # append panels
@@ -113,6 +123,7 @@ class GenericCodeEdit(CodeEdit):
         self.panels.append(panels.FoldingPanel())
 
         # append modes
+        self.modes.append(modes.CursorHistoryMode())
         self.modes.append(modes.AutoCompleteMode())
         self.modes.append(modes.ExtendedSelectionMode())
         self.modes.append(modes.CaseConverterMode())
@@ -128,23 +139,29 @@ class GenericCodeEdit(CodeEdit):
         self.modes.append(modes.SymbolMatcherMode())
         self.modes.append(modes.OccurrencesHighlighterMode())
         self.modes.append(modes.SmartBackSpaceMode())
+
         self.panels.append(panels.EncodingPanel(), Panel.Position.TOP)
+        self.panels.append(panels.ReadOnlyPanel(), Panel.Position.TOP)
 
     def setPlainText(self, txt, mime_type='', encoding=''):
         if mime_type is None:
             mime_type = self.file.mimetype
         if encoding is None:
             encoding = self.file.encoding
-        self.syntax_highlighter.set_lexer_from_filename(self.file.path)
         try:
-            mimetype = self.syntax_highlighter._lexer.mimetypes[0]
-        except (AttributeError, IndexError):
-            mimetype = ''
+            self.syntax_highlighter.set_lexer_from_filename(self.file.path)
+            try:
+                mimetype = self.syntax_highlighter._lexer.mimetypes[0]
+            except (AttributeError, IndexError):
+                mimetype = ''
 
-        if mimetype in self._char_based_mimetypes:
-            self.syntax_highlighter.fold_detector = CharBasedFoldDetector()
-        else:
-            self.syntax_highlighter.fold_detector = IndentFoldDetector()
+            if mimetype in self._char_based_mimetypes:
+                self.syntax_highlighter.fold_detector = CharBasedFoldDetector()
+            else:
+                self.syntax_highlighter.fold_detector = IndentFoldDetector()
+        except AttributeError:
+            # syntax highlighter removed, e.g. file size > FileManager.limit
+            pass
 
         super(GenericCodeEdit, self).setPlainText(txt, mime_type, encoding)
 

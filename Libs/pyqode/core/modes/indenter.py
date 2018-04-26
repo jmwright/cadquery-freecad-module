@@ -12,6 +12,10 @@ def _logger():
     return logging.getLogger(__name__)
 
 
+def debug(msg, *args):
+    return _logger().log(5, msg, *args)
+
+
 class IndenterMode(Mode):
     """ Implements classic indentation/tabulation (Tab/Shift+Tab)
 
@@ -77,17 +81,17 @@ class IndenterMode(Mode):
         block = doc.findBlock(cursor.selectionStart())
         assert isinstance(block, QtGui.QTextBlock)
         i = 0
-        _logger().debug('unindent selection: %d lines', nb_lines)
+        debug('unindent selection: %d lines', nb_lines)
         while i < nb_lines:
             txt = block.text()
-            _logger().debug('line to unindent: %s', txt)
-            _logger().debug('self.editor.use_spaces_instead_of_tabs: %r',
-                            self.editor.use_spaces_instead_of_tabs)
+            debug('line to unindent: %s', txt)
+            debug('self.editor.use_spaces_instead_of_tabs: %r',
+                  self.editor.use_spaces_instead_of_tabs)
             if self.editor.use_spaces_instead_of_tabs:
                 indentation = (len(txt) - len(txt.lstrip()))
             else:
                 indentation = len(txt) - len(txt.replace('\t', ''))
-            _logger().debug('unindent line %d: %d spaces', i, indentation)
+            debug('unindent line %d: %d spaces', i, indentation)
             if indentation > 0:
                 c = QtGui.QTextCursor(block)
                 c.movePosition(c.StartOfLine, cursor.MoveAnchor)
@@ -141,9 +145,9 @@ class IndenterMode(Mode):
         Un-indents text at cursor position.
         """
 
-        _logger().debug('unindent')
+        debug('unindent')
         cursor = self.editor.textCursor()
-        _logger().debug('cursor has selection %r', cursor.hasSelection())
+        debug('cursor has selection %r', cursor.hasSelection())
         if cursor.hasSelection():
             cursor.beginEditBlock()
             self.unindent_selection(cursor)
@@ -154,7 +158,7 @@ class IndenterMode(Mode):
             indentation = cursor.positionInBlock()
             max_spaces = tab_len - (indentation - (indentation % tab_len))
             spaces = self.count_deletable_spaces(cursor, max_spaces)
-            _logger().debug('deleting %d space before cursor' % spaces)
+            debug('deleting %d space before cursor' % spaces)
             cursor.beginEditBlock()
             if spaces:
                 # delete spaces before cursor
@@ -162,8 +166,8 @@ class IndenterMode(Mode):
                     cursor.deletePreviousChar()
             else:
                 # un-indent whole line
-                _logger().debug('un-indent whole line')
+                debug('un-indent whole line')
                 cursor = self.unindent_selection(cursor)
             cursor.endEditBlock()
             self.editor.setTextCursor(cursor)
-            _logger().debug(cursor.block().text())
+            debug(cursor.block().text())

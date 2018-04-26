@@ -4,13 +4,23 @@ This module contains the backend controller
 import logging
 import socket
 import sys
+from pyqode.qt import QtCore
+
 from pyqode.core.api.client import JsonTcpClient, BackendProcess
 from pyqode.core.api.manager import Manager
-from pyqode.core.backend import NotRunning
+from pyqode.core.backend import NotRunning, echo_worker
 
 
 def _logger():
     return logging.getLogger(__name__)
+
+
+#: log level for communication
+COMM = 1
+
+
+def comm(msg, *args):
+    _logger().log(COMM, msg, *args)
 
 
 class BackendManager(Manager):
@@ -38,6 +48,10 @@ class BackendManager(Manager):
         self.interpreter = None
         self.args = None
         self._shared = False
+        self._heartbeat_timer = QtCore.QTimer()
+        self._heartbeat_timer.setInterval(1000)
+        self._heartbeat_timer.timeout.connect(self._send_heartbeat)
+        self._heartbeat_timer.start()
 
     @staticmethod
     def pick_free_port():
@@ -107,8 +121,9 @@ class BackendManager(Manager):
                 BackendManager.LAST_PROCESS = self._process
                 BackendManager.LAST_PORT = self._port
                 BackendManager.SHARE_COUNT += 1
-            _logger().debug('starting backend process: %s %s', program,
-                            ' '.join(pgm_args))
+            comm('starting backend process: %s %s', program,
+                 ' '.join(pgm_args))
+            self._heartbeat_timer.start()
 
     def stop(self):
         """
@@ -120,7 +135,7 @@ class BackendManager(Manager):
             BackendManager.SHARE_COUNT -= 1
             if BackendManager.SHARE_COUNT:
                 return
-        _logger().debug('stopping backend process')
+        comm('stopping backend process')
         # close all sockets
         for s in self._sockets:
             s._callback = None
@@ -140,7 +155,8 @@ class BackendManager(Manager):
             else:
                 self._process.terminate()
         self._process._prevent_logs = False
-        _logger().debug('backend process terminated')
+        self._heartbeat_timer.stop()
+        comm('backend process terminated')
 
     def send_request(self, worker_class_or_function, args, on_receive=None):
         """
@@ -156,10 +172,17 @@ class BackendManager(Manager):
         :raise: backend.NotRunning if the backend process is not running.
         """
         if not self.running:
-            raise NotRunning()
+            try:
+                # try to restart the backend if it crashed.
+                self.start(self.server_script, interpreter=self.interpreter,
+                           args=self.args)
+            except AttributeError:
+                pass  # not started yet
+            finally:
+                # caller should try again, later
+                raise NotRunning()
         else:
-            _logger().debug('sending request, worker=%r' %
-                            worker_class_or_function)
+            comm('sending request, worker=%r' % worker_class_or_function)
             # create a socket, the request will be send as soon as the socket
             # has connected
             socket = JsonTcpClient(
@@ -167,11 +190,20 @@ class BackendManager(Manager):
                 on_receive=on_receive)
             socket.finished.connect(self._rm_socket)
             self._sockets.append(socket)
+            # restart heartbeat timer
+            self._heartbeat_timer.start()
+
+    def _send_heartbeat(self):
+        try:
+            self.send_request(echo_worker, {'heartbeat': True})
+        except NotRunning:
+            self._heartbeat_timer.stop()
 
     def _rm_socket(self, socket):
         try:
             socket.close()
             self._sockets.remove(socket)
+            socket.deleteLater()
         except ValueError:
             pass
 
@@ -182,8 +214,11 @@ class BackendManager(Manager):
 
         :return: True if the process is running, otherwise False
         """
-        return (self._process is not None and
-                self._process.state() != self._process.NotRunning)
+        try:
+            return (self._process is not None and
+                    self._process.state() != self._process.NotRunning)
+        except RuntimeError:
+            return False
 
     @property
     def connected(self):

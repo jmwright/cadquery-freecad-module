@@ -97,7 +97,7 @@ class EncodingsMenu(QtWidgets.QMenu):
         self._current_encoding = convert_to_codec_key(value)
         self._refresh()
 
-    def __init__(self, title='Encodings', parent=None,
+    def __init__(self, title=_('Encodings'), parent=None,
                  selected_encoding=locale.getpreferredencoding()):
         super(EncodingsMenu, self).__init__(parent)
         self.setTitle(title)
@@ -119,7 +119,7 @@ class EncodingsMenu(QtWidgets.QMenu):
             try:
                 alias, lang = ENCODINGS_MAP[encoding]
             except KeyError:
-                _logger().debug('KeyError with encoding:', encoding)
+                _logger().warn('KeyError with encoding:', encoding)
             else:
                 action = QtWidgets.QAction('%s (%s)' % (alias, lang), self)
                 action.setData(encoding)
@@ -131,7 +131,7 @@ class EncodingsMenu(QtWidgets.QMenu):
                 self._group.addAction(action)
         self._group.triggered.connect(self._on_encoding_triggered)
         self.addSeparator()
-        self._edit_action = QtWidgets.QAction('Add or remove', self)
+        self._edit_action = QtWidgets.QAction(_('Add or remove'), self)
         self._edit_action.triggered.connect(self._on_edit_requested)
         self.addAction(self._edit_action)
 
@@ -140,7 +140,6 @@ class EncodingsMenu(QtWidgets.QMenu):
         if DlgPreferredEncodingsEditor.edit_encoding(self):
             self._refresh()
 
-    @QtCore.Slot(QtWidgets.QAction)
     def _on_encoding_triggered(self, action):
         self.reload_requested.emit(action.data())
 
@@ -174,20 +173,18 @@ class EncodingsContextMenu(EncodingsMenu):
             self.parent().file.encoding)
         super(EncodingsContextMenu, self)._refresh()
 
-    @QtCore.Slot(str)
     def _on_reload_requested(self, encoding):
         self._encoding = encoding
         self._timer.start()
 
-    @QtCore.Slot()
     def _reload(self):
         self._timer.stop()
         try:
             self.parent().file.reload(self._encoding)
         except UnicodeDecodeError:
             QtWidgets.QMessageBox.warning(
-                self.parent(), 'Decoding error',
-                'Failed to reload file with encoding %s' % self._encoding)
+                self.parent(), _('Decoding error'),
+                _('Failed to reload file with encoding %s') % self._encoding)
         else:
             try:
                 from pyqode.core.panels import EncodingPanel
@@ -195,4 +192,4 @@ class EncodingsContextMenu(EncodingsMenu):
             except KeyError:
                 pass
             else:
-                panel.cancel()
+                panel.close_panel()

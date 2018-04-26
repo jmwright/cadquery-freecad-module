@@ -111,7 +111,7 @@ class Panel(QtWidgets.QWidget, Mode):
 
         :param visible: Visible state
         """
-        _logger().debug('%s visibility changed', self.name)
+        _logger().log(5, '%s visibility changed', self.name)
         super(Panel, self).setVisible(visible)
         if self.editor:
             self.editor.panels.refresh()

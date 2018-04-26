@@ -50,7 +50,7 @@ class FileWatcherMode(Mode, QtCore.QObject):
         self._data = (None, None)
         self._timer = QtCore.QTimer()
         self._timer.setInterval(1000)
-        self._timer.timeout.connect(self._check_mtime)
+        self._timer.timeout.connect(self._check_file)
         self._mtime = 0
         self._notification_pending = False
         self._processing = False
@@ -105,12 +105,20 @@ class FileWatcherMode(Mode, QtCore.QObject):
             # file path is none, this happen if you use setPlainText instead of
             # openFile. This is perfectly fine, we just do not have anything to
             # watch
-            self._timer.stop()
+            try:
+                self._timer.stop()
+            except AttributeError:
+                pass
 
-    def _check_mtime(self):
+    def _check_file(self):
         """
-        Checks watched file moficiation time.
+        Checks watched file moficiation time and permission changes.
         """
+        try:
+            self.editor.toPlainText()
+        except RuntimeError:
+            self._timer.stop()
+            return
         if self.editor and self.editor.file.path:
             if not os.path.exists(self.editor.file.path) and self._mtime:
                 self._notify_deleted_file()
@@ -119,11 +127,16 @@ class FileWatcherMode(Mode, QtCore.QObject):
                 if mtime > self._mtime:
                     self._mtime = mtime
                     self._notify_change()
+                # check for permission change
+                writeable = os.access(self.editor.file.path, os.W_OK)
+                self.editor.setReadOnly(not writeable)
 
     def _notify(self, title, message, expected_action=None):
         """
         Notify user from external event
         """
+        if self.editor is None:
+            return
         inital_value = self.editor.save_on_focus_out
         self.editor.save_on_focus_out = False
         self._flg_notify = True
@@ -150,12 +163,16 @@ class FileWatcherMode(Mode, QtCore.QObject):
             Cache().set_cursor_position(
                 self.editor.file.path,
                 self.editor.textCursor().position())
-            self.editor.file.open(self.editor.file.path)
-            self.file_reloaded.emit()
+            if os.path.exists(self.editor.file.path):
+                self.editor.file.open(self.editor.file.path)
+                self.file_reloaded.emit()
+            else:
+                # file moved just after a change, see OpenCobolIDE/OpenCobolIDE#337
+                self._notify_deleted_file()
 
-        args = ("File changed",
-                "The file <i>%s</i> has changed externally.\nDo you want to "
-                "reload it?" % os.path.basename(self.editor.file.path))
+        args = (_("File changed"),
+                _("The file <i>%s</i> has changed externally.\nDo you want to "
+                  "reload it?") % os.path.basename(self.editor.file.path))
         kwargs = {"expected_action": inner_action}
         if self.editor.hasFocus() or self.auto_reload:
             self._notify(*args, **kwargs)

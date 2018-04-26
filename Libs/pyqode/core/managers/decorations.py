@@ -53,7 +53,10 @@ class TextDecorationsManager(Manager):
 
         """
         self._decorations[:] = []
-        self.editor.setExtraSelections(self._decorations)
+        try:
+            self.editor.setExtraSelections(self._decorations)
+        except RuntimeError:
+            pass
 
     def __iter__(self):
         return iter(self._decorations)

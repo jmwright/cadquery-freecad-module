@@ -69,9 +69,9 @@ class TabWidget(QTabWidget):
         self.setTabBar(tab_bar)
         self.tab_bar = tab_bar
         self._context_mnu = QtWidgets.QMenu()
-        for name, slot in [('Close', self.close),
-                           ('Close others', self.close_others),
-                           ('Close all', self.close_all)]:
+        for name, slot in [(_('Close'), self.close),
+                           (_('Close others'), self.close_others),
+                           (_('Close all'), self.close_all)]:
             qaction = QtWidgets.QAction(name, self)
             qaction.triggered.connect(slot)
             self._context_mnu.addAction(qaction)
@@ -80,14 +80,12 @@ class TabWidget(QTabWidget):
         # the C++ class loose the wrapped obj type).
         self._widgets = []
 
-    @QtCore.Slot()
     def close(self):
         """
         Closes the active editor
         """
         self.tabCloseRequested.emit(self.currentIndex())
 
-    @QtCore.Slot()
     def close_others(self):
         """
         Closes every editors tabs except the current one.
@@ -102,7 +100,6 @@ class TabWidget(QTabWidget):
             else:
                 i = 1
 
-    @QtCore.Slot()
     def close_all(self):
         """
         Closes all editors
@@ -126,7 +123,6 @@ class TabWidget(QTabWidget):
                 code_edit, code_edit.file.name, code_edit.file.path)
             code_edit._tab_name = file_name
 
-    @QtCore.Slot()
     def save_current(self, path=None):
         """
         Save current editor content. Leave file to None to erase the previous
@@ -141,7 +137,7 @@ class TabWidget(QTabWidget):
         try:
             if not path and not self._current.file.path:
                 path, filter = QtWidgets.QFileDialog.getSaveFileName(
-                    self, 'Choose destination path')
+                    self, _('Choose destination path'))
                 if not path:
                     return False
             old_path = self._current.file.path
@@ -163,7 +159,6 @@ class TabWidget(QTabWidget):
             pass
         return False
 
-    @QtCore.Slot()
     def save_all(self):
         """
         Save all editors.
@@ -304,7 +299,7 @@ class TabWidget(QTabWidget):
             path = code_edit.file.path
             if not os.path.exists(path):
                 path, status = QtWidgets.QFileDialog.getSaveFileName(
-                    self, 'Save as (%s)' % code_edit.file.path)
+                    self, _('Save as (%s)') % code_edit.file.path)
         if path:
             try:
                 code_edit.file.save(path)

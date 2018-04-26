@@ -26,7 +26,7 @@ class ModesManager(Manager):
         :param mode: The mode instance to append.
 
         """
-        _logger().debug('adding mode %r', mode.name)
+        _logger().log(5, 'adding mode %r', mode.name)
         self._modes[mode.name] = mode
         mode.on_install(self.editor)
         return mode
@@ -38,7 +38,7 @@ class ModesManager(Manager):
         :param name_or_klass: The name (or class) of the mode to remove.
         :returns: The removed mode.
         """
-        _logger().debug('removing mode %r', name_or_klass)
+        _logger().log(5, 'removing mode %r', name_or_klass)
         mode = self.get(name_or_klass)
         mode.on_uninstall()
         self._modes.pop(mode.name)
@@ -51,9 +51,8 @@ class ModesManager(Manager):
 
         """
         while len(self._modes):
-            key = list(self._modes.keys())[0]
-            mode = self.remove(key)
-            del mode
+            key = sorted(list(self._modes.keys()))[0]
+            self.remove(key)
 
     def get(self, name_or_klass):
         """
@@ -66,6 +65,18 @@ class ModesManager(Manager):
         if not isinstance(name_or_klass, str):
             name_or_klass = name_or_klass.__name__
         return self._modes[name_or_klass]
+
+    def keys(self):
+        """
+        Returns the list of the names of the installed modes.
+        """
+        return self._modes.keys()
+
+    def values(self):
+        """
+        Returns the list of installed modes.
+        """
+        return self._modes.values()
 
     def __len__(self):
         return len(list(self._modes.values()))

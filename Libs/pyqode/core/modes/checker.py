@@ -160,6 +160,7 @@ class CheckerMode(Mode, QtCore.QObject):
         QtCore.QObject.__init__(self)
         # max number of messages to keep good performances
         self.limit = 200
+        self.ignore_rules = []
         self._job_runner = DelayJobRunner(delay=delay)
         self._messages = []
         self._worker = worker
@@ -167,6 +168,15 @@ class CheckerMode(Mode, QtCore.QObject):
         self._show_tooltip = show_tooltip
         self._pending_msg = []
         self._finished = True
+
+    def set_ignore_rules(self, rules):
+        """
+        Sets the ignore rules for the linter.
+
+        Rules are a list of string that the actual linter function will check
+        to reject some warnings/errors.
+        """
+        self.ignore_rules = rules
 
     def add_messages(self, messages):
         """
@@ -177,7 +187,7 @@ class CheckerMode(Mode, QtCore.QObject):
         # remove old messages
         if len(messages) > self.limit:
             messages = messages[:self.limit]
-        _logger(self.__class__).debug('adding %s messages' % len(messages))
+        _logger(self.__class__).log(5, 'adding %s messages' % len(messages))
         self._finished = False
         self._new_messages = messages
         self._to_check = list(self._messages)
@@ -210,7 +220,7 @@ class CheckerMode(Mode, QtCore.QObject):
             if not len(self._pending_msg):
                 # all pending message added
                 self._finished = True
-                _logger(self.__class__).debug('finished')
+                _logger(self.__class__).log(5, 'finished')
                 self.editor.repaint()
                 return False
             message = self._pending_msg.pop(0)
@@ -218,8 +228,7 @@ class CheckerMode(Mode, QtCore.QObject):
                 try:
                     usd = message.block.userData()
                 except AttributeError:
-                    message.block = self.editor.document().findBlockByNumber(
-                        message.line)
+                    message.block = self.editor.document().findBlockByNumber(message.line)
                     usd = message.block.userData()
                 if usd is None:
                     usd = TextBlockUserData()
@@ -235,7 +244,7 @@ class CheckerMode(Mode, QtCore.QObject):
                 message.decoration = TextDecoration(
                     self.editor.textCursor(), start_line=message.line,
                     tooltip=tooltip, draw_order=3)
-                message.decoration.select_line()
+                message.decoration.set_full_width()
                 message.decoration.set_as_error(color=QtGui.QColor(
                     message.color))
                 self.editor.decorations.append(message.decoration)
@@ -250,7 +259,7 @@ class CheckerMode(Mode, QtCore.QObject):
         :param message: Message to remove
         """
         import time
-        _logger(self.__class__).debug('removing message %s' % message)
+        _logger(self.__class__).log(5, 'removing message %s' % message)
         t = time.time()
         usd = message.block.userData()
         if usd:
@@ -295,6 +304,8 @@ class CheckerMode(Mode, QtCore.QObject):
         messages = []
         for msg in results:
             msg = CheckerMessage(*msg)
+            if msg.line >= self.editor.blockCount():
+                msg.line = self.editor.blockCount() - 1
             block = self.editor.document().findBlockByNumber(msg.line)
             msg.block = block
             messages.append(msg)
@@ -305,22 +316,31 @@ class CheckerMode(Mode, QtCore.QObject):
         Requests an analysis.
         """
         if self._finished:
-            _logger(self.__class__).debug('running analysis')
+            _logger(self.__class__).log(5, 'running analysis')
             self._job_runner.request_job(self._request)
         elif self.editor:
             # retry later
-            _logger(self.__class__).debug(
-                'delaying analysis (previous analysis not finished)')
+            _logger(self.__class__).log(
+                5, 'delaying analysis (previous analysis not finished)')
             QtCore.QTimer.singleShot(500, self.request_analysis)
 
     def _request(self):
         """ Requests a checking of the editor content. """
-        if not self.editor:
+        try:
+            self.editor.toPlainText()
+        except (TypeError, RuntimeError):
             return
+        try:
+            max_line_length = self.editor.modes.get(
+                'RightMarginMode').position
+        except KeyError:
+            max_line_length = 79
         request_data = {
             'code': self.editor.toPlainText(),
             'path': self.editor.file.path,
-            'encoding': self.editor.file.encoding
+            'encoding': self.editor.file.encoding,
+            'ignore_rules': self.ignore_rules,
+            'max_line_length': max_line_length,
         }
         try:
             self.editor.backend.send_request(

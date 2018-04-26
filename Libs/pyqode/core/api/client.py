@@ -9,12 +9,22 @@ import json
 import logging
 import socket
 import struct
+import sys
 import uuid
+from weakref import ref
 from pyqode.qt import QtCore, QtNetwork
 
 
 def _logger():
     return logging.getLogger(__name__)
+
+
+#: log level for communication
+COMM = 1
+
+
+def comm(msg, *args):
+    _logger().log(COMM, msg, *args)
 
 
 #: Dictionary of socket errors messages
@@ -53,6 +63,103 @@ PROCESS_ERROR_STRING = {
 }
 
 
+if sys.version_info[0] >= 3:
+    class WeakMethod(ref):
+        """
+        A custom `weakref.ref` subclass which simulates a weak reference to
+        a bound method, working around the lifetime problem of bound methods.
+        """
+
+        __slots__ = "_func_ref", "_meth_type", "_alive", "__weakref__"
+
+        def __new__(cls, meth, callback=None):
+            try:
+                obj = meth.__self__
+                func = meth.__func__
+            except AttributeError:
+                raise TypeError("argument should be a bound method, not {}"
+                                .format(type(meth)))
+
+            def _cb(arg):
+                # The self-weakref trick is needed to avoid creating a
+                # reference cycle.
+                self = self_wr()
+                if self._alive:
+                    self._alive = False
+                    if callback is not None:
+                        callback(self)
+            self = ref.__new__(cls, obj, _cb)
+            self._func_ref = ref(func, _cb)
+            self._meth_type = type(meth)
+            self._alive = True
+            self_wr = ref(self)
+            return self
+
+        def __call__(self):
+            obj = super().__call__()
+            func = self._func_ref()
+            if obj is None or func is None:
+                return None
+            return self._meth_type(func, obj)
+
+        def __eq__(self, other):
+            if isinstance(other, WeakMethod):
+                if not self._alive or not other._alive:
+                    return self is other
+                return ref.__eq__(self, other) and \
+                    self._func_ref == other._func_ref
+            return False
+
+        def __ne__(self, other):
+            if isinstance(other, WeakMethod):
+                if not self._alive or not other._alive:
+                    return self is not other
+                return ref.__ne__(self, other) or \
+                    self._func_ref != other._func_ref
+            return True
+
+        __hash__ = ref.__hash__
+else:
+    class _weak_callable:
+        def __init__(self, obj, func):
+            self._obj = obj
+            self._meth = func
+
+        def __call__(self, *args, **kws):
+            if self._obj is not None:
+                return self._meth(self._obj, *args, **kws)
+            else:
+                return self._meth(*args, **kws)
+
+        def __getattr__(self, attr):
+            if attr == 'im_self':
+                return self._obj
+            if attr == 'im_func':
+                return self._meth
+            raise AttributeError(attr)
+
+    class WeakMethod:
+        """ Wraps a function or, more importantly, a bound method, in
+        a way that allows a bound method's object to be GC'd, while
+        providing the same interface as a normal weak reference. """
+        def __init__(self, fn):
+            try:
+                self._obj = ref(fn.im_self)
+                self._meth = fn.im_func
+            except AttributeError:
+                # It's not a bound method.
+                self._obj = None
+                self._meth = fn
+
+        def __call__(self):
+            if self._dead():
+                return None
+            return _weak_callable(self._obj(), self._meth)
+
+        def _dead(self):
+            return self._obj is not None and self._obj() is None
+
+
 class JsonTcpClient(QtNetwork.QTcpSocket):
     """
     A json tcp client socket used to start and communicate with the pyqode
@@ -79,7 +186,14 @@ class JsonTcpClient(QtNetwork.QTcpSocket):
         self._header_buf = bytes()
         self._to_read = 0
         self._data_buf = bytes()
-        self._callback = on_receive
+        if on_receive:
+            try:
+                self._callback = WeakMethod(on_receive)
+            except TypeError:
+                # unbound method (i.e. free function)
+                self._callback = ref(on_receive)
+        else:
+            self._callback = None
         self.is_connected = False
         self._closed = False
         self.connected.connect(self._on_connected)
@@ -91,6 +205,7 @@ class JsonTcpClient(QtNetwork.QTcpSocket):
     def close(self):
         self._closed = True  # fix issue with QTimer.singleShot
         super(JsonTcpClient, self).close()
+        self._callback = None
 
     def _send_request(self):
         """
@@ -114,7 +229,7 @@ class JsonTcpClient(QtNetwork.QTcpSocket):
         :param encoding: encoding used to encode the json message into a
             bytes array, this should match CodeEdit.file.encoding.
         """
-        _logger().debug('sending request: %r', obj)
+        comm('sending request: %r', obj)
         msg = json.dumps(obj)
         msg = msg.encode(encoding)
         header = struct.pack('=I', len(msg))
@@ -132,13 +247,16 @@ class JsonTcpClient(QtNetwork.QTcpSocket):
 
     def _connect(self):
         """ Connects our client socket to the backend socket """
-        _logger().debug('connecting to 127.0.0.1:%d', self._port)
+        if self is None:
+            return
+        comm('connecting to 127.0.0.1:%d', self._port)
         address = QtNetwork.QHostAddress('127.0.0.1')
         self.connectToHost(address, self._port)
+        if sys.platform == 'darwin':
+            self.waitForConnected()
 
     def _on_connected(self):
-        _logger().debug('connected to backend: %s:%d',
-                        self.peerName(), self.peerPort())
+        comm('connected to backend: %s:%d', self.peerName(), self.peerPort())
         self.is_connected = True
         self._send_request()
 
@@ -147,7 +265,7 @@ class JsonTcpClient(QtNetwork.QTcpSocket):
             error = -1
         if error == 1 and self.is_connected or (
                 not self.is_connected and error == 0 and not self._closed):
-            log_fct = _logger().debug
+            log_fct = comm
         else:
             log_fct = _logger().warning
 
@@ -158,8 +276,8 @@ class JsonTcpClient(QtNetwork.QTcpSocket):
 
     def _on_disconnected(self):
         try:
-            _logger().debug('disconnected from backend: %s:%d',
-                            self.peerName(), self.peerPort())
+            comm('disconnected from backend: %s:%d', self.peerName(),
+                 self.peerPort())
         except (AttributeError, RuntimeError):
             # logger might be None if for some reason qt deletes the socket
             # after python global exit
@@ -170,7 +288,7 @@ class JsonTcpClient(QtNetwork.QTcpSocket):
             pass
 
     def _read_header(self):
-        _logger().debug('reading header')
+        comm('reading header')
         self._header_buf += self.read(4)
         if len(self._header_buf) == 4:
             self._header_complete = True
@@ -181,15 +299,15 @@ class JsonTcpClient(QtNetwork.QTcpSocket):
                 header = struct.unpack('=I', self._header_buf.data())
             self._to_read = header[0]
             self._header_buf = bytes()
-            _logger().debug('header content: %d', self._to_read)
+            comm('header content: %d', self._to_read)
 
     def _read_payload(self):
         """ Reads the payload (=data) """
-        _logger().debug('reading payload data')
-        _logger().debug('remaining bytes to read: %d', self._to_read)
+        comm('reading payload data')
+        comm('remaining bytes to read: %d', self._to_read)
         data_read = self.read(self._to_read)
         nb_bytes_read = len(data_read)
-        _logger().debug('%d bytes read', nb_bytes_read)
+        comm('%d bytes read', nb_bytes_read)
         self._data_buf += data_read
         self._to_read -= nb_bytes_read
         if self._to_read <= 0:
@@ -197,15 +315,18 @@ class JsonTcpClient(QtNetwork.QTcpSocket):
                 data = self._data_buf.decode('utf-8')
             except AttributeError:
                 data = bytes(self._data_buf.data()).decode('utf-8')
-            _logger().debug('payload read: %r', data)
-            _logger().debug('payload length: %r', len(self._data_buf))
-            _logger().debug('decoding payload as json object')
+            comm('payload read: %r', data)
+            comm('payload length: %r', len(self._data_buf))
+            comm('decoding payload as json object')
             obj = json.loads(data)
-            _logger().debug('response received: %r', obj)
-            results = obj['results']
+            comm('response received: %r', obj)
+            try:
+                results = obj['results']
+            except (KeyError, TypeError):
+                results = None
             # possible callback
-            if self._callback:
-                self._callback(results)
+            if self._callback and self._callback():
+                self._callback()(results)
             self._header_complete = False
             self._data_buf = bytes()
             self.finished.emit(self)
@@ -240,12 +361,16 @@ class BackendProcess(QtCore.QProcess):
 
     def _on_process_started(self):
         """ Logs process started """
-        _logger().debug('backend process started')
+        comm('backend process started')
+        if self is None:
+            return
         self.starting = False
         self.running = True
 
     def _on_process_error(self, error):
         """ Logs process error """
+        if self is None:
+            return
         if error not in PROCESS_ERROR_STRING:
             error = -1
         if not self._prevent_logs:
@@ -253,8 +378,7 @@ class BackendProcess(QtCore.QProcess):
 
     def _on_process_finished(self, exit_code):
         """ Logs process exit status """
-        _logger().debug('backend process finished with exit code %d',
-                        exit_code)
+        comm('backend process finished with exit code %d', exit_code)
         try:
             self.running = False
         except AttributeError:
@@ -262,25 +386,27 @@ class BackendProcess(QtCore.QProcess):
 
     def _on_process_stdout_ready(self):
         """ Logs process output """
+        if not self:
+            return
         o = self.readAllStandardOutput()
         try:
             output = bytes(o).decode(self._encoding)
         except TypeError:
             output = bytes(o.data()).decode(self._encoding)
-        output = output[:output.rfind('\n')]
         for line in output.splitlines():
-            self._srv_logger.debug(line)
+            self._srv_logger.log(1, line)
 
     def _on_process_stderr_ready(self):
         """ Logs process output (stderr) """
-        if not self:
+        try:
+            o = self.readAllStandardError()
+        except (TypeError, RuntimeError):
+            # widget already deleted
             return
-        o = self.readAllStandardError()
         try:
             output = bytes(o).decode(self._encoding)
         except TypeError:
             output = bytes(o.data()).decode(self._encoding)
-        output = output[:output.rfind('\n')]
         for line in output.splitlines():
             self._srv_logger.error(line)
 

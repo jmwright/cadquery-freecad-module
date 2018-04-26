@@ -12,6 +12,8 @@ class PyInteractiveConsole(InteractiveConsole):
     press on a filename in a traceback, the signal open_file_requested is
     emitted with the file path to open and the line where the user want to go.
 
+    .. deprecated: since version 2.10.0, you should use pyqode.core.widgets.OutputWindow
+
     """
     #: Signal emitted when the user pressed on a traceback file location.
     #: Client code should open the requested file in the editor.
@@ -30,9 +32,8 @@ class PyInteractiveConsole(InteractiveConsole):
         self.set_writer(self._write)
         self.setMouseTracking(True)
         self.PROG = QtCore.QRegExp(
-            r'\s*File "[a-zA-Z\/_\d:\\\.]*((.\.[a-zA-Z\/_\d:\\]*")|(")), '
-            r'line [0-9]*.*')
-        self.FILENAME_PROG = QtCore.QRegExp(r'"[a-zA-Z\/_\.\d:\\]*"')
+            r'\s*File ".*", line [0-9]*, in ')
+        self.FILENAME_PROG = QtCore.QRegExp(r'".*"')
         self.LINE_PROG = QtCore.QRegExp(r'line [0-9]*')
         self.setLineWrapMode(self.NoWrap)
         self._module_color = QtGui.QColor('blue')
@@ -42,6 +43,8 @@ class PyInteractiveConsole(InteractiveConsole):
             env = {}
         if 'PYTHONUNBUFFERED' not in env:
             env['PYTHONUNBUFFERED'] = '1'
+        if 'QT_LOGGING_TO_CONSOLE' not in env:
+            env['QT_LOGGING_TO_CONSOLE'] = '1'
         super(PyInteractiveConsole, self).start_process(
             process, args, cwd, env)
 

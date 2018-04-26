@@ -7,7 +7,14 @@ highlight decorators and self parameters.
 It is approximately 3 time faster then :class:`pyqode.core.modes.PygmentsSH`.
 
 """
-import builtins
+
+try:
+    #it works on windows
+    import builtins
+except ImportError:
+    #it works on osx
+    builtins = __import__('__builtin__')
+
 import re
 from pyqode.core.api import SyntaxHighlighter as BaseSH
 from pyqode.core.api import TextBlockHelper
