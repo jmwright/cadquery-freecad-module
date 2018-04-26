@@ -27,7 +27,11 @@ elif os.environ[QT_API] in PYQT4_API:
     from PyQt4.QtCore import QT_VERSION_STR as __version__
 elif os.environ[QT_API] in PYSIDE_API:
     from PySide.QtCore import *
-    from PySide.QtGui import QSortFilterProxyModel
+    # If we can't import QSortFilterProxyModel it's probably because it was already imported in QtCore
+    try:
+        from PySide.QtGui import QSortFilterProxyModel
+    except:
+        pass
     # use a common __version__
     import PySide.QtCore
     __version__ = PySide.QtCore.__version__
