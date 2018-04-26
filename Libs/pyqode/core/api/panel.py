@@ -84,8 +84,18 @@ class Panel(QtWidgets.QWidget, Mode):
         """
         Mode.on_install(self, editor)
         self.setParent(editor)
-        self.setPalette(QtWidgets.QApplication.instance().palette())
-        self.setFont(QtWidgets.QApplication.instance().font())
+        # Qt5 compatibility
+        try:
+            self.setPalette(QtWidgets.QApplication.instance().palette())
+        except:
+            self.setPalette(QtGui.QGuiApplication.palette())
+
+        # Qt5 compatibility
+        try:
+            self.setFont(QtWidgets.QApplication.instance().font())
+        except:
+            self.setFont(QtGui.QGuiApplication.font())
+            
         self.editor.panels.refresh()
         self._background_brush = QtGui.QBrush(QtGui.QColor(
             self.palette().window().color()))

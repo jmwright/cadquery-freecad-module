@@ -1232,8 +1232,14 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         self._foreground = QtGui.QColor('black')
         self._whitespaces_foreground = QtGui.QColor('light gray')
         app = QtWidgets.QApplication.instance()
-        self._sel_background = app.palette().highlight().color()
-        self._sel_foreground = app.palette().highlightedText().color()
+        # Qt5 compatibility
+        try:
+            self._sel_background = app.palette().highlight().color()
+            self._sel_foreground = app.palette().highlightedText().color()
+        except:
+            palette = QtGui.QGuiApplication.palette()
+            self._sel_background = palette.highlight().color()
+            self._sel_foreground = palette.highlightedText().color()
         self._font_size = 10
         self.font_name = ""
 
@@ -1269,7 +1275,13 @@ class CodeEdit(QtWidgets.QPlainTextEdit):
         self.setFont(QtGui.QFont(self._font_family,
                                  self._font_size + self._zoom_level))
         flg_stylesheet = hasattr(self, '_flg_stylesheet')
-        if QtWidgets.QApplication.instance().styleSheet() or flg_stylesheet:
+        # Qt5 compatibility
+        try:
+            curStylesheet = QtWidgets.QApplication.instance().styleSheet()
+        except:
+            curStylesheet = None
+            
+        if curStylesheet or flg_stylesheet:
             self._flg_stylesheet = True
             # On Window, if the application once had a stylesheet, we must
             # keep on using a stylesheet otherwise strange colors appear
