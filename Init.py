@@ -19,9 +19,7 @@ sys.path.insert(1, cq_lib_path)
 
 # Add our third party libraries so that they can be used in scripts
 third_party_path = os.path.join(module_base_path, 'ThirdParty')
-cqparts_base_path = os.path.join(third_party_path, 'cqparts')
-cqparts_path = os.path.join(cqparts_base_path, 'src')
-sys.path.append(cqparts_path)
+sys.path.append(third_party_path)
 
 # Make sure we get the right libs under the FreeCAD installation
 fc_base_path = os.path.dirname(os.path.dirname(module_base_path))
