@@ -1,0 +1,11 @@
+cqparts_misc/LICENSE,sha256=WJ7YI-moTFb-uVrFjnzzhGJrnL9P2iqQe8NuED3hutI,35141
+cqparts_misc/__init__.py,sha256=6_q7xAvxSqrvt8cXW2k1tLck2nxUDTThJo01nPh7iek,1105
+cqparts_misc/basic/__init__.py,sha256=KnbUGyMfhdCtws8JwSwGvuK0PuOsZHw5HRx7qwh3_kY,101
+cqparts_misc/basic/indicators.py,sha256=15qsCB9VZAcMS7wse6zaBlDNzrD5bUGrrBTAVRc7JUE,2179
+cqparts_misc/basic/primatives.py,sha256=32xlZlaqbpFQHqDJIwUBbmRicfqzATYX6qrIw64BWuY,5177
+cqparts_misc-0.1.0.dist-info/DESCRIPTION.rst,sha256=o_9C4JHYZNYRZf-pf6ovQY3HzIk7yjufX8KOCm88uSk,1875
+cqparts_misc-0.1.0.dist-info/METADATA,sha256=NLeV2p09Mdn10o4p4XZG144fbB3MFprDvTgJVzbeVdk,3019
+cqparts_misc-0.1.0.dist-info/RECORD,,
+cqparts_misc-0.1.0.dist-info/WHEEL,sha256=hZvi-8L6mc2COqhOUWREM_h2lvnJbaHycZt8eohtmso,92
+cqparts_misc-0.1.0.dist-info/metadata.json,sha256=5_8X5og3_SC5dXd2pgUyFUvQqYdeERiB-u1qysqFOQI,1260
+cqparts_misc-0.1.0.dist-info/top_level.txt,sha256=uJPPE3buNwO2mPDaXCrUwyRfr-664RZEaPhTnFnS0Oc,13

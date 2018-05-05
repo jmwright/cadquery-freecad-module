@@ -1,0 +1,89 @@
+Metadata-Version: 2.0
+Name: cqparts-bearings
+Version: 0.1.0
+Summary: Bearings content library for cqparts
+Home-page: https://github.com/fragmuffin/cqparts
+Author: Peter Boin
+Author-email: peter.boin+cqparts@gmail.com
+License: GPLv3
+Description-Content-Type: UNKNOWN
+Keywords: cadquery,cad,3d,modeling,bearings
+Platform: UNKNOWN
+Classifier: Intended Audience :: Developers
+Classifier: Intended Audience :: Manufacturing
+Classifier: Intended Audience :: End Users/Desktop
+Classifier: Intended Audience :: Science/Research
+Classifier: License :: OSI Approved :: GNU General Public License v3 (GPLv3)
+Classifier: Natural Language :: English
+Classifier: Operating System :: MacOS
+Classifier: Operating System :: POSIX
+Classifier: Operating System :: Unix
+Classifier: Programming Language :: Python
+Classifier: Programming Language :: Python :: 2
+Classifier: Programming Language :: Python :: 3
+Classifier: Topic :: Scientific/Engineering
+Classifier: Topic :: Multimedia :: Graphics :: 3D Modeling
+Classifier: Topic :: Multimedia :: Graphics :: 3D Rendering
+Classifier: Development Status :: 2 - Pre-Alpha
+Requires-Dist: cqparts
+
+=========================================
+`cqparts` Content Library : Bearings
+=========================================
+
+Components
+-------------------------
+
+* Ball Bearings
+* Tapered Roller Bearings
+
+Examples
+-------------------------
+
+`BallBearing`
+^^^^^^^^^^^^^^^^^^^^^^^
+
+Create a ball bearing with::
+
+    from cqparts_bearings.ball import BallBearing
+
+    bearing = BallBearing(
+        # outer edges
+        inner_diam=8,
+        outer_diam=20,
+        width=5,
+
+        # internal rolling elements
+        ball_count=6,
+        ball_diam=4,
+    )
+
+    # display [optional]
+    from cqparts.display import display
+    display(bearing)
+
+    # export model to file, various formats available [optional]
+    bearing.exporter('gltf')('bearing.gltf')
+
+.. image:: https://fragmuffin.github.io/cqparts/media/img/bearings/ball-example.png
+
+All `BallBearing` parameters are documented
+`here <https://fragmuffin.github.io/cqparts/doc/api/cqparts_bearings.html#cqparts_bearings.ball.BallBearing>`_.
+
+The bearing is generated in the following hierarchy:
+
+::
+
+    >>> print(bearing.tree_str())
+    <BallBearing: angle=0.0, ball_count=6, ball_diam=4.0, ball_min_gap=0.4, inner_diam=8.0, inner_width=2.0, outer_diam=20.0, outer_width=2.0, rolling_radius=7.0, tolerance=0.001, width=5.0>
+     ├○ inner_ring
+     ├○ outer_ring
+     └─ rolling_elements
+         ├○ ball_000
+         ├○ ball_001
+         ├○ ball_002
+         ├○ ball_003
+         ├○ ball_004
+         └○ ball_005
+
+
