@@ -867,6 +867,20 @@ class TestCadQuery(BaseTest):
                           r.vertices(selectors.NearestToPointSelector((0.0, 0.0, 0.0)))\
                           .first().val().Y))
 
+        # Test the sagittaArc and radiusArc functions
+        a1 = Workplane(Plane.YZ()).threePointArc((5, 1), (10, 0))
+        a2 = Workplane(Plane.YZ()).sagittaArc((10, 0), -1)
+        a3 = Workplane(Plane.YZ()).threePointArc((6, 2), (12, 0))
+        a4 = Workplane(Plane.YZ()).radiusArc((12, 0), -10)
+
+        assert(a1.edges().first().val().geomType() == "CIRCLE")
+        assert(a2.edges().first().val().geomType() == "CIRCLE")
+        assert(a3.edges().first().val().geomType() == "CIRCLE")
+        assert(a4.edges().first().val().geomType() == "CIRCLE")
+
+        assert(a1.edges().first().val().Length() == a2.edges().first().val().Length())
+        assert(a3.edges().first().val().Length() == a4.edges().first().val().Length())
+
     def testLargestDimension(self):
         """
         Tests the largestDimension function when no solids are on the stack and when there are
@@ -1591,3 +1605,36 @@ class TestCadQuery(BaseTest):
         self.assertTupleAlmostEquals(delta.toTuple(),
                                      (0.,0.,2.*h),
                                      decimal_places)
+
+    def testClose(self):
+        # Close without endPoint and startPoint coincide.
+        # Create a half-circle
+        a = Workplane(Plane.XY()).sagittaArc((10, 0), 2).close().extrude(2)
+
+        # Close when endPoint and startPoint coincide.
+        # Create a double half-circle
+        b = Workplane(Plane.XY()).sagittaArc((10, 0), 2).sagittaArc((0, 0), 2).close().extrude(2)
+
+        # The b shape shall have twice the volume of the a shape.
+        self.assertAlmostEqual(a.val().wrapped.Volume * 2.0, b.val().wrapped.Volume)
+
+        # Testcase 3 from issue #238
+        thickness = 3.0
+        length = 10.0
+        width = 5.0
+
+        obj1 = Workplane('XY', origin=(0, 0, -thickness / 2)) \
+            .moveTo(length / 2, 0).threePointArc((0, width / 2), (-length / 2, 0)) \
+            .threePointArc((0, -width / 2), (length / 2, 0)) \
+            .close().extrude(thickness)
+
+        os_x = 8.0    # Offset in X
+        os_y = -19.5  # Offset in Y
+
+        obj2 = Workplane('YZ', origin=(os_x, os_y, -thickness / 2)) \
+            .moveTo(os_x + length / 2, os_y).sagittaArc((os_x -length / 2, os_y), width / 2) \
+            .sagittaArc((os_x + length / 2, os_y), width / 2) \
+            .close().extrude(thickness)
+
+        # The obj1 shape shall have the same volume as the obj2 shape.
+        self.assertAlmostEqual(obj1.val().wrapped.Volume, obj2.val().wrapped.Volume)
