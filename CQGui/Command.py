@@ -188,7 +188,7 @@ class CadQueryExecuteScript:
             build_result = cqModel.build(build_parameters=build_parameters)
 
             if Settings.report_execute_time:
-                FreeCAD.Console.PrintMessage("Script executed in " + str(build_result.buildTime) + " seconds\r\n");
+                FreeCAD.Console.PrintMessage("Script executed in " + str(build_result.buildTime) + " seconds\r\n")
 
             # Make sure that the build was successful
             if build_result.success:
