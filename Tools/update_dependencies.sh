@@ -30,3 +30,7 @@ done
 # Extract all the relevant components of cqparts to the ThirdParty directory
 ls *.whl | grep cqparts | xargs -L1 unzip
 ls *.whl | grep cqparts | awk -F "-" '{print $1}' | xargs -I {} cp -R {} ../../ThirdParty/
+
+# Clean up temporary files
+cd ../
+rm -rf temp/
