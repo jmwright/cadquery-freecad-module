@@ -1320,76 +1320,16 @@ class Workplane(CQ):
             provide tangent arcs
         """
 
-        startPoint = self._findFromPoint(False)
-        point1 = self.plane.toWorldCoords(point1)
-        point2 = self.plane.toWorldCoords(point2)
+        gstartPoint = self._findFromPoint(False)
+        gpoint1 = self.plane.toWorldCoords(point1)
+        gpoint2 = self.plane.toWorldCoords(point2)
 
-        arc = Edge.makeThreePointArc(startPoint, point1, point2)
+        arc = Edge.makeThreePointArc(gstartPoint, gpoint1, gpoint2)
 
         if not forConstruction:
             self._addPendingEdge(arc)
 
         return self.newObject([arc])
-
-    def sagittaArc(self, endPoint, sag, forConstruction=False):
-        """
-        Draw an arc from the current point to endPoint with an arc defined by the sag (sagitta).
-
-        :param endPoint: end point for the arc
-        :type endPoint: 2-tuple, in workplane coordinates
-        :param sag: the sagitta of the arc
-        :type sag: float, perpendicular distance from arc center to arc baseline.
-        :return: a workplane with the current point at the end of the arc
-
-        The sagitta is the distance from the center of the arc to the arc base.
-        Given that a closed contour is drawn clockwise;
-        A positive sagitta means convex arc and negative sagitta means concave arc.
-        See "https://en.wikipedia.org/wiki/Sagitta_(geometry)" for more information.
-        """
-
-        startPoint = self._findFromPoint(useLocalCoords=True)
-        endPoint = Vector(endPoint)
-        midPoint = endPoint.add(startPoint).multiply(0.5)
-
-        sagVector = endPoint.sub(startPoint).normalized().multiply(abs(sag))
-        if(sag > 0):
-            sagVector.x, sagVector.y = -sagVector.y, sagVector.x # Rotate sagVector +90 deg
-        else:
-            sagVector.x, sagVector.y = sagVector.y, -sagVector.x # Rotate sagVector -90 deg
-
-        sagPoint = midPoint.add(sagVector)
-
-        return self.threePointArc(sagPoint, endPoint, forConstruction)
-
-    def radiusArc(self, endPoint, radius, forConstruction=False):
-        """
-        Draw an arc from the current point to endPoint with an arc defined by the sag (sagitta).
-
-        :param endPoint: end point for the arc
-        :type endPoint: 2-tuple, in workplane coordinates
-        :param radius: the radius of the arc
-        :type radius: float, the radius of the arc between start point and end point.
-        :return: a workplane with the current point at the end of the arc
-
-        Given that a closed contour is drawn clockwise;
-        A positive radius means convex arc and negative radius means concave arc.
-        """
-
-        startPoint = self._findFromPoint(useLocalCoords=True)
-        endPoint = Vector(endPoint)
-
-        # Calculate the sagitta from the radius
-        length = endPoint.sub(startPoint).Length / 2.0
-        try:
-            sag = abs(radius) - math.sqrt(radius**2 - length**2)
-        except ValueError:
-            raise ValueError("Arc radius is not large enough to reach the end point.")
-
-        # Return a sagittaArc
-        if radius > 0:
-            return self.sagittaArc(endPoint, sag, forConstruction)
-        else:
-            return self.sagittaArc(endPoint, -sag, forConstruction)
 
     def rotateAndCopy(self, matrix):
         """
@@ -1798,14 +1738,7 @@ class Workplane(CQ):
 
             s = Workplane().lineTo(1,0).lineTo(1,1).close().extrude(0.2)
         """
-        endPoint = self._findFromPoint(True)
-        startPoint = self.ctx.firstPoint
-
-        # Check if there is a distance between startPoint and endPoint
-        # that is larger than what is considered a numerical error.
-        # If so; add a line segment between endPoint and startPoint
-        if endPoint.sub(startPoint).Length > 1e-6:
-            self.lineTo(self.ctx.firstPoint.x, self.ctx.firstPoint.y)
+        self.lineTo(self.ctx.firstPoint.x, self.ctx.firstPoint.y)
 
         # Need to reset the first point after closing a wire
         self.ctx.firstPoint=None
@@ -2147,7 +2080,7 @@ class Workplane(CQ):
         :param path: A wire along which the pending wires will be swept
         :param boolean sweepAlongWires:
             False to create mutliple swept from wires on the chain along path
-            True to create only one solid swept along path with shape following the list of wires on the chain
+            True to create only one solid swept along path with shape following the list of wires on the chain 
         :param boolean combine: True to combine the resulting solid with parent solids if found.
         :param boolean clean: call :py:meth:`clean` afterwards to have a clean shape
         :return: a CQ object with the resulting solid selected.
@@ -2474,7 +2407,7 @@ class Workplane(CQ):
         :param path: A wire along which the pending wires will be swept
         :param boolean sweepAlongWires:
             False to create mutliple swept from wires on the chain along path
-            True to create only one solid swept along path with shape following the list of wires on the chain
+            True to create only one solid swept along path with shape following the list of wires on the chain 
         :return:a FreeCAD solid, suitable for boolean operations
         """
 
