@@ -6,7 +6,7 @@ v1.2.0 (Unreleased)
     * Made a copy of the PyQode editor which is abandoned, so that a custom version can be maintained here
     * Fixed Qt5 bugs, particularly ones that were effecting macOS
     * Added infrastructure to support third party add-on libraries
-    * Integrated the [cqparts library](https://github.com/fragmuffin/cqparts) as an add-on in the ThirdParty directory
+    * Integrated the cqparts library as an add-on in the ThirdParty directory - https://github.com/fragmuffin/cqparts
     * Created a script to update third-party libraries to aid in maintenance
     * Created a Docs directory to lay the ground work for a documentation revamp.
     
