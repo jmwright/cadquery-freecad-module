@@ -8,6 +8,7 @@ v1.2.0 (Unreleased)
     * Added infrastructure to support third party add-on libraries
     * Integrated the cqparts library as an add-on in the ThirdParty directory - https://github.com/fragmuffin/cqparts
     * Created a script to update third-party libraries to aid in maintenance
+    * An option was added to Settings.py which reports script execution time to the Report View
     * Created a Docs directory to lay the ground work for a documentation revamp.
     
 v1.1.0
