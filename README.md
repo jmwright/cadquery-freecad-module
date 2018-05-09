@@ -1,6 +1,6 @@
 The CadQuery Module for FreeCAD
 =======================
-[![GitHub version](https://d25lcipzij17d.cloudfront.net/badge.svg?id=gh&type=6&v=1.1.0&x2=0)](https://github.com/jmwright/cadquery-freecad-module/releases/tag/v1.1.0)
+[![GitHub version](https://d25lcipzij17d.cloudfront.net/badge.svg?id=gh&type=6&v=1.2.0&x2=0)](https://github.com/jmwright/cadquery-freecad-module/releases/tag/v1.2.0)
 [![License](https://img.shields.io/badge/license-LGPL-lightgrey.svg)](https://github.com/jmwright/cadquery-freecad-module/blob/master/LICENSE)
 
 ## Introduction
@@ -14,7 +14,7 @@ Module that adds a tabbed CadQuery editor to FreeCAD. Please see the [wiki](http
   1. Follow the instructions [here](https://github.com/FreeCAD/FreeCAD-addons/blob/master/README.md) to install and execute the FreeCAD-Addons macro.
   2. Choose `cadquery_module` from the list in the datalog box and click Install/Update.
   3. Restart FreeCAD.
-  
+
 You can use the Install/Update button periodically to get the latest changes to this module.
 
 ## Manual Installation
@@ -24,7 +24,7 @@ Installation is handled slightly differently whether you are installing version 
 
 ### Installing v1.0.0.1 and Earlier
 
-Download the [latest released version](https://github.com/jmwright/cadquery-freecad-module/releases), extract the archive file, and copy the `CadQuery` subdirectory to FreeCAD's `Mod` directory on your system. 
+Download the [latest released version](https://github.com/jmwright/cadquery-freecad-module/releases), extract the archive file, and copy the `CadQuery` subdirectory to FreeCAD's `Mod` directory on your system.
 
 ### Installing v1.0.0.2 and Later
 
