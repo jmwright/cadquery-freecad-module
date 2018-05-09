@@ -7,7 +7,7 @@ The CadQuery Module for FreeCAD
 
 Module that adds a tabbed CadQuery editor to FreeCAD. Please see the [wiki](https://github.com/jmwright/cadquery-freecad-module/wiki) for more detailed information on getting started.
 
-![User Interface](https://github.com/jmwright/cadquery-freecad-module/blob/master/Docs/cqfm_user_interface.png)
+![User Interface](https://github.com/jmwright/cadquery-freecad-module/blob/master/docs/cqfm_user_interface.png)
 
 ## Install Through FreeCAD-Addons
 
