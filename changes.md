@@ -1,7 +1,7 @@
 Changes
 =======
 
-v1.2.0 (Unreleased)
+v1.2.0
 -----
     * Made a copy of the PyQode editor which is abandoned, so that a custom version can be maintained here
     * Fixed Qt5 bugs, particularly ones that were effecting macOS
