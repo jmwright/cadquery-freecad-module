@@ -1,6 +1,7 @@
 ## CadQuery Module for FreeCAD
 
-### Table of Contents
+### Documentation
+- [Introduction](index.md#introduction)
 - [Installation](installation.md)
 - [Usage](usage.md)
 - [Developers](developers.md)
