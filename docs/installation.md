@@ -7,9 +7,8 @@ If you are running FreeCAD 0.17 or newer, which is recommended, this module is e
 2. Scroll down and click on `cadquery_module`
 ![cadquery_module addon item](images/cadquery_module_addon_manager_item.png)
 3. Click the `Install / update` button
-
 3. Restart FreeCAD
-4. Confirm that CadQuery is in the drop down menu of workbenches
+4. Confirm that CadQuery is in the drop down menu of available workbenches
 
 ![cadquery workbench item](images/cadquery_workbench_item.png)
 
