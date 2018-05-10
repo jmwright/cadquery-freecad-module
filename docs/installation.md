@@ -1,4 +1,11 @@
+[<Back to Main](index.md)
 ## Installation
+
+### Table of Contents
+- [Automated](installation.md#automated)
+- [Manual](installation.md#manual)
+- [Troubleshooting](installation.md#troubleshooting)
+- [Next Steps](installation.md#next-steps)
 
 ### Automated
 If you are running FreeCAD 0.17 or newer, which is recommended, this module is easy to install through the included addon manager.
