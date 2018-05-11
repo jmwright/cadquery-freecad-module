@@ -5,7 +5,7 @@ The CadQuery Module for FreeCAD
 
 ## Introduction
 
-This is a FreeCAD module (aka workbench) that adds elements like a tabbed CadQuery editor. All of the libraries are embedded with the workbench, and so it is probably the fastest way to get up and running with CadQuery on a local computer. For users who just want to try CadQuery without installing anything, the [CadQuery Jupyter Notebook](https://mybinder.org/v2/gh/RustyVermeer/tryCQ/master) might be a better choice.
+This is a FreeCAD module (aka workbench) that adds elements like a CadQuery code editor. All of the required libraries are embedded with the workbench, and so it is probably the fastest way to get up and running with CadQuery on a local computer. For users who just want to try CadQuery without installing anything, the [CadQuery Jupyter Notebook](https://mybinder.org/v2/gh/RustyVermeer/tryCQ/master) might be a better choice.
 
 ![User Interface](https://github.com/jmwright/cadquery-freecad-module/blob/master/docs/cqfm_user_interface.png)
 
