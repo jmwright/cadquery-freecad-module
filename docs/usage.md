@@ -91,4 +91,6 @@ If you are using an external editor that supports type annotations, the [cadqury
 ### Getting Help
 
 - Need help using this workbench? You can open an issue [here](https://github.com/jmwright/cadquery-freecad-module/issues), or join the [CadQuery Google Group](https://groups.google.com/forum/#!forum/cadquery) and ask your question there.
-- Need help using CadQuery? You can open an issue over [there](https://github.com/dcowden/cadquery/issues), , or join the [CadQuery Google Group](https://groups.google.com/forum/#!forum/cadquery) and ask your question there. Complete documentation for CadQuery is also available [here](http://dcowden.github.io/cadquery/).
+- Need help using CadQuery? You can open an issue over [there](https://github.com/dcowden/cadquery/issues), or join the [CadQuery Google Group](https://groups.google.com/forum/#!forum/cadquery) and ask your question there. Complete documentation for CadQuery is also available [here](http://dcowden.github.io/cadquery/).
+
+[<Back to Main](index.md)

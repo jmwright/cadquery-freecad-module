@@ -52,3 +52,5 @@ Below are some future enhancements that contributors are welcome to take on.
 * From [issue 28](https://github.com/jmwright/cadquery-freecad-module/issues/28) - Add a way to visualize the negative space in a cut (something like openscad's debug operator).
 * From [issue 28](https://github.com/jmwright/cadquery-freecad-module/issues/28) - Some limited mouse interaction; use to generate a direction selector based on the current view, for example.
 * From [issue 19](https://github.com/jmwright/cadquery-freecad-module/issues/19) - Add interactive parameters like there are on ParametricParts.com.
+
+[<Back to Main](index.md)
