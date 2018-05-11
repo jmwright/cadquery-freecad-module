@@ -9,7 +9,7 @@ This is a FreeCAD module (aka workbench) that adds elements like a CadQuery code
 
 ![User Interface](https://github.com/jmwright/cadquery-freecad-module/blob/master/docs/cqfm_user_interface.png)
 
-The documentation for this module/workbench has been rewritten and restructured, and can be found [here](docs/index.md). Below are the main sections of interest from the documentation.
+The documentation for this module/workbench has been rewritten and restructured, and can be found [here](docs/index.md). Below are the main entry points into the documentation.
 
 ### Documentation
 - [Introduction](docs/index.md#introduction)
