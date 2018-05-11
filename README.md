@@ -5,54 +5,14 @@ The CadQuery Module for FreeCAD
 
 ## Introduction
 
-Module that adds a tabbed CadQuery editor to FreeCAD. Please see the [wiki](https://github.com/jmwright/cadquery-freecad-module/wiki) for more detailed information on getting started.
+This is a FreeCAD module (aka workbench) that adds elements like a tabbed CadQuery editor. All of the libraries are embedded with the workbench, and so it is probably the fastest way to get up and running with CadQuery on a local computer. For users who just want to try CadQuery without installing anything, the [CadQuery Jupyter Notebook](https://mybinder.org/v2/gh/RustyVermeer/tryCQ/master) might be a better choice.
 
 ![User Interface](https://github.com/jmwright/cadquery-freecad-module/blob/master/docs/cqfm_user_interface.png)
 
-## Install Through FreeCAD-Addons
+The documentation for this module/workbench has been rewritten and restructured, and can be found [here](docs/index.md). Below are the main sections of interest from the documentation.
 
-  1. Follow the instructions [here](https://github.com/FreeCAD/FreeCAD-addons/blob/master/README.md) to install and execute the FreeCAD-Addons macro.
-  2. Choose `cadquery_module` from the list in the datalog box and click Install/Update.
-  3. Restart FreeCAD.
-
-You can use the Install/Update button periodically to get the latest changes to this module.
-
-## Manual Installation
-**Requires FreeCAD 0.14 or newer**
-
-Installation is handled slightly differently whether you are installing version 1.0.0.1 and earlier, or a later version.
-
-### Installing v1.0.0.1 and Earlier
-
-Download the [latest released version](https://github.com/jmwright/cadquery-freecad-module/releases), extract the archive file, and copy the `CadQuery` subdirectory to FreeCAD's `Mod` directory on your system.
-
-### Installing v1.0.0.2 and Later
-
-Download the [latest released version](https://github.com/jmwright/cadquery-freecad-module/releases), extract the archive file, and copy the entire extracted directory to FreeCAD's `Mod` directory on your system. You can optionally rename the directory to something like `CadQuery`.
-
-## Typical Installation Locations
-The module should show up in the 'Workbenches' drop down the next time you start FreeCAD. Some typical `Mod` directory locations are as follows.
-
-### Linux
-* /usr/lib/freecad/Mod
-* /usr/local/lib/freecad/Mod
-* ~/.FreeCAD/Mod
-
-If you are running Ubuntu Linux, be sure to run the following line in a terminal before using this module.
-```
-sudo apt-get install python-pyside.qtnetwork
-```
-
-### Windows
-* C:\Program Files\FreeCAD 0.14\Mod
-* C:\Program Files (x86)\FreeCAD 0.14\Mod
-* C:\Users\[your_user_name]\Application Data\FreeCAD\Mod
-
-### Mac
-* /Applications/FreeCAD.app/Contents/Mod
-* /Applications/FreeCAD.app/Mod
-* /Users/[your_user_name]/Library/Preferences/FreeCAD/Mod
-* ~/Library/Preferences/FreeCAD/Mod
-
-## It's Installed, Now What?
-For getting started information and troubleshooting steps, please see the [wiki](https://github.com/jmwright/cadquery-freecad-module/wiki)
+### Documentation
+- [Introduction](docs/index.md#introduction)
+- [Installation](docs/installation.md)
+- [Usage](docs/usage.md)
+- [Developers](docs/developers.md)
