@@ -15,8 +15,6 @@ __all__ = [
     'as_part',
 ]
 
-from .env import get_env_name
-
 from .geometry import CoordSystem
 
 from .misc import property_buffered

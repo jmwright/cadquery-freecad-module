@@ -34,7 +34,7 @@ def revert_sys_modules():
     finally:
         # irrespective of the succes of the context's execution, new modules
         # will be deleted upon exit
-        for mod_name in sys.modules.keys():
+        for mod_name in list(sys.modules.keys()):
             if mod_name not in modules_before:
                 del sys.modules[mod_name]
 

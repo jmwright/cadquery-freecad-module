@@ -217,7 +217,7 @@ Why CadQuery instead of OpenSCAD?
 
 CadQuery is based on OpenCasCade.  CadQuery shares many features with OpenSCAD, another open source, script based, parametric model generator.
 
-The primary advantage of OpenSCAD is the large number of already existing model libaries  that exist already. So why not simply use OpenSCAD?
+The primary advantage of OpenSCAD is the large number of already existing model libraries  that exist already. So why not simply use OpenSCAD?
 
 CadQuery scripts have several key advantages over OpenSCAD:
 
@@ -257,8 +257,7 @@ Adam Urbańczyk has been working hard on his own [CQ fork](https://github.com/ad
 Work has begun on Cadquery 2.0, which will feature:
 
    1. Feature trees, for more powerful selection
-   2. Direct use of OpenCascade Community Edition(OCE), so that it is no longer required to install FreeCAD
-   3. https://github.com/jmwright/cadquery-gui, which will allow visualization of workplanes  
+   2. Direct use of OpenCascade Community Edition (OCE), so that it is no longer required to install FreeCAD
 
 The project page can be found here: https://github.com/dcowden/cadquery/projects/1
 

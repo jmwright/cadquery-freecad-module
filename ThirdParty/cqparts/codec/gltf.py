@@ -257,6 +257,19 @@ class GLTFExporter(Exporter):
     **Spec**        `glTF 2.0 <https://github.com/KhronosGroup/glTF/tree/master/specification/2.0>`_
     =============== ======================
 
+    **Exporting a Box:**
+
+    For this example we'll instantiate an existing ``Part`` class, a simple
+    :class:`Box <cqparts_misc.basic.primatives.Box>`::
+
+        >>> import cpqarts
+        >>> from cqparts_misc.basic.primatives import Box
+        >>> box = Box()
+        >>> box.exporter('gltf')('box.gltf', embed=True)
+
+    Will export a single file ``box.gltf`` with mesh data encoded into
+    it as a string.
+
     **Embedding vs .bin Files:** default generates ``.bin`` files
 
     If ``embed`` is ``True`` when :meth:`calling <__call__>`, then all data is
@@ -270,6 +283,8 @@ class GLTFExporter(Exporter):
     For example, if we use the ``car`` from :ref:`tutorial_assembly`,
     with the hierarchy::
 
+        >>> car = Car()
+        >>> print(car.tree_str(name='car'))
         car
         \u251c\u25cb chassis
         \u251c\u2500 front_axle
@@ -280,6 +295,7 @@ class GLTFExporter(Exporter):
             \u251c\u25cb axle
             \u251c\u25cb left_wheel
             \u2514\u25cb right_wheel
+        >>> car.exporter('gltf')('car.gltf', embed=False)
 
     When exported, a ``.bin`` file will be created for each
     :class:`Part <cqparts.Part>` (denoted by a ``\u25cb``).

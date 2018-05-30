@@ -114,7 +114,7 @@ def populateParameterEditor(parameters):
             line = 1
 
             # Add controls for all the parameters so that they can be edited from the GUI
-            for pKey, pVal in parameters.iteritems():
+            for pKey, pVal in list(parameters.items()):
                 label = QtGui.QLabel(pKey)
 
                 # We want to keep track of this parameter value field so that we can pull its value later when executing

@@ -5,7 +5,10 @@ def show(cqObject, rgba=(204, 204, 204, 0.0)):
     import FreeCAD
     from random import random
     import os, tempfile
-    import Shared
+    try:
+        from . import Shared
+    except:
+        import Shared
 
     #Convert our rgba values
     r = rgba[0] / 255.0

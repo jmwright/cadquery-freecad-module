@@ -16,6 +16,7 @@ else:
     # python 2.x
     import SimpleHTTPServer
     import SocketServer
+
 import threading
 import webbrowser
 
@@ -23,6 +24,7 @@ import logging
 log = logging.getLogger(__name__)
 
 from ..utils import working_dir
+from .environment import map_environment, DisplayEnvironment
 
 # Get this file's location
 _this_path = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
@@ -40,16 +42,20 @@ TEMPLATE_CONTENT_DIR = os.path.join(_this_path, 'web-template')
 SocketServer.TCPServer.allow_reuse_address = True  # stops crash on re-use of port
 
 
-def web_display(component, port=9041):
+@map_environment(
+    # named 'cmdline'?
+    # This is a fallback display environment if no other method is available.
+    # Therefore it's assumed that the environment that's been detected is a
+    # no-frills command line.
+    name='cmdline',
+    order=99,
+    condition=lambda: True,  # fallback
+)
+class WebDisplayEnv(DisplayEnvironment):
     """
     Display given component in a browser window
 
-    :param component: the component to render
-    :type component: :class:`Component <cqparts.Component>`
-    :param port: port to expose http service on
-    :type port: :class:`int`
-
-    This method exports the model, then exposes a http service on *localhost*
+    This display exports the model, then exposes a http service on *localhost*
     for a browser to use.
     The http service does not know when the browser window has been closed, so
     it will continue to serve the model's data until the user halts the
@@ -57,9 +63,9 @@ def web_display(component, port=9041):
 
     When run, you should see output similar to::
 
-        >>> from cqparts.display import web_display
+        >>> from cqparts.display import WebDisplayEnv
         >>> from cqparts_misc.basic.primatives import Cube
-        >>> web_display(Cube())
+        >>> WebDisplayEnv().display(Cube())
         press [ctrl+c] to stop server
         127.0.0.1 - - [27/Dec/2017 16:06:37] "GET / HTTP/1.1" 200 -
         Created new window in existing browser session.
@@ -77,97 +83,110 @@ def web_display(component, port=9041):
     and any further request on the opened browser window will return
     an errorcode 404 (file not found), because the http service has stopped.
     """
-    # Verify Parameter(s)
-    from .. import Component
 
-    if not isinstance(component, Component):
-        raise TypeError("given component must be a %r, not a %r" % (
-            Component, type(component)
-        ))
+    def display_callback(self, component, port=9041, autorotate=False):
+        """
+        :param component: the component to render
+        :type component: :class:`Component <cqparts.Component>`
+        :param port: port to expose http service on
+        :type port: :class:`int`
+        :param autorotate: if ``True``, rendered component will rotate
+                           as if on a turntable.
+        :type autorotate: :class:`bool`
+        """
 
-    # Create temporary file to host files
-    temp_dir = tempfile.mkdtemp()
-    host_dir = os.path.join(temp_dir, 'html')
-    print("host temp folder: %s" % host_dir)
+        # Verify Parameter(s)
+        from .. import Component
 
-    # Copy template content to temporary location
-    shutil.copytree(TEMPLATE_CONTENT_DIR, host_dir)
+        if not isinstance(component, Component):
+            raise TypeError("given component must be a %r, not a %r" % (
+                Component, type(component)
+            ))
 
-    # Export model
-    exporter = component.exporter('gltf')
-    exporter(
-        filename=os.path.join(host_dir, 'model', 'out.gltf'),
-        embed=False,
-    )
+        # Create temporary file to host files
+        temp_dir = tempfile.mkdtemp()
+        host_dir = os.path.join(temp_dir, 'html')
+        print("host temp folder: %s" % host_dir)
 
-    # Modify templated content
-    # index.html
-    with open(os.path.join(host_dir, 'index.html'), 'r') as fh:
-        index_template = jinja2.Template(fh.read())
-    with open(os.path.join(host_dir, 'index.html'), 'w') as fh:
-        # camera location & target
-        cam_t = [
-            (((a + b) / 2.0) / 1000)  # midpoint (unit: meters)
-            for (a, b) in zip(exporter.scene_min, exporter.scene_max)
-        ]
-        cam_p = [
-            ((b - a) * 1.0) / 1000 + t  # max point * 200% (unit: meters)
-            for (a, b, t) in zip(exporter.scene_min, exporter.scene_max, cam_t)
-        ]
+        # Copy template content to temporary location
+        shutil.copytree(TEMPLATE_CONTENT_DIR, host_dir)
 
-        # write
-        xzy = lambda a: (a[0], a[2], -a[1])  # x,z,y coordinates (not x,y,z)
-        fh.write(index_template.render(
-            model_filename='model/out.gltf',
-            camera_target=' '.join("%g" % (val) for val in xzy(cam_t)),
-            camera_pos=' '.join("%g" % (val) for val in xzy(cam_p)),
-        ))
-
-    try:
-        # Start web-service (loop forever)
-        server = SocketServer.ThreadingTCPServer(
-            server_address=("localhost", port),
-            RequestHandlerClass=SimpleHTTPServer.SimpleHTTPRequestHandler,
+        # Export model
+        exporter = component.exporter('gltf')
+        exporter(
+            filename=os.path.join(host_dir, 'model', 'out.gltf'),
+            embed=False,
         )
-        server_addr = "http://%s:%i/" % server.server_address
-        def thread_target():
-            with working_dir(host_dir):
-                server.serve_forever()
 
-        print("serving: %s" % server_addr)
-        sys.stdout.flush()
-        server_thread = threading.Thread(target=thread_target)
-        server_thread.daemon = True
-        server_thread.start()
+        # Modify templated content
+        # index.html
+        with open(os.path.join(host_dir, 'index.html'), 'r') as fh:
+            index_template = jinja2.Template(fh.read())
+        with open(os.path.join(host_dir, 'index.html'), 'w') as fh:
+            # camera location & target
+            cam_t = [
+                (((a + b) / 2.0) / 1000)  # midpoint (unit: meters)
+                for (a, b) in zip(exporter.scene_min, exporter.scene_max)
+            ]
+            cam_p = [
+                (((b - a) * 1.0) / 1000) + t  # max point * 200% (unit: meters)
+                for (a, b, t) in zip(exporter.scene_min, exporter.scene_max, cam_t)
+            ]
 
-        # Open in browser
-        print("opening in browser: %s" % server_addr)
-        sys.stdout.flush()
-        webbrowser.open(server_addr)
+            # write
+            xzy = lambda a: (a[0], a[2], -a[1])  # x,z,y coordinates (not x,y,z)
+            fh.write(index_template.render(
+                model_filename='model/out.gltf',
+                autorotate = str(autorotate).lower(),
+                camera_target=','.join("%g" % (val) for val in xzy(cam_t)),
+                camera_pos=','.join("%g" % (val) for val in xzy(cam_p)),
+            ))
 
-        # workaround for https://github.com/dcowden/cadquery/issues/211
-        import signal
-        def _handler_sigint(signum, frame):
-            raise KeyboardInterrupt()
-        signal.signal(signal.SIGINT, _handler_sigint)
+        try:
+            # Start web-service (loop forever)
+            server = SocketServer.ThreadingTCPServer(
+                server_address=("0.0.0.0", port),
+                RequestHandlerClass=SimpleHTTPServer.SimpleHTTPRequestHandler,
+            )
+            server_addr = "http://%s:%i/" % server.server_address
+            def thread_target():
+                with working_dir(host_dir):
+                    server.serve_forever()
 
-        print("press [ctrl+c] to stop server")
-        sys.stdout.flush()
-        while True:  # wait for Ctrl+C
-            time.sleep(1)
+            print("serving: %s" % server_addr)
+            sys.stdout.flush()
+            server_thread = threading.Thread(target=thread_target)
+            server_thread.daemon = True
+            server_thread.start()
 
-    except KeyboardInterrupt:
-        log.info("\n[keyboard interrupt]")
-        sys.stdout.flush()
+            # Open in browser
+            print("opening in browser: %s" % server_addr)
+            sys.stdout.flush()
+            webbrowser.open(server_addr)
 
-    finally:
-        # Stop web-service
-        server.shutdown()
-        server.server_close()
-        server_thread.join()
-        print("[server shutdown successfully]")
+            # workaround for https://github.com/dcowden/cadquery/issues/211
+            import signal
+            def _handler_sigint(signum, frame):
+                raise KeyboardInterrupt()
+            signal.signal(signal.SIGINT, _handler_sigint)
 
-        # Delete temporary content
-        if os.path.exists(os.path.join(host_dir, 'cqparts-display.txt')):
-            # just making sure we're deleting the right folder
-            shutil.rmtree(temp_dir)
+            print("press [ctrl+c] to stop server")
+            sys.stdout.flush()
+            while True:  # wait for Ctrl+C
+                time.sleep(1)
+
+        except KeyboardInterrupt:
+            log.info("\n[keyboard interrupt]")
+            sys.stdout.flush()
+
+        finally:
+            # Stop web-service
+            server.shutdown()
+            server.server_close()
+            server_thread.join()
+            print("[server shutdown successfully]")
+
+            # Delete temporary content
+            if os.path.exists(os.path.join(host_dir, 'cqparts-display.txt')):
+                # just making sure we're deleting the right folder
+                shutil.rmtree(temp_dir)

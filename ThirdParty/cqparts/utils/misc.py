@@ -60,6 +60,23 @@ def indicate_last(items):
 
 @contextmanager
 def working_dir(path):
+    """
+    Change working directory within a context::
+
+        >>> import os
+        >>> from cqparts.utils import working_dir
+
+        >>> print(os.getcwd())
+        /home/myuser/temp
+
+        >>> with working_dir('..'):
+        ...     print(os.getcwd())
+        ...
+        /home/myuser
+
+    :param path: working path to use while in context
+    :type path: :class:`str`
+    """
     initial_path = os.getcwd()
     os.chdir(path)
     yield

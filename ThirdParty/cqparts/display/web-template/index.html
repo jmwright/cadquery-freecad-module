@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>CQParts display-o-tron</title>
+    <script src="/static/js/three.min.js"></script>
+    <script src="/static/js/OrbitControls.js"></script>
+    <script src="/static/js/GLTFLoader.js"></script>
+  </head>
+  <body>
+    <script src="/static/js/app.js"></script>
+    <script>
+      camera.position.set({{camera_pos}});
+      controls.target.set({{camera_target}});
+      controls.autoRotate = {{autorotate}};
+    </script>
+  </body>
+</html>

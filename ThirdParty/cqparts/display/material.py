@@ -170,7 +170,7 @@ class RenderProps(object):
                 "metallicFactor": 0.1,
                 "roughnessFactor": 0.7,
             },
-            'alphaMode': 'MASK',
+            'alphaMode': 'BLEND',
             'alphaCutoff': 1.0,
             #"name": "red",
         }

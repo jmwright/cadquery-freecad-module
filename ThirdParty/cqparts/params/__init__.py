@@ -5,6 +5,7 @@ __all__ = [
 
     # Parameter Types
     'Boolean',
+    'ComponentRef',
     'Float',
     'FloatRange',
     'Int',
@@ -27,6 +28,7 @@ from .parametric_object import ParametricObject
 
 # Parameter Types
 from .types import Boolean
+from .types import ComponentRef
 from .types import Float
 from .types import FloatRange
 from .types import Int

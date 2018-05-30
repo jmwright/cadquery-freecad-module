@@ -5,7 +5,88 @@ import inspect
 from .. import Component, Part, Assembly
 
 
-class CatalogueTest(unittest.TestCase):
+class ComponentTest(unittest.TestCase):
+    """
+    Generic testcase with utilities for testing
+    :class:`Part <cqparts.Part>` and :class:`Assembly <cqparts.Assembly>` instances.
+
+    For example:
+
+    .. doctest::
+
+        import cqparts
+        import cadquery
+        from cqparts.utils.test import ComponentTest
+
+        class Box(cqparts.Part):
+            def make(self):
+                return cadquery.Workplane('XY').box(1,1,1)
+
+        class BoxTest(ComponentTest):
+            def test_box(self):
+                box = Box()
+                self.assertComponent(box)
+
+    """
+
+
+    # ----- Assertion utilities
+    def assertPartBoundingBox(self, obj):
+        assert isinstance(obj, Part), "assertion only relevant for Part instances"
+        self.assertGreater(obj.bounding_box.DiagonalLength, 0)
+
+    def assertPartHasVolume(self, obj):
+        self.assertGreater(obj.local_obj.val().wrapped.Volume, 0)  # has volume
+
+    def assertAssembyHasComponents(self, obj):
+        self.assertGreater(len(obj.components), 0)  # has components
+
+    # ----- Class-wide utilities
+    def assertPart(self, obj):
+        """
+        Assert criteria common to any fully formed Part.
+
+        :param obj: part under test
+        :type obj: :class:`Part <cqparts.Part>`
+        """
+        self.assertPartBoundingBox(obj)
+        self.assertPartHasVolume(obj)
+        # TODO: more
+
+    def assertAssembly(self, obj):
+        """
+        Assert criteria common to any fully formed Assembly.
+
+        :param obj: assembly under test
+        :type obj: :class:`Assembly <cqparts.Assembly>`
+        """
+        self.assertAssembyHasComponents(obj)
+        # TODO: more
+
+    def assertComponent(self, obj, recursive=True, _depth=0):
+        """
+        Assert criteria common to any fully formed Component.
+
+        :param obj: component under test
+        :type obj: :class:`Component <cqparts.Component>`
+        :param recursive: if ``True`` sub-components will also be tested
+        :type recursive: :class:`bool`
+        """
+        self.assertIsInstance(obj, Component)
+        if _depth == 0:
+            obj.build()
+        if isinstance(obj, Part):
+            self.assertPart(obj)
+        elif isinstance(obj, Assembly):
+            self.assertAssembly(obj)
+            if recursive:
+                for (name, child) in obj.components.items():
+                    self.assertComponent(child, recursive=recursive, _depth=_depth+1)
+        else:
+            self.fail("unsupported class %r, only Part & Assembly should inherit directly from Component" % (type(obj)))
+
+
+class CatalogueTest(ComponentTest):
 
     catalogue = None
 
@@ -119,8 +200,6 @@ class CatalogueTest(unittest.TestCase):
         ``True``    ``False``   No
         ``True``    ``True``    Yes : inclusion take precedence
         =========== =========== =======================
-
-
         """
 
         # runtime import?
@@ -147,13 +226,7 @@ class CatalogueTest(unittest.TestCase):
             # Create test method run when test is executed
             def test_meth(self):
                 obj = self.catalogue.deserialize_item(item_data)
-                self.assertIsInstance(obj, Component)
-                if isinstance(obj, Part):
-                    obj.build()
-                    self.assertGreater(obj.bounding_box.DiagonalLength, 0)
-                elif isinstance(obj, Assembly):
-                    obj.build()
-                    self.assertTrue(bool(obj.components))  # has components
+                self.assertComponent(obj, recursive=True)
 
             return test_meth
 

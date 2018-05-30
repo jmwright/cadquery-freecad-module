@@ -8,6 +8,41 @@ except:
     from CQGui.Command import *
 import CadQuery_rc
 
+import os
+import sys
+try:
+    from . import module_locator
+except:
+    import module_locator
+
+# Set up so that we can import from our embedded packages
+module_base_path = module_locator.module_path()
+libs_dir_path = os.path.join(module_base_path, 'Libs')
+sys.path.insert(0, libs_dir_path)
+
+# Tack on our CadQuery library git subtree
+cq_lib_path = os.path.join(libs_dir_path, 'cadquery')
+sys.path.insert(1, cq_lib_path)
+
+# Add our third party libraries so that they can be used in scripts
+third_party_path = os.path.join(module_base_path, 'ThirdParty')
+sys.path.append(third_party_path)
+
+# Make sure we get the right libs under the FreeCAD installation
+fc_base_path = os.path.dirname(os.path.dirname(module_base_path))
+fc_lib_path = os.path.join(fc_base_path, 'lib')
+fc_bin_path = os.path.join(fc_base_path, 'bin')
+
+# Make sure that the directories exist before we add them to sys.path
+# This could cause problems or solve them by overriding what CQ is setting for the paths
+if os.path.exists(fc_lib_path):
+    sys.path.insert(1, fc_lib_path)
+if os.path.exists(fc_bin_path):
+    sys.path.insert(1, fc_bin_path)
+
+# Need to set this for PyQode
+os.environ['QT_API'] = 'pyside'
+
 class CadQueryWorkbench (Workbench):
     """CadQuery workbench for FreeCAD"""
     """CadQuery workbench for FreeCAD"""
@@ -39,7 +74,10 @@ class CadQueryWorkbench (Workbench):
 
     def Activated(self):
         import os
-        import module_locator
+        try:
+            from . import module_locator
+        except:
+            import module_locator
         try:
             from CadQuery.CQGui import ImportCQ
         except:
@@ -86,7 +124,7 @@ class CadQueryWorkbench (Workbench):
         except:
             from CQGui import ImportCQ
             CQGui.Command.CadQueryExecuteScript().Activated()
-        
+
 
     def Deactivated(self):
         pass
@@ -94,7 +132,10 @@ class CadQueryWorkbench (Workbench):
     @staticmethod
     def ListExamples():
         import os
-        import module_locator
+        try:
+            from . import module_locator
+        except:
+            import module_locator
 
         dirs = []
 

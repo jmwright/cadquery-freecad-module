@@ -202,3 +202,46 @@ class PartsList(Parameter):
             raise ParameterError("value must be a list")
 
         return value
+
+
+class ComponentRef(Parameter):
+    """
+    Reference to a Component
+
+    Initially introduced as a means to reference a sub-component's parent
+
+    .. doctest::
+
+        import cadquery
+        from cqparts import Part, Component
+        from cqparts.params import *
+
+        class Eighth(Part):
+            parent = ComponentRef(doc="part's parent")
+
+            def make(self):
+                size = self.parent.size / 2.
+                return cadquery.Workplane('XY').box(size, size, size)
+
+        class Cube(Assembly):
+            size = PositiveFloat(10, doc="cube size")
+
+            def make_components(self):
+                # create a single cube 1/8 the volume of the whole cube
+                return {
+                    'a': Eighth(parent=self),
+                }
+
+            def make_constraints(self):
+                return [
+                    Fixed(self.components['a'].mate_origin),
+                ]
+
+    """
+
+    def type(self, value):
+        # Verify, raise exception for any problems
+        from .. import Component  # avoid circular dependency
+        if not isinstance(value, Component):
+            raise ParameterError("value must be a Component")
+        return value

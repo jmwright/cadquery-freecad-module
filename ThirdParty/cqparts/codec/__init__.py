@@ -189,7 +189,7 @@ __all__ = [
 
 from .amf import AMFExporter
 from .gltf import GLTFExporter
-from .step import STEPExporter, STEPImporter
+from .step import STEPExporter, STEPPartImporter, STEPAssemblyImporter
 from .stl import STLExporter
 from .svg import SVGExporter
 from .threejs_json import ThreejsJSONExporter, ThreejsJSONAssemblyExporter
