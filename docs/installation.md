@@ -44,9 +44,14 @@ Sometimes a different version or branch of the workbench may be needed, other th
 - ~/Library/Preferences/FreeCAD/Mod
 
 ### Troubleshooting
-If you are running Ubuntu Linux, you may need to run the following line in a terminal before using this module.
+You may get a `No module named QtNetwork` error on Ubuntu based systems when you select the module in FreeCAD. If you do, run the following command line from a terminal to fix this issue.
 ```
 sudo apt-get install python-pyside.qtnetwork
+```
+
+When running on Ubuntu 14.04 with the default version of FreeCAD included in the repositories, you may get a `No module named PySide` or `No module named QtGui` error. If you do, run the following line to install the missing packages.
+```
+sudo apt-get install libboost-python1.54.0 libnglib-4.9.13 liboce-foundation10 liboce-modeling10 liboce-ocaf-lite10 liboce-ocaf10 liboce-visualization10 libpyside1.2 libshiboken1.2 python-pyside.qtcore python-pyside.qtgui python-pyside.qtsvg python-pyside.qtuitools python-pyside.qtxml
 ```
 
 ### Next Steps
