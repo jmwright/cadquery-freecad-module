@@ -153,7 +153,7 @@ class CadQueryExecuteScript:
         scriptText = cqCodePane.toPlainText().encode('utf-8')
 
         # Check to see if we are executig a CQGI compliant script
-        if ("show_object(" in scriptText and "# show_object(" not in scriptText and "#show_boject(" not in scriptText) or ("debug(" in scriptText and "# debug(" not in scriptText and "#debug(" not in scriptText):
+        if "show_object(" in scriptText or "debug(" in scriptText:
             FreeCAD.Console.PrintMessage("Executing CQGI-compliant script.\r\n")
 
             # A repreentation of the CQ script with all the metadata attached
