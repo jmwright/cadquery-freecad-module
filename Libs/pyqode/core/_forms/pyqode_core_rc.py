@@ -5,7 +5,6 @@
 # Created by: The Resource Compiler for PyQt5 (Qt v5.5.1)
 #
 # WARNING! All changes made in this file will be lost!
-
 from pyqode.qt import QtCore
 
 qt_resource_data = b"\

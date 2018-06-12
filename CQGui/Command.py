@@ -5,7 +5,14 @@
 import imp, os, sys, tempfile
 import FreeCAD, FreeCADGui
 from PySide import QtGui, QtCore
-import ExportCQ, ImportCQ
+try:
+    import ExportCQ
+except:
+    from . import ExportCQ
+try:
+    import ImportCQ
+except:
+    from . import ImportCQ
 import module_locator
 import Settings
 import Shared
