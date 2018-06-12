@@ -35,6 +35,12 @@ This is done to update the CadQuery logo.
 2. `cd` into the root directory of this module/workbench.
 3. Run the following command: `pyside-rcc ./CQGui/Resources/CadQuery.qrc -o CadQuery_rc.py`
 
+Newer versions of FreeCAD use Pyside2, and so `pyside2-rcc` is needed instead:
+```bash
+sudo add-apt-repository ppa:thopiekar/pyside-git
+sudo apt-get update
+```
+
 ### Future Enhancements
 Below are some future enhancements that contributors are welcome to take on.
 
