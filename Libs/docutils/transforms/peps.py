@@ -1,4 +1,4 @@
-# $Id: peps.py 6433 2010-09-28 08:21:25Z milde $
+# $Id: peps.py 7995 2016-12-10 17:50:59Z milde $
 # Author: David Goodger <goodger@python.org>
 # Copyright: This module has been placed in the public domain.
 
@@ -32,8 +32,8 @@ class Headers(Transform):
     default_priority = 360
 
     pep_url = 'pep-%04d'
-    pep_cvs_url = ('http://svn.python.org/view/*checkout*'
-                   '/peps/trunk/pep-%04d.txt')
+    pep_cvs_url = ('http://hg.python.org'
+                   '/peps/file/default/pep-%04d.txt')
     rcs_keyword_substitutions = (
           (re.compile(r'\$' r'RCSfile: (.+),v \$$', re.IGNORECASE), r'\1'),
           (re.compile(r'\$[a-zA-Z]+: (.+) \$$'), r'\1'),)
@@ -113,7 +113,7 @@ class Headers(Transform):
             elif name in ('replaces', 'replaced-by', 'requires'):
                 newbody = []
                 space = nodes.Text(' ')
-                for refpep in re.split(',?\s+', body.astext()):
+                for refpep in re.split(r',?\s+', body.astext()):
                     pepno = int(refpep)
                     newbody.append(nodes.reference(
                         refpep, refpep,

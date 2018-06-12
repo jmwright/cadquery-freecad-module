@@ -14,7 +14,7 @@
 # .. _2-Clause BSD license: http://www.spdx.org/licenses/BSD-2-Clause
 
 #   Based on eLyXer: convert LyX source files to HTML output.
-#   http://elyxer.nongnu.org/
+#   http://alexfernandez.github.io/elyxer/
 
 # --end--
 # Alex 20101110
@@ -112,7 +112,7 @@ class BibStylesConfig(object):
       u'@conference':u'$authors: “$title”, <i>$journal</i>,{ pp. $pages,} $year.{ URL <a href="$url">$url</a>.}{ $note.}', 
       u'@inbook':u'$authors: <i>$title</i>.{{ $publisher,} $year.}{ URL <a href="$url">$url</a>.}{ $note.}', 
       u'@incollection':u'$authors: <i>$title</i>{ in <i>$booktitle</i>{ ($editor, ed.)}}.{{ $publisher,} $year.}{ URL <a href="$url">$url</a>.}{ $note.}', 
-      u'@inproceedings':u'$authors: “$title”, <i>$journal</i>,{ pp. $pages,} $year.{ URL <a href="$url">$url</a>.}{ $note.}', 
+      u'@inproceedings':u'$authors: “$title”, <i>$booktitle</i>,{ pp. $pages,} $year.{ URL <a href="$url">$url</a>.}{ $note.}', 
       u'@manual':u'$authors: <i>$title</i>.{{ $publisher,} $year.}{ URL <a href="$url">$url</a>.}{ $note.}', 
       u'@mastersthesis':u'$authors: <i>$title</i>.{{ $publisher,} $year.}{ URL <a href="$url">$url</a>.}{ $note.}', 
       u'@misc':u'$authors: <i>$title</i>.{{ $publisher,}{ $howpublished,} $year.}{ URL <a href="$url">$url</a>.}{ $note.}', 
@@ -245,7 +245,8 @@ class ContainerConfig(object):
       u'\\begin_inset Quotes':u'QuoteContainer', 
       u'\\begin_inset Tabular':u'Table', u'\\begin_inset Text':u'InsetText', 
       u'\\begin_inset VSpace':u'VerticalSpace', u'\\begin_inset Wrap':u'Wrap', 
-      u'\\begin_inset listings':u'Listing', u'\\begin_inset space':u'Space', 
+      u'\\begin_inset listings':u'Listing', 
+      u'\\begin_inset script':u'ScriptInset', u'\\begin_inset space':u'Space', 
       u'\\begin_layout':u'Layout', u'\\begin_layout Abstract':u'Abstract', 
       u'\\begin_layout Author':u'Author', 
       u'\\begin_layout Bibliography':u'Bibliography', 
@@ -291,7 +292,7 @@ class EscapeConfig(object):
   "Configuration class from elyxer.config file"
 
   chars = {
-      u'\n':u'', u' -- ':u' — ', u'\'':u'’', u'---':u'—', u'`':u'‘', 
+      u'\n':u'', u' -- ':u' — ', u' --- ':u' — ', u'\'':u'’', u'`':u'‘', 
       }
 
   commands = {
@@ -324,21 +325,24 @@ class FormulaConfig(object):
 
   alphacommands = {
       u'\\AA':u'Å', u'\\AE':u'Æ', 
-      u'\\AmS':u'<span class="versalitas">AmS</span>', u'\\DH':u'Ð', 
-      u'\\L':u'Ł', u'\\O':u'Ø', u'\\OE':u'Œ', u'\\TH':u'Þ', u'\\aa':u'å', 
-      u'\\ae':u'æ', u'\\alpha':u'α', u'\\beta':u'β', u'\\delta':u'δ', 
-      u'\\dh':u'ð', u'\\epsilon':u'ϵ', u'\\eta':u'η', u'\\gamma':u'γ', 
-      u'\\i':u'ı', u'\\imath':u'ı', u'\\iota':u'ι', u'\\j':u'ȷ', 
-      u'\\jmath':u'ȷ', u'\\kappa':u'κ', u'\\l':u'ł', u'\\lambda':u'λ', 
+      u'\\AmS':u'<span class="versalitas">AmS</span>', u'\\Angstroem':u'Å', 
+      u'\\DH':u'Ð', u'\\Koppa':u'Ϟ', u'\\L':u'Ł', u'\\Micro':u'µ', u'\\O':u'Ø', 
+      u'\\OE':u'Œ', u'\\Sampi':u'Ϡ', u'\\Stigma':u'Ϛ', u'\\TH':u'Þ', 
+      u'\\aa':u'å', u'\\ae':u'æ', u'\\alpha':u'α', u'\\beta':u'β', 
+      u'\\delta':u'δ', u'\\dh':u'ð', u'\\digamma':u'ϝ', u'\\epsilon':u'ϵ', 
+      u'\\eta':u'η', u'\\eth':u'ð', u'\\gamma':u'γ', u'\\i':u'ı', 
+      u'\\imath':u'ı', u'\\iota':u'ι', u'\\j':u'ȷ', u'\\jmath':u'ȷ', 
+      u'\\kappa':u'κ', u'\\koppa':u'ϟ', u'\\l':u'ł', u'\\lambda':u'λ', 
       u'\\mu':u'μ', u'\\nu':u'ν', u'\\o':u'ø', u'\\oe':u'œ', u'\\omega':u'ω', 
       u'\\phi':u'φ', u'\\pi':u'π', u'\\psi':u'ψ', u'\\rho':u'ρ', 
-      u'\\sigma':u'σ', u'\\ss':u'ß', u'\\tau':u'τ', u'\\textcrh':u'ħ', 
-      u'\\th':u'þ', u'\\theta':u'θ', u'\\upsilon':u'υ', u'\\varDelta':u'∆', 
+      u'\\sampi':u'ϡ', u'\\sigma':u'σ', u'\\ss':u'ß', u'\\stigma':u'ϛ', 
+      u'\\tau':u'τ', u'\\tcohm':u'Ω', u'\\textcrh':u'ħ', u'\\th':u'þ', 
+      u'\\theta':u'θ', u'\\upsilon':u'υ', u'\\varDelta':u'∆', 
       u'\\varGamma':u'Γ', u'\\varLambda':u'Λ', u'\\varOmega':u'Ω', 
       u'\\varPhi':u'Φ', u'\\varPi':u'Π', u'\\varPsi':u'Ψ', u'\\varSigma':u'Σ', 
       u'\\varTheta':u'Θ', u'\\varUpsilon':u'Υ', u'\\varXi':u'Ξ', 
-      u'\\varepsilon':u'ε', u'\\varkappa':u'ϰ', u'\\varphi':u'φ', 
-      u'\\varpi':u'ϖ', u'\\varrho':u'ϱ', u'\\varsigma':u'ς', 
+      u'\\varbeta':u'ϐ', u'\\varepsilon':u'ε', u'\\varkappa':u'ϰ', 
+      u'\\varphi':u'φ', u'\\varpi':u'ϖ', u'\\varrho':u'ϱ', u'\\varsigma':u'ς', 
       u'\\vartheta':u'ϑ', u'\\xi':u'ξ', u'\\zeta':u'ζ', 
       }
 
@@ -376,59 +380,75 @@ class FormulaConfig(object):
 
   commands = {
       u'\\ ':u' ', u'\\!':u'', u'\\#':u'#', u'\\$':u'$', u'\\%':u'%', 
-      u'\\&':u'&', u'\\,':u' ', u'\\:':u' ', u'\\;':u' ', 
-      u'\\APLdownarrowbox':u'⍗', u'\\APLleftarrowbox':u'⍇', 
+      u'\\&':u'&', u'\\,':u' ', u'\\:':u' ', u'\\;':u' ', u'\\AC':u'∿', 
+      u'\\APLcomment':u'⍝', u'\\APLdownarrowbox':u'⍗', u'\\APLinput':u'⍞', 
+      u'\\APLinv':u'⌹', u'\\APLleftarrowbox':u'⍇', u'\\APLlog':u'⍟', 
       u'\\APLrightarrowbox':u'⍈', u'\\APLuparrowbox':u'⍐', u'\\Box':u'□', 
-      u'\\Bumpeq':u'≎', u'\\CIRCLE':u'●', u'\\Cap':u'⋒', u'\\CheckedBox':u'☑', 
-      u'\\Circle':u'○', u'\\Coloneqq':u'⩴', u'\\Corresponds':u'≙', 
-      u'\\Cup':u'⋓', u'\\Delta':u'Δ', u'\\Diamond':u'◇', u'\\Downarrow':u'⇓', 
-      u'\\EUR':u'€', u'\\Game':u'⅁', u'\\Gamma':u'Γ', u'\\Im':u'ℑ', 
-      u'\\Join':u'⨝', u'\\LEFTCIRCLE':u'◖', u'\\LEFTcircle':u'◐', 
-      u'\\Lambda':u'Λ', u'\\Leftarrow':u'⇐', u'\\Lleftarrow':u'⇚', 
-      u'\\Longleftarrow':u'⟸', u'\\Longleftrightarrow':u'⟺', 
-      u'\\Longrightarrow':u'⟹', u'\\Lsh':u'↰', u'\\Mapsfrom':u'⇐|', 
-      u'\\Mapsto':u'|⇒', u'\\Omega':u'Ω', u'\\P':u'¶', u'\\Phi':u'Φ', 
-      u'\\Pi':u'Π', u'\\Pr':u'Pr', u'\\Psi':u'Ψ', u'\\RIGHTCIRCLE':u'◗', 
-      u'\\RIGHTcircle':u'◑', u'\\Re':u'ℜ', u'\\Rrightarrow':u'⇛', 
-      u'\\Rsh':u'↱', u'\\S':u'§', u'\\Sigma':u'Σ', u'\\Square':u'☐', 
-      u'\\Subset':u'⋐', u'\\Supset':u'⋑', u'\\Theta':u'Θ', u'\\Uparrow':u'⇑', 
-      u'\\Updownarrow':u'⇕', u'\\Upsilon':u'Υ', u'\\Vdash':u'⊩', 
-      u'\\Vert':u'∥', u'\\Vvdash':u'⊪', u'\\XBox':u'☒', u'\\Xi':u'Ξ', 
-      u'\\Yup':u'⅄', u'\\\\':u'<br/>', u'\\_':u'_', u'\\aleph':u'ℵ', 
-      u'\\amalg':u'∐', u'\\angle':u'∠', u'\\aquarius':u'♒', 
-      u'\\arccos':u'arccos', u'\\arcsin':u'arcsin', u'\\arctan':u'arctan', 
-      u'\\arg':u'arg', u'\\aries':u'♈', u'\\ast':u'∗', u'\\asymp':u'≍', 
+      u'\\Bumpeq':u'≎', u'\\CIRCLE':u'●', u'\\Cap':u'⋒', 
+      u'\\CapitalDifferentialD':u'ⅅ', u'\\CheckedBox':u'☑', u'\\Circle':u'○', 
+      u'\\Coloneqq':u'⩴', u'\\ComplexI':u'ⅈ', u'\\ComplexJ':u'ⅉ', 
+      u'\\Corresponds':u'≙', u'\\Cup':u'⋓', u'\\Delta':u'Δ', u'\\Diamond':u'◇', 
+      u'\\Diamondblack':u'◆', u'\\Diamonddot':u'⟐', u'\\DifferentialD':u'ⅆ', 
+      u'\\Downarrow':u'⇓', u'\\EUR':u'€', u'\\Euler':u'ℇ', 
+      u'\\ExponetialE':u'ⅇ', u'\\Finv':u'Ⅎ', u'\\Game':u'⅁', u'\\Gamma':u'Γ', 
+      u'\\Im':u'ℑ', u'\\Join':u'⨝', u'\\LEFTCIRCLE':u'◖', u'\\LEFTcircle':u'◐', 
+      u'\\LHD':u'◀', u'\\Lambda':u'Λ', u'\\Lbag':u'⟅', u'\\Leftarrow':u'⇐', 
+      u'\\Lleftarrow':u'⇚', u'\\Longleftarrow':u'⟸', 
+      u'\\Longleftrightarrow':u'⟺', u'\\Longrightarrow':u'⟹', u'\\Lparen':u'⦅', 
+      u'\\Lsh':u'↰', u'\\Mapsfrom':u'⇐|', u'\\Mapsto':u'|⇒', u'\\Omega':u'Ω', 
+      u'\\P':u'¶', u'\\Phi':u'Φ', u'\\Pi':u'Π', u'\\Pr':u'Pr', u'\\Psi':u'Ψ', 
+      u'\\Qoppa':u'Ϙ', u'\\RHD':u'▶', u'\\RIGHTCIRCLE':u'◗', 
+      u'\\RIGHTcircle':u'◑', u'\\Rbag':u'⟆', u'\\Re':u'ℜ', u'\\Rparen':u'⦆', 
+      u'\\Rrightarrow':u'⇛', u'\\Rsh':u'↱', u'\\S':u'§', u'\\Sigma':u'Σ', 
+      u'\\Square':u'☐', u'\\Subset':u'⋐', u'\\Sun':u'☉', u'\\Supset':u'⋑', 
+      u'\\Theta':u'Θ', u'\\Uparrow':u'⇑', u'\\Updownarrow':u'⇕', 
+      u'\\Upsilon':u'Υ', u'\\Vdash':u'⊩', u'\\Vert':u'∥', u'\\Vvdash':u'⊪', 
+      u'\\XBox':u'☒', u'\\Xi':u'Ξ', u'\\Yup':u'⅄', u'\\\\':u'<br/>', 
+      u'\\_':u'_', u'\\aleph':u'ℵ', u'\\amalg':u'∐', u'\\anchor':u'⚓', 
+      u'\\angle':u'∠', u'\\aquarius':u'♒', u'\\arccos':u'arccos', 
+      u'\\arcsin':u'arcsin', u'\\arctan':u'arctan', u'\\arg':u'arg', 
+      u'\\aries':u'♈', u'\\arrowbullet':u'➢', u'\\ast':u'∗', u'\\asymp':u'≍', 
       u'\\backepsilon':u'∍', u'\\backprime':u'‵', u'\\backsimeq':u'⋍', 
-      u'\\backslash':u'\\', u'\\barwedge':u'⊼', u'\\because':u'∵', 
-      u'\\beth':u'ℶ', u'\\between':u'≬', u'\\bigcap':u'∩', u'\\bigcirc':u'○', 
-      u'\\bigcup':u'∪', u'\\bigodot':u'⊙', u'\\bigoplus':u'⊕', 
-      u'\\bigotimes':u'⊗', u'\\bigsqcup':u'⊔', u'\\bigstar':u'★', 
-      u'\\bigtriangledown':u'▽', u'\\bigtriangleup':u'△', u'\\biguplus':u'⊎', 
-      u'\\bigvee':u'∨', u'\\bigwedge':u'∧', u'\\blacklozenge':u'⧫', 
-      u'\\blacksmiley':u'☻', u'\\blacksquare':u'■', u'\\blacktriangle':u'▲', 
-      u'\\blacktriangledown':u'▼', u'\\blacktriangleright':u'▶', u'\\bot':u'⊥', 
-      u'\\bowtie':u'⋈', u'\\box':u'▫', u'\\boxdot':u'⊡', u'\\bullet':u'•', 
+      u'\\backslash':u'\\', u'\\ballotx':u'✗', u'\\barwedge':u'⊼', 
+      u'\\because':u'∵', u'\\beth':u'ℶ', u'\\between':u'≬', u'\\bigcap':u'∩', 
+      u'\\bigcirc':u'○', u'\\bigcup':u'∪', u'\\bigodot':u'⊙', 
+      u'\\bigoplus':u'⊕', u'\\bigotimes':u'⊗', u'\\bigsqcup':u'⊔', 
+      u'\\bigstar':u'★', u'\\bigtriangledown':u'▽', u'\\bigtriangleup':u'△', 
+      u'\\biguplus':u'⊎', u'\\bigvee':u'∨', u'\\bigwedge':u'∧', 
+      u'\\biohazard':u'☣', u'\\blacklozenge':u'⧫', u'\\blacksmiley':u'☻', 
+      u'\\blacksquare':u'■', u'\\blacktriangle':u'▲', 
+      u'\\blacktriangledown':u'▼', u'\\blacktriangleleft':u'◂', 
+      u'\\blacktriangleright':u'▶', u'\\blacktriangleup':u'▴', u'\\bot':u'⊥', 
+      u'\\bowtie':u'⋈', u'\\box':u'▫', u'\\boxast':u'⧆', u'\\boxbar':u'◫', 
+      u'\\boxbox':u'⧈', u'\\boxbslash':u'⧅', u'\\boxcircle':u'⧇', 
+      u'\\boxdot':u'⊡', u'\\boxminus':u'⊟', u'\\boxplus':u'⊞', 
+      u'\\boxslash':u'⧄', u'\\boxtimes':u'⊠', u'\\bullet':u'•', 
       u'\\bumpeq':u'≏', u'\\cancer':u'♋', u'\\cap':u'∩', u'\\capricornus':u'♑', 
-      u'\\cdot':u'⋅', u'\\cdots':u'⋯', u'\\centerdot':u'∙', 
-      u'\\checkmark':u'✓', u'\\chi':u'χ', u'\\circ':u'○', u'\\circeq':u'≗', 
-      u'\\circledR':u'®', u'\\circledast':u'⊛', u'\\circledcirc':u'⊚', 
-      u'\\circleddash':u'⊝', u'\\clubsuit':u'♣', u'\\coloneqq':u'≔', 
+      u'\\cat':u'⁀', u'\\cdot':u'⋅', u'\\cdots':u'⋯', u'\\cent':u'¢', 
+      u'\\centerdot':u'∙', u'\\checkmark':u'✓', u'\\chi':u'χ', u'\\circ':u'∘', 
+      u'\\circeq':u'≗', u'\\circlearrowleft':u'↺', u'\\circlearrowright':u'↻', 
+      u'\\circledR':u'®', u'\\circledast':u'⊛', u'\\circledbslash':u'⦸', 
+      u'\\circledcirc':u'⊚', u'\\circleddash':u'⊝', u'\\circledgtr':u'⧁', 
+      u'\\circledless':u'⧀', u'\\clubsuit':u'♣', u'\\colon':u': ', u'\\coloneqq':u'≔', 
       u'\\complement':u'∁', u'\\cong':u'≅', u'\\coprod':u'∐', 
       u'\\copyright':u'©', u'\\cos':u'cos', u'\\cosh':u'cosh', u'\\cot':u'cot', 
-      u'\\coth':u'coth', u'\\csc':u'csc', u'\\cup':u'∪', 
-      u'\\curvearrowleft':u'↶', u'\\curvearrowright':u'↷', u'\\dag':u'†', 
-      u'\\dagger':u'†', u'\\daleth':u'ℸ', u'\\dashleftarrow':u'⇠', 
-      u'\\dashv':u'⊣', u'\\ddag':u'‡', u'\\ddagger':u'‡', u'\\ddots':u'⋱', 
-      u'\\deg':u'deg', u'\\det':u'det', u'\\diagdown':u'╲', u'\\diagup':u'╱', 
-      u'\\diamond':u'◇', u'\\diamondsuit':u'♦', u'\\dim':u'dim', u'\\div':u'÷', 
-      u'\\divideontimes':u'⋇', u'\\dotdiv':u'∸', u'\\doteq':u'≐', 
-      u'\\doteqdot':u'≑', u'\\dotplus':u'∔', u'\\dots':u'…', 
-      u'\\doublebarwedge':u'⌆', u'\\downarrow':u'↓', u'\\downdownarrows':u'⇊', 
-      u'\\downharpoonleft':u'⇃', u'\\downharpoonright':u'⇂', u'\\earth':u'♁', 
-      u'\\ell':u'ℓ', u'\\emptyset':u'∅', u'\\eqcirc':u'≖', u'\\eqcolon':u'≕', 
-      u'\\eqsim':u'≂', u'\\euro':u'€', u'\\exists':u'∃', u'\\exp':u'exp', 
-      u'\\fallingdotseq':u'≒', u'\\female':u'♀', u'\\flat':u'♭', 
-      u'\\forall':u'∀', u'\\frown':u'⌢', u'\\frownie':u'☹', u'\\gcd':u'gcd', 
+      u'\\coth':u'coth', u'\\csc':u'csc', u'\\cup':u'∪', u'\\curlyvee':u'⋎', 
+      u'\\curlywedge':u'⋏', u'\\curvearrowleft':u'↶', 
+      u'\\curvearrowright':u'↷', u'\\dag':u'†', u'\\dagger':u'†', 
+      u'\\daleth':u'ℸ', u'\\dashleftarrow':u'⇠', u'\\dashv':u'⊣', 
+      u'\\ddag':u'‡', u'\\ddagger':u'‡', u'\\ddots':u'⋱', u'\\deg':u'deg', 
+      u'\\det':u'det', u'\\diagdown':u'╲', u'\\diagup':u'╱', 
+      u'\\diameter':u'⌀', u'\\diamond':u'◇', u'\\diamondsuit':u'♦', 
+      u'\\dim':u'dim', u'\\div':u'÷', u'\\divideontimes':u'⋇', 
+      u'\\dotdiv':u'∸', u'\\doteq':u'≐', u'\\doteqdot':u'≑', u'\\dotplus':u'∔', 
+      u'\\dots':u'…', u'\\doublebarwedge':u'⌆', u'\\downarrow':u'↓', 
+      u'\\downdownarrows':u'⇊', u'\\downharpoonleft':u'⇃', 
+      u'\\downharpoonright':u'⇂', u'\\dsub':u'⩤', u'\\earth':u'♁', 
+      u'\\eighthnote':u'♪', u'\\ell':u'ℓ', u'\\emptyset':u'∅', 
+      u'\\eqcirc':u'≖', u'\\eqcolon':u'≕', u'\\eqsim':u'≂', u'\\euro':u'€', 
+      u'\\exists':u'∃', u'\\exp':u'exp', u'\\fallingdotseq':u'≒', 
+      u'\\fcmp':u'⨾', u'\\female':u'♀', u'\\flat':u'♭', u'\\forall':u'∀', 
+      u'\\fourth':u'⁗', u'\\frown':u'⌢', u'\\frownie':u'☹', u'\\gcd':u'gcd', 
       u'\\gemini':u'♊', u'\\geq)':u'≥', u'\\geqq':u'≧', u'\\geqslant':u'≥', 
       u'\\gets':u'←', u'\\gg':u'≫', u'\\ggg':u'⋙', u'\\gimel':u'ℷ', 
       u'\\gneqq':u'≩', u'\\gnsim':u'⋧', u'\\gtrdot':u'⋗', u'\\gtreqless':u'⋚', 
@@ -439,41 +459,44 @@ class FormulaConfig(object):
       u'\\hslash':u'ℏ', u'\\idotsint':u'<span class="bigsymbol">∫⋯∫</span>', 
       u'\\iiint':u'<span class="bigsymbol">∭</span>', 
       u'\\iint':u'<span class="bigsymbol">∬</span>', u'\\imath':u'ı', 
-      u'\\inf':u'inf', u'\\infty':u'∞', u'\\invneg':u'⌐', u'\\jmath':u'ȷ', 
-      u'\\jupiter':u'♃', u'\\ker':u'ker', u'\\land':u'∧', 
-      u'\\landupint':u'<span class="bigsymbol">∱</span>', u'\\langle':u'⟨', 
-      u'\\lbrace':u'{', u'\\lbrace)':u'{', u'\\lbrack':u'[', u'\\lceil':u'⌈', 
-      u'\\ldots':u'…', u'\\leadsto':u'⇝', u'\\leftarrow)':u'←', 
-      u'\\leftarrowtail':u'↢', u'\\leftarrowtobar':u'⇤', 
+      u'\\inf':u'inf', u'\\infty':u'∞', u'\\intercal':u'⊺', 
+      u'\\interleave':u'⫴', u'\\invamp':u'⅋', u'\\invneg':u'⌐', 
+      u'\\jmath':u'ȷ', u'\\jupiter':u'♃', u'\\ker':u'ker', u'\\land':u'∧', 
+      u'\\landupint':u'<span class="bigsymbol">∱</span>', u'\\lang':u'⟪', 
+      u'\\langle':u'⟨', u'\\lblot':u'⦉', u'\\lbrace':u'{', u'\\lbrace)':u'{', 
+      u'\\lbrack':u'[', u'\\lceil':u'⌈', u'\\ldots':u'…', u'\\leadsto':u'⇝', 
+      u'\\leftarrow)':u'←', u'\\leftarrowtail':u'↢', u'\\leftarrowtobar':u'⇤', 
       u'\\leftharpoondown':u'↽', u'\\leftharpoonup':u'↼', 
       u'\\leftleftarrows':u'⇇', u'\\leftleftharpoons':u'⥢', u'\\leftmoon':u'☾', 
       u'\\leftrightarrow':u'↔', u'\\leftrightarrows':u'⇆', 
       u'\\leftrightharpoons':u'⇋', u'\\leftthreetimes':u'⋋', u'\\leo':u'♌', 
       u'\\leq)':u'≤', u'\\leqq':u'≦', u'\\leqslant':u'≤', u'\\lessdot':u'⋖', 
       u'\\lesseqgtr':u'⋛', u'\\lesseqqgtr':u'⪋', u'\\lessgtr':u'≶', 
-      u'\\lesssim':u'≲', u'\\lfloor':u'⌊', u'\\lg':u'lg', u'\\lhd':u'⊲', 
-      u'\\libra':u'♎', u'\\lightning':u'↯', u'\\liminf':u'liminf', 
-      u'\\limsup':u'limsup', u'\\ll':u'≪', u'\\lll':u'⋘', u'\\ln':u'ln', 
+      u'\\lesssim':u'≲', u'\\lfloor':u'⌊', u'\\lg':u'lg', u'\\lgroup':u'⟮', 
+      u'\\lhd':u'⊲', u'\\libra':u'♎', u'\\lightning':u'↯', u'\\limg':u'⦇', 
+      u'\\liminf':u'liminf', u'\\limsup':u'limsup', u'\\ll':u'≪', 
+      u'\\llbracket':u'⟦', u'\\llcorner':u'⌞', u'\\lll':u'⋘', u'\\ln':u'ln', 
       u'\\lneqq':u'≨', u'\\lnot':u'¬', u'\\lnsim':u'⋦', u'\\log':u'log', 
       u'\\longleftarrow':u'⟵', u'\\longleftrightarrow':u'⟷', 
       u'\\longmapsto':u'⟼', u'\\longrightarrow':u'⟶', u'\\looparrowleft':u'↫', 
       u'\\looparrowright':u'↬', u'\\lor':u'∨', u'\\lozenge':u'◊', 
-      u'\\ltimes':u'⋉', u'\\lyxlock':u'', u'\\male':u'♂', u'\\maltese':u'✠', 
-      u'\\mapsfrom':u'↤', u'\\mapsto':u'↦', u'\\mathcircumflex':u'^', 
-      u'\\max':u'max', u'\\measuredangle':u'∡', u'\\mercury':u'☿', 
-      u'\\mho':u'℧', u'\\mid':u'∣', u'\\min':u'min', u'\\models':u'⊨', 
-      u'\\mp':u'∓', u'\\multimap':u'⊸', u'\\nLeftarrow':u'⇍', 
-      u'\\nLeftrightarrow':u'⇎', u'\\nRightarrow':u'⇏', u'\\nVDash':u'⊯', 
-      u'\\nabla':u'∇', u'\\napprox':u'≉', u'\\natural':u'♮', u'\\ncong':u'≇', 
-      u'\\nearrow':u'↗', u'\\neg':u'¬', u'\\neg)':u'¬', u'\\neptune':u'♆', 
-      u'\\nequiv':u'≢', u'\\newline':u'<br/>', u'\\nexists':u'∄', 
-      u'\\ngeqslant':u'≱', u'\\ngtr':u'≯', u'\\ngtrless':u'≹', u'\\ni':u'∋', 
-      u'\\ni)':u'∋', u'\\nleftarrow':u'↚', u'\\nleftrightarrow':u'↮', 
-      u'\\nleqslant':u'≰', u'\\nless':u'≮', u'\\nlessgtr':u'≸', u'\\nmid':u'∤', 
-      u'\\nolimits':u'', u'\\nonumber':u'', u'\\not':u'¬', u'\\not<':u'≮', 
-      u'\\not=':u'≠', u'\\not>':u'≯', u'\\notbackslash':u'⍀', u'\\notin':u'∉', 
-      u'\\notni':u'∌', u'\\notslash':u'⌿', u'\\nparallel':u'∦', 
-      u'\\nprec':u'⊀', u'\\nrightarrow':u'↛', u'\\nsim':u'≁', u'\\nsimeq':u'≄', 
+      u'\\lrcorner':u'⌟', u'\\ltimes':u'⋉', u'\\lyxlock':u'', u'\\male':u'♂', 
+      u'\\maltese':u'✠', u'\\mapsfrom':u'↤', u'\\mapsto':u'↦', 
+      u'\\mathcircumflex':u'^', u'\\max':u'max', u'\\measuredangle':u'∡', 
+      u'\\medbullet':u'⚫', u'\\medcirc':u'⚪', u'\\mercury':u'☿', u'\\mho':u'℧', 
+      u'\\mid':u'∣', u'\\min':u'min', u'\\models':u'⊨', u'\\mp':u'∓', 
+      u'\\multimap':u'⊸', u'\\nLeftarrow':u'⇍', u'\\nLeftrightarrow':u'⇎', 
+      u'\\nRightarrow':u'⇏', u'\\nVDash':u'⊯', u'\\nabla':u'∇', 
+      u'\\napprox':u'≉', u'\\natural':u'♮', u'\\ncong':u'≇', u'\\nearrow':u'↗', 
+      u'\\neg':u'¬', u'\\neg)':u'¬', u'\\neptune':u'♆', u'\\nequiv':u'≢', 
+      u'\\newline':u'<br/>', u'\\nexists':u'∄', u'\\ngeqslant':u'≱', 
+      u'\\ngtr':u'≯', u'\\ngtrless':u'≹', u'\\ni':u'∋', u'\\ni)':u'∋', 
+      u'\\nleftarrow':u'↚', u'\\nleftrightarrow':u'↮', u'\\nleqslant':u'≰', 
+      u'\\nless':u'≮', u'\\nlessgtr':u'≸', u'\\nmid':u'∤', u'\\nolimits':u'', 
+      u'\\nonumber':u'', u'\\not':u'¬', u'\\not<':u'≮', u'\\not=':u'≠', 
+      u'\\not>':u'≯', u'\\notbackslash':u'⍀', u'\\notin':u'∉', u'\\notni':u'∌', 
+      u'\\notslash':u'⌿', u'\\nparallel':u'∦', u'\\nprec':u'⊀', 
+      u'\\nrightarrow':u'↛', u'\\nsim':u'≁', u'\\nsimeq':u'≄', 
       u'\\nsqsubset':u'⊏̸', u'\\nsubseteq':u'⊈', u'\\nsucc':u'⊁', 
       u'\\nsucccurlyeq':u'⋡', u'\\nsupset':u'⊅', u'\\nsupseteq':u'⊉', 
       u'\\ntriangleleft':u'⋪', u'\\ntrianglelefteq':u'⋬', 
@@ -485,31 +508,40 @@ class FormulaConfig(object):
       u'\\ointclockwise':u'<span class="bigsymbol">∲</span>', 
       u'\\ointctrclockwise':u'<span class="bigsymbol">∳</span>', 
       u'\\ominus':u'⊖', u'\\oplus':u'⊕', u'\\oslash':u'⊘', u'\\otimes':u'⊗', 
-      u'\\owns':u'∋', u'\\parallel':u'∥', u'\\partial':u'∂', u'\\perp':u'⊥', 
-      u'\\pisces':u'♓', u'\\pitchfork':u'⋔', u'\\pluto':u'♇', u'\\pm':u'±', 
-      u'\\pointer':u'➪', u'\\pounds':u'£', u'\\prec':u'≺', 
-      u'\\preccurlyeq':u'≼', u'\\preceq':u'≼', u'\\precsim':u'≾', 
-      u'\\prime':u'′', u'\\prompto':u'∝', u'\\qquad':u'  ', u'\\quad':u' ', 
-      u'\\quarternote':u'♩', u'\\rangle':u'⟩', u'\\rbrace':u'}', 
-      u'\\rbrace)':u'}', u'\\rbrack':u']', u'\\rceil':u'⌉', u'\\rfloor':u'⌋', 
-      u'\\rhd':u'⊳', u'\\rightarrow)':u'→', u'\\rightarrowtail':u'↣', 
+      u'\\owns':u'∋', u'\\parallel':u'∥', u'\\partial':u'∂', u'\\pencil':u'✎', 
+      u'\\perp':u'⊥', u'\\pisces':u'♓', u'\\pitchfork':u'⋔', u'\\pluto':u'♇', 
+      u'\\pm':u'±', u'\\pointer':u'➪', u'\\pointright':u'☞', u'\\pounds':u'£', 
+      u'\\prec':u'≺', u'\\preccurlyeq':u'≼', u'\\preceq':u'≼', 
+      u'\\precsim':u'≾', u'\\prime':u'′', u'\\prompto':u'∝', u'\\qoppa':u'ϙ', 
+      u'\\qquad':u'  ', u'\\quad':u' ', u'\\quarternote':u'♩', 
+      u'\\radiation':u'☢', u'\\rang':u'⟫', u'\\rangle':u'⟩', u'\\rblot':u'⦊', 
+      u'\\rbrace':u'}', u'\\rbrace)':u'}', u'\\rbrack':u']', u'\\rceil':u'⌉', 
+      u'\\recycle':u'♻', u'\\rfloor':u'⌋', u'\\rgroup':u'⟯', u'\\rhd':u'⊳', 
+      u'\\rightangle':u'∟', u'\\rightarrow)':u'→', u'\\rightarrowtail':u'↣', 
       u'\\rightarrowtobar':u'⇥', u'\\rightharpoondown':u'⇁', 
       u'\\rightharpoonup':u'⇀', u'\\rightharpooondown':u'⇁', 
       u'\\rightharpooonup':u'⇀', u'\\rightleftarrows':u'⇄', 
       u'\\rightleftharpoons':u'⇌', u'\\rightmoon':u'☽', 
       u'\\rightrightarrows':u'⇉', u'\\rightrightharpoons':u'⥤', 
-      u'\\rightthreetimes':u'⋌', u'\\risingdotseq':u'≓', u'\\rtimes':u'⋊', 
+      u'\\rightthreetimes':u'⋌', u'\\rimg':u'⦈', u'\\risingdotseq':u'≓', 
+      u'\\rrbracket':u'⟧', u'\\rsub':u'⩥', u'\\rtimes':u'⋊', 
       u'\\sagittarius':u'♐', u'\\saturn':u'♄', u'\\scorpio':u'♏', 
-      u'\\searrow':u'↘', u'\\sec':u'sec', u'\\setminus':u'∖', u'\\sharp':u'♯', 
-      u'\\simeq':u'≃', u'\\sin':u'sin', u'\\sinh':u'sinh', u'\\slash':u'∕', 
-      u'\\smile':u'⌣', u'\\smiley':u'☺', u'\\spadesuit':u'♠', 
-      u'\\sphericalangle':u'∢', u'\\sqcap':u'⊓', u'\\sqcup':u'⊔', 
-      u'\\sqsubset':u'⊏', u'\\sqsubseteq':u'⊑', u'\\sqsupset':u'⊐', 
-      u'\\sqsupseteq':u'⊒', u'\\square':u'□', u'\\star':u'⋆', 
+      u'\\searrow':u'↘', u'\\sec':u'sec', u'\\second':u'″', u'\\setminus':u'∖', 
+      u'\\sharp':u'♯', u'\\simeq':u'≃', u'\\sin':u'sin', u'\\sinh':u'sinh', 
+      u'\\sixteenthnote':u'♬', u'\\skull':u'☠', u'\\slash':u'∕', 
+      u'\\smallsetminus':u'∖', u'\\smalltriangledown':u'▿', 
+      u'\\smalltriangleleft':u'◃', u'\\smalltriangleright':u'▹', 
+      u'\\smalltriangleup':u'▵', u'\\smile':u'⌣', u'\\smiley':u'☺', 
+      u'\\spadesuit':u'♠', u'\\spddot':u'¨', u'\\sphat':u'', 
+      u'\\sphericalangle':u'∢', u'\\spot':u'⦁', u'\\sptilde':u'~', 
+      u'\\sqcap':u'⊓', u'\\sqcup':u'⊔', u'\\sqsubset':u'⊏', 
+      u'\\sqsubseteq':u'⊑', u'\\sqsupset':u'⊐', u'\\sqsupseteq':u'⊒', 
+      u'\\square':u'□', u'\\sslash':u'⫽', u'\\star':u'⋆', u'\\steaming':u'☕', 
       u'\\subseteqq':u'⫅', u'\\subsetneqq':u'⫋', u'\\succ':u'≻', 
       u'\\succcurlyeq':u'≽', u'\\succeq':u'≽', u'\\succnsim':u'⋩', 
       u'\\succsim':u'≿', u'\\sun':u'☼', u'\\sup':u'sup', u'\\supseteqq':u'⫆', 
-      u'\\supsetneqq':u'⫌', u'\\surd':u'√', u'\\swarrow':u'↙', u'\\tan':u'tan', 
+      u'\\supsetneqq':u'⫌', u'\\surd':u'√', u'\\swarrow':u'↙', 
+      u'\\swords':u'⚔', u'\\talloblong':u'⫾', u'\\tan':u'tan', 
       u'\\tanh':u'tanh', u'\\taurus':u'♉', u'\\textasciicircum':u'^', 
       u'\\textasciitilde':u'~', u'\\textbackslash':u'\\', 
       u'\\textcopyright':u'©\'', u'\\textdegree':u'°', u'\\textellipsis':u'…', 
@@ -520,20 +552,21 @@ class FormulaConfig(object):
       u'\\textregistered':u'®', u'\\textrightarrow':u'→', 
       u'\\textsection':u'§', u'\\texttrademark':u'™', 
       u'\\texttwosuperior':u'²', u'\\textvisiblespace':u' ', 
-      u'\\therefore':u'∴', u'\\top':u'⊤', u'\\triangle':u'△', 
+      u'\\therefore':u'∴', u'\\third':u'‴', u'\\top':u'⊤', u'\\triangle':u'△', 
       u'\\triangleleft':u'⊲', u'\\trianglelefteq':u'⊴', u'\\triangleq':u'≜', 
       u'\\triangleright':u'▷', u'\\trianglerighteq':u'⊵', 
       u'\\twoheadleftarrow':u'↞', u'\\twoheadrightarrow':u'↠', 
-      u'\\twonotes':u'♫', u'\\udot':u'⊍', u'\\unlhd':u'⊴', u'\\unrhd':u'⊵', 
-      u'\\unrhl':u'⊵', u'\\uparrow':u'↑', u'\\updownarrow':u'↕', 
-      u'\\upharpoonleft':u'↿', u'\\upharpoonright':u'↾', u'\\uplus':u'⊎', 
-      u'\\upuparrows':u'⇈', u'\\uranus':u'♅', u'\\vDash':u'⊨', 
-      u'\\varclubsuit':u'♧', u'\\vardiamondsuit':u'♦', u'\\varheartsuit':u'♥', 
-      u'\\varnothing':u'∅', u'\\varspadesuit':u'♤', u'\\vdash':u'⊢', 
-      u'\\vdots':u'⋮', u'\\vee':u'∨', u'\\vee)':u'∨', u'\\veebar':u'⊻', 
-      u'\\vert':u'∣', u'\\virgo':u'♍', u'\\wedge':u'∧', u'\\wedge)':u'∧', 
-      u'\\wp':u'℘', u'\\wr':u'≀', u'\\yen':u'¥', u'\\{':u'{', u'\\|':u'∥', 
-      u'\\}':u'}', 
+      u'\\twonotes':u'♫', u'\\udot':u'⊍', u'\\ulcorner':u'⌜', u'\\unlhd':u'⊴', 
+      u'\\unrhd':u'⊵', u'\\unrhl':u'⊵', u'\\uparrow':u'↑', 
+      u'\\updownarrow':u'↕', u'\\upharpoonleft':u'↿', u'\\upharpoonright':u'↾', 
+      u'\\uplus':u'⊎', u'\\upuparrows':u'⇈', u'\\uranus':u'♅', 
+      u'\\urcorner':u'⌝', u'\\vDash':u'⊨', u'\\varclubsuit':u'♧', 
+      u'\\vardiamondsuit':u'♦', u'\\varheartsuit':u'♥', u'\\varnothing':u'∅', 
+      u'\\varspadesuit':u'♤', u'\\vdash':u'⊢', u'\\vdots':u'⋮', u'\\vee':u'∨', 
+      u'\\vee)':u'∨', u'\\veebar':u'⊻', u'\\vert':u'∣', u'\\virgo':u'♍', 
+      u'\\warning':u'⚠', u'\\wasylozenge':u'⌑', u'\\wedge':u'∧', 
+      u'\\wedge)':u'∧', u'\\wp':u'℘', u'\\wr':u'≀', u'\\yen':u'¥', 
+      u'\\yinyang':u'☯', u'\\{':u'{', u'\\|':u'∥', u'\\}':u'}', 
       }
 
   decoratedcommand = {
@@ -580,7 +613,9 @@ class FormulaConfig(object):
       }
 
   hybridfunctions = {
-      
+      u'\\addcontentsline':[u'{$p!}{$q!}{$r!}',u'f0{}',u'ignored',], 
+      u'\\addtocontents':[u'{$p!}{$q!}',u'f0{}',u'ignored',], 
+      u'\\backmatter':[u'',u'f0{}',u'ignored',], 
       u'\\binom':[u'{$1}{$2}',u'f2{(}f0{f1{$1}f1{$2}}f2{)}',u'span class="binom"',u'span class="binomstack"',u'span class="bigsymbol"',], 
       u'\\boxed':[u'{$1}',u'f0{$1}',u'span class="boxed"',], 
       u'\\cfrac':[u'[$p!]{$1}{$2}',u'f0{f3{(}f1{$1}f3{)/(}f2{$2}f3{)}}',u'span class="fullfraction"',u'span class="numerator align-$p"',u'span class="denominator"',u'span class="ignored"',], 
@@ -589,15 +624,21 @@ class FormulaConfig(object):
       u'\\dbinom':[u'{$1}{$2}',u'(f0{f1{f2{$1}}f1{f2{ }}f1{f2{$2}}})',u'span class="binomial"',u'span class="binomrow"',u'span class="binomcell"',], 
       u'\\dfrac':[u'{$1}{$2}',u'f0{f3{(}f1{$1}f3{)/(}f2{$2}f3{)}}',u'span class="fullfraction"',u'span class="numerator"',u'span class="denominator"',u'span class="ignored"',], 
       u'\\displaystyle':[u'{$1}',u'f0{$1}',u'span class="displaystyle"',], 
+      u'\\fancyfoot':[u'[$p!]{$q!}',u'f0{}',u'ignored',], 
+      u'\\fancyhead':[u'[$p!]{$q!}',u'f0{}',u'ignored',], 
       u'\\fbox':[u'{$1}',u'f0{$1}',u'span class="fbox"',], 
       u'\\fboxrule':[u'{$p!}',u'f0{}',u'ignored',], 
       u'\\fboxsep':[u'{$p!}',u'f0{}',u'ignored',], 
       u'\\fcolorbox':[u'{$p!}{$q!}{$1}',u'f0{$1}',u'span class="boxed" style="border-color: $p; background: $q;"',], 
       u'\\frac':[u'{$1}{$2}',u'f0{f3{(}f1{$1}f3{)/(}f2{$2}f3{)}}',u'span class="fraction"',u'span class="numerator"',u'span class="denominator"',u'span class="ignored"',], 
       u'\\framebox':[u'[$p!][$q!]{$1}',u'f0{$1}',u'span class="framebox align-$q" style="width: $p;"',], 
+      u'\\frontmatter':[u'',u'f0{}',u'ignored',], 
       u'\\href':[u'[$o]{$u!}{$t!}',u'f0{$t}',u'a href="$u"',], 
       u'\\hspace':[u'{$p!}',u'f0{ }',u'span class="hspace" style="width: $p;"',], 
       u'\\leftroot':[u'{$p!}',u'f0{ }',u'span class="leftroot" style="width: $p;px"',], 
+      u'\\mainmatter':[u'',u'f0{}',u'ignored',], 
+      u'\\markboth':[u'{$p!}{$q!}',u'f0{}',u'ignored',], 
+      u'\\markright':[u'{$p!}',u'f0{}',u'ignored',], 
       u'\\nicefrac':[u'{$1}{$2}',u'f0{f1{$1}⁄f2{$2}}',u'span class="fraction"',u'sup class="numerator"',u'sub class="denominator"',u'span class="ignored"',], 
       u'\\parbox':[u'[$p!]{$w!}{$1}',u'f0{1}',u'div class="Boxed" style="width: $w;"',], 
       u'\\raisebox':[u'{$p!}{$1}',u'f0{$1.font}',u'span class="raisebox" style="vertical-align: $p;"',], 
@@ -610,6 +651,7 @@ class FormulaConfig(object):
       u'\\tbinom':[u'{$1}{$2}',u'(f0{f1{f2{$1}}f1{f2{ }}f1{f2{$2}}})',u'span class="binomial"',u'span class="binomrow"',u'span class="binomcell"',], 
       u'\\textcolor':[u'{$p!}{$1}',u'f0{$1}',u'span style="color: $p;"',], 
       u'\\textstyle':[u'{$1}',u'f0{$1}',u'span class="textstyle"',], 
+      u'\\thispagestyle':[u'{$p!}',u'f0{}',u'ignored',], 
       u'\\unit':[u'[$0]{$1}',u'$0f0{$1.font}',u'span class="unit"',], 
       u'\\unitfrac':[u'[$0]{$1}{$2}',u'$0f0{f1{$1.font}⁄f2{$2.font}}',u'span class="fraction"',u'sup class="unit"',u'sub class="unit"',], 
       u'\\uproot':[u'{$p!}',u'f0{ }',u'span class="uproot" style="width: $p;px"',], 
@@ -627,24 +669,24 @@ class FormulaConfig(object):
       }
 
   limitcommands = {
-      u'\\int':u'∫', u'\\intop':u'∫', u'\\lim':u'lim', u'\\prod':u'∏', 
-      u'\\smallint':u'∫', u'\\sum':u'∑', 
+      u'\\biginterleave':u'⫼', u'\\bigsqcap':u'⨅', u'\\fint':u'⨏', 
+      u'\\iiiint':u'⨌', u'\\int':u'∫', u'\\intop':u'∫', u'\\lim':u'lim', 
+      u'\\prod':u'∏', u'\\smallint':u'∫', u'\\sqint':u'⨖', u'\\sum':u'∑', 
+      u'\\varointclockwise':u'∲', u'\\varprod':u'⨉', u'\\zcmp':u'⨟', 
+      u'\\zhide':u'⧹', u'\\zpipe':u'⨠', u'\\zproject':u'⨡', 
       }
-  # TODO: setting for simple enlarged vs. piecewise  symbols
-  for key in (u'\\int', u'\\intop', u'\\prod', u'\\sum'):
-    limitcommands[key] = '<span class="symbol">%s</span>' % limitcommands[key]
 
   misccommands = {
       u'\\limits':u'LimitPreviousCommand', u'\\newcommand':u'MacroDefinition', 
       u'\\renewcommand':u'MacroDefinition', 
       u'\\setcounter':u'SetCounterFunction', u'\\tag':u'FormulaTag', 
-      u'\\tag*':u'FormulaTag', 
+      u'\\tag*':u'FormulaTag', u'\\today':u'TodayCommand', 
       }
 
   modified = {
-      u'\n':u'', u' ':u'', u'$':u'', u'&':u'    ', u'\'':u'’', u'+':u' + ', 
-      u',':u', ', u'-':u' − ', u'/':u' ⁄ ', u'<':u' &lt; ', u'=':u' = ', 
-      u'>':u' &gt; ', u'@':u'', u'~':u'', 
+      u'\n':u'', u' ':u'', u'$':u'', u'&':u'	', u'\'':u'’', u'+':u' + ', 
+      u',':u', ', u'-':u' − ', u'/':u' ⁄ ', u':':u' : ', u'<':u' &lt; ', 
+      u'=':u' = ', u'>':u' &gt; ', u'@':u'', u'~':u'', 
       }
 
   onefunctions = {
@@ -664,13 +706,58 @@ class FormulaConfig(object):
       }
 
   spacedcommands = {
-      u'\\Leftrightarrow':u'⇔', u'\\Rightarrow':u'⇒', u'\\approx':u'≈', 
-      u'\\dashrightarrow':u'⇢', u'\\equiv':u'≡', u'\\ge':u'≥', u'\\geq':u'≥', 
+      u'\\Bot':u'⫫', u'\\Doteq':u'≑', u'\\DownArrowBar':u'⤓', 
+      u'\\DownLeftTeeVector':u'⥞', u'\\DownLeftVectorBar':u'⥖', 
+      u'\\DownRightTeeVector':u'⥟', u'\\DownRightVectorBar':u'⥗', 
+      u'\\Equal':u'⩵', u'\\LeftArrowBar':u'⇤', u'\\LeftDownTeeVector':u'⥡', 
+      u'\\LeftDownVectorBar':u'⥙', u'\\LeftTeeVector':u'⥚', 
+      u'\\LeftTriangleBar':u'⧏', u'\\LeftUpTeeVector':u'⥠', 
+      u'\\LeftUpVectorBar':u'⥘', u'\\LeftVectorBar':u'⥒', 
+      u'\\Leftrightarrow':u'⇔', u'\\Longmapsfrom':u'⟽', u'\\Longmapsto':u'⟾', 
+      u'\\MapsDown':u'↧', u'\\MapsUp':u'↥', u'\\Nearrow':u'⇗', 
+      u'\\NestedGreaterGreater':u'⪢', u'\\NestedLessLess':u'⪡', 
+      u'\\NotGreaterLess':u'≹', u'\\NotGreaterTilde':u'≵', 
+      u'\\NotLessTilde':u'≴', u'\\Nwarrow':u'⇖', u'\\Proportion':u'∷', 
+      u'\\RightArrowBar':u'⇥', u'\\RightDownTeeVector':u'⥝', 
+      u'\\RightDownVectorBar':u'⥕', u'\\RightTeeVector':u'⥛', 
+      u'\\RightTriangleBar':u'⧐', u'\\RightUpTeeVector':u'⥜', 
+      u'\\RightUpVectorBar':u'⥔', u'\\RightVectorBar':u'⥓', 
+      u'\\Rightarrow':u'⇒', u'\\Same':u'⩶', u'\\Searrow':u'⇘', 
+      u'\\Swarrow':u'⇙', u'\\Top':u'⫪', u'\\UpArrowBar':u'⤒', u'\\VDash':u'⊫', 
+      u'\\approx':u'≈', u'\\approxeq':u'≊', u'\\backsim':u'∽', u'\\barin':u'⋶', 
+      u'\\barleftharpoon':u'⥫', u'\\barrightharpoon':u'⥭', u'\\bij':u'⤖', 
+      u'\\coloneq':u'≔', u'\\corresponds':u'≙', u'\\curlyeqprec':u'⋞', 
+      u'\\curlyeqsucc':u'⋟', u'\\dashrightarrow':u'⇢', u'\\dlsh':u'↲', 
+      u'\\downdownharpoons':u'⥥', u'\\downuparrows':u'⇵', 
+      u'\\downupharpoons':u'⥯', u'\\drsh':u'↳', u'\\eqslantgtr':u'⪖', 
+      u'\\eqslantless':u'⪕', u'\\equiv':u'≡', u'\\ffun':u'⇻', u'\\finj':u'⤕', 
+      u'\\ge':u'≥', u'\\geq':u'≥', u'\\ggcurly':u'⪼', u'\\gnapprox':u'⪊', 
+      u'\\gneq':u'⪈', u'\\gtrapprox':u'⪆', u'\\hash':u'⋕', u'\\iddots':u'⋰', 
       u'\\implies':u' ⇒ ', u'\\in':u'∈', u'\\le':u'≤', u'\\leftarrow':u'←', 
-      u'\\leq':u'≤', u'\\ne':u'≠', u'\\neq':u'≠', u'\\not\\in':u'∉', 
-      u'\\propto':u'∝', u'\\rightarrow':u'→', u'\\rightsquigarrow':u'⇝', 
-      u'\\sim':u'~', u'\\subset':u'⊂', u'\\subseteq':u'⊆', u'\\supset':u'⊃', 
-      u'\\supseteq':u'⊇', u'\\times':u'×', u'\\to':u'→', 
+      u'\\leftarrowtriangle':u'⇽', u'\\leftbarharpoon':u'⥪', 
+      u'\\leftrightarrowtriangle':u'⇿', u'\\leftrightharpoon':u'⥊', 
+      u'\\leftrightharpoondown':u'⥐', u'\\leftrightharpoonup':u'⥎', 
+      u'\\leftrightsquigarrow':u'↭', u'\\leftslice':u'⪦', 
+      u'\\leftsquigarrow':u'⇜', u'\\leftupdownharpoon':u'⥑', u'\\leq':u'≤', 
+      u'\\lessapprox':u'⪅', u'\\llcurly':u'⪻', u'\\lnapprox':u'⪉', 
+      u'\\lneq':u'⪇', u'\\longmapsfrom':u'⟻', u'\\multimapboth':u'⧟', 
+      u'\\multimapdotbothA':u'⊶', u'\\multimapdotbothB':u'⊷', 
+      u'\\multimapinv':u'⟜', u'\\nVdash':u'⊮', u'\\ne':u'≠', u'\\neq':u'≠', 
+      u'\\ngeq':u'≱', u'\\nleq':u'≰', u'\\nni':u'∌', u'\\not\\in':u'∉', 
+      u'\\notasymp':u'≭', u'\\npreceq':u'⋠', u'\\nsqsubseteq':u'⋢', 
+      u'\\nsqsupseteq':u'⋣', u'\\nsubset':u'⊄', u'\\nsucceq':u'⋡', 
+      u'\\pfun':u'⇸', u'\\pinj':u'⤔', u'\\precapprox':u'⪷', u'\\preceqq':u'⪳', 
+      u'\\precnapprox':u'⪹', u'\\precnsim':u'⋨', u'\\propto':u'∝', 
+      u'\\psur':u'⤀', u'\\rightarrow':u'→', u'\\rightarrowtriangle':u'⇾', 
+      u'\\rightbarharpoon':u'⥬', u'\\rightleftharpoon':u'⥋', 
+      u'\\rightslice':u'⪧', u'\\rightsquigarrow':u'⇝', 
+      u'\\rightupdownharpoon':u'⥏', u'\\sim':u'~', u'\\strictfi':u'⥼', 
+      u'\\strictif':u'⥽', u'\\subset':u'⊂', u'\\subseteq':u'⊆', 
+      u'\\subsetneq':u'⊊', u'\\succapprox':u'⪸', u'\\succeqq':u'⪴', 
+      u'\\succnapprox':u'⪺', u'\\supset':u'⊃', u'\\supseteq':u'⊇', 
+      u'\\supsetneq':u'⊋', u'\\times':u'×', u'\\to':u'→', 
+      u'\\updownarrows':u'⇅', u'\\updownharpoons':u'⥮', u'\\upupharpoons':u'⥣', 
+      u'\\vartriangleleft':u'⊲', u'\\vartriangleright':u'⊳', 
       }
 
   starts = {
@@ -695,7 +782,7 @@ class FormulaConfig(object):
 
   unmodified = {
       
-      u'characters':[u'.',u'*',u'€',u'(',u')',u'[',u']',u':',u'·',u'!',u';',u'|',u'§',u'"',], 
+      u'characters':[u'.',u'*',u'€',u'(',u')',u'[',u']',u'·',u'!',u';',u'|',u'§',u'"',], 
       }
 
   urls = {
@@ -706,7 +793,7 @@ class GeneralConfig(object):
   "Configuration class from elyxer.config file"
 
   version = {
-      u'date':u'2011-06-27', u'lyxformat':u'413', u'number':u'1.2.3', 
+      u'date':u'2015-02-26', u'lyxformat':u'413', u'number':u'1.2.5', 
       }
 
 class HeaderConfig(object):
@@ -735,6 +822,7 @@ class ImageConfig(object):
       
       u'imagemagick':u'convert[ -density $scale][ -define $format:use-cropbox=true] "$input" "$output"', 
       u'inkscape':u'inkscape "$input" --export-png="$output"', 
+      u'lyx':u'lyx -C "$input" "$output"', 
       }
 
   cropboxformats = {
@@ -860,6 +948,10 @@ class TagConfig(object):
       u'Comment':u'', u'Greyedout':u'span class="greyedout"', u'Note':u'', 
       }
 
+  script = {
+      u'subscript':u'sub', u'superscript':u'sup', 
+      }
+
   shaped = {
       u'italic':u'i', u'slanted':u'i', u'smallcaps':u'span class="versalitas"', 
       }
@@ -889,7 +981,8 @@ class TranslationConfig(object):
 
   languages = {
       u'american':u'en', u'british':u'en', u'deutsch':u'de', u'dutch':u'nl', 
-      u'english':u'en', u'french':u'fr', u'ngerman':u'de', u'spanish':u'es', 
+      u'english':u'en', u'french':u'fr', u'ngerman':u'de', u'russian':u'ru', 
+      u'spanish':u'es', 
       }
 
 
@@ -936,7 +1029,7 @@ class CommandLineParser(object):
       initial = args[0]
       del args[0]
       return key, self.readquoted(args, initial)
-    value = args[0]
+    value = args[0].decode('utf-8')
     del args[0]
     if isinstance(current, list):
       current.append(value)
@@ -945,8 +1038,10 @@ class CommandLineParser(object):
 
   def readquoted(self, args, initial):
     "Read a value between quotes"
+    Trace.error('Oops')
     value = initial[1:]
     while len(args) > 0 and not args[0].endswith('"') and not args[0].startswith('--'):
+      Trace.error('Appending ' + args[0])
       value += ' ' + args[0]
       del args[0]
     if len(args) == 0 or args[0].startswith('--'):
@@ -983,6 +1078,7 @@ class Options(object):
   unicode = False
   iso885915 = False
   css = []
+  favicon = ''
   title = None
   directory = None
   destdirectory = None
@@ -1062,6 +1158,8 @@ class Options(object):
       Options.copyimages = True
     if Options.css == []:
       Options.css = ['http://elyxer.nongnu.org/lyx.css']
+    if Options.favicon == '':
+      pass # no default favicon
     if Options.html:
       Options.simplemath = True
     if Options.toc and not Options.tocfor:
@@ -1069,6 +1167,8 @@ class Options(object):
       Options.tocfor = Options.toctarget
     if Options.nocopy:
       Trace.error('Option --nocopy is deprecated; it is no longer needed')
+    if Options.jsmath:
+      Trace.error('Option --jsmath is deprecated; use --mathjax instead')
     # set in Trace if necessary
     for param in dir(Trace):
       if param.endswith('mode'):
@@ -1088,6 +1188,7 @@ class Options(object):
       return
     Options.marginfoot = False
     Options.letterfoot = False
+    Options.hoverfoot = False
     options = Options.footnotes.split(',')
     for option in options:
       footoption = option + 'foot'
@@ -1113,7 +1214,8 @@ class Options(object):
     Trace.error('  Options for HTML output:')
     Trace.error('    --title "title":        set the generated page title')
     Trace.error('    --css "file.css":       use a custom CSS file')
-    Trace.error('    --embedcss "file.css":  embed styles from elyxer.a CSS file into the output')
+    Trace.error('    --embedcss "file.css":  embed styles from a CSS file into the output')
+    Trace.error('    --favicon "icon.ico":   insert the specified favicon in the header.')
     Trace.error('    --html:                 output HTML 4.0 instead of the default XHTML')
     Trace.error('    --unicode:              full Unicode output')
     Trace.error('    --iso885915:            output a document with ISO-8859-15 encoding')
@@ -1143,8 +1245,8 @@ class Options(object):
     Trace.error('    --notoclabels:          omit the part labels in the TOC, such as Chapter')
     Trace.error('    --lowmem:               do the conversion on the fly (conserve memory)')
     Trace.error('    --raw:                  generate HTML without header or footer.')
-    Trace.error('    --jsmath "URL":         use jsMath from elyxer.the given URL to display equations')
-    Trace.error('    --mathjax "URL":        use MathJax from elyxer.the given URL to display equations')
+    Trace.error('    --mathjax remote:       use MathJax remotely to display equations')
+    Trace.error('    --mathjax "URL":        use MathJax from the given URL to display equations')
     Trace.error('    --googlecharts:         use Google Charts to generate formula images')
     Trace.error('    --template "file":      use a template, put everything in <!--$content-->')
     Trace.error('    --copyright:            add a copyright notice at the bottom')
@@ -1152,6 +1254,7 @@ class Options(object):
     Trace.error('    --toc:                  (deprecated) create a table of contents')
     Trace.error('    --toctarget "page":     (deprecated) generate a TOC for the given page')
     Trace.error('    --nocopy:               (deprecated) maintained for backwards compatibility')
+    Trace.error('    --jsmath "URL":         use jsMath from the given URL to display equations')
     sys.exit()
 
   def showversion(self):
@@ -3536,11 +3639,17 @@ class BarredText(TaggedText):
       return
     self.output.tag = TagConfig.barred[self.type]
 
-class LangLine(BlackBox):
+class LangLine(TaggedText):
   "A line with language information"
 
   def process(self):
-    self.lang = self.header[1]
+    "Only generate a span with lang info when the language is recognized."
+    lang = self.header[1]
+    if not lang in TranslationConfig.languages:
+      self.output = ContentsOutput()
+      return
+    isolang = TranslationConfig.languages[lang]
+    self.output = TaggedOutput().settag('span lang="' + isolang + '"', False)
 
 class InsetLength(BlackBox):
   "A length measure inside an inset."
@@ -3908,8 +4017,7 @@ class Reference(Link):
     self.replace('@', partkey and partkey.number)
     self.replace(u'¶', partkey and partkey.tocentry)
     if not '$' in self.formatted or not partkey or not partkey.titlecontents:
-      if '$' in self.formatted:
-        Trace.error('No title in ' + unicode(partkey))
+      # there is a $ left, but it should go away on preprocessing
       self.contents = [Constant(self.formatted)]
       return
     pieces = self.formatted.split('$')
@@ -3993,7 +4101,7 @@ class FormulaCommand(FormulaBit):
 
   def emptycommand(self, pos):
     """Check for an empty command: look for command disguised as ending.
-    Special case against '{ \{ \} }' situation."""
+    Special case against '{ \\{ \\} }' situation."""
     command = ''
     if not pos.isout():
       ending = pos.nextending()
@@ -4452,7 +4560,7 @@ class EquationEnvironment(MultiRowFormula):
     self.parserows(pos)
 
 class BeginCommand(CommandBit):
-  "A \\begin{}...\end command and what it entails (array, cases, aligned)"
+  "A \\begin{}...\\end command and what it entails (array, cases, aligned)"
 
   commandmap = {FormulaConfig.array['begin']:''}
 
@@ -4480,6 +4588,8 @@ class BeginCommand(CommandBit):
 
 FormulaCommand.types += [BeginCommand]
 
+
+import datetime
 
 
 class CombiningFunction(OneParamFunction):
@@ -4696,6 +4806,16 @@ class BracketProcessor(MathsProcessor):
     bracket = BigBracket(size, character, alignment)
     command.output = ContentsOutput()
     command.contents = bracket.getcontents()
+
+class TodayCommand(EmptyCommand):
+  "Shows today's date."
+
+  commandmap = None
+
+  def parsebit(self, pos):
+    "Parse a command without parameters"
+    self.output = FixedOutput()
+    self.html = [datetime.date.today().strftime('%b %d, %Y')]
 
 
 FormulaCommand.types += [

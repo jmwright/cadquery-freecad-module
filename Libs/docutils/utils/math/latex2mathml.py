@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-# :Id: $Id: latex2mathml.py 7668 2013-06-04 12:46:30Z milde $
+# :Id: $Id: latex2mathml.py 7995 2016-12-10 17:50:59Z milde $
 # :Copyright: © 2010 Günter Milde.
 #             Based on rst2mathml.py from the latex_math sandbox project
 #             © 2005 Jens Jørgen Mortensen
@@ -151,8 +151,8 @@ mathscr = {
           }
 
 negatables = {'=': u'\u2260',
-              '\in': u'\u2209',
-              '\equiv': u'\u2262'}
+              r'\in': u'\u2209',
+              r'\equiv': u'\u2262'}
 
 # LaTeX to MathML translation stuff:
 class math:
@@ -558,3 +558,14 @@ def handle_keyword(name, node, string):
         raise SyntaxError(u'Unknown LaTeX command: ' + name)
 
     return node, skip
+
+def tex2mathml(tex_math, inline=True):
+    """Return string with MathML code corresponding to `tex_math`. 
+    
+    `inline`=True is for inline math and `inline`=False for displayed math.
+    """
+    
+    mathml_tree = parse_latex_math(tex_math, inline=inline)
+    return ''.join(mathml_tree.xml())
+
+    

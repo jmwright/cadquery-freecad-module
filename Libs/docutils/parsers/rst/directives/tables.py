@@ -1,4 +1,4 @@
-# $Id: tables.py 7747 2014-03-20 10:51:10Z milde $
+# $Id: tables.py 8039 2017-02-28 12:19:20Z milde $
 # Authors: David Goodger <goodger@python.org>; David Priest
 # Copyright: This module has been placed in the public domain.
 
@@ -20,6 +20,10 @@ from docutils.parsers.rst import Directive
 from docutils.parsers.rst import directives
 
 
+def align(argument):
+    return directives.choice(argument, ('left', 'center', 'right'))
+
+
 class Table(Directive):
 
     """
@@ -29,7 +33,10 @@ class Table(Directive):
     optional_arguments = 1
     final_argument_whitespace = True
     option_spec = {'class': directives.class_option,
-                   'name': directives.unchanged}
+                   'name': directives.unchanged,
+                   'align': align,
+                   'widths': directives.value_or(('auto', 'grid'),
+                                                 directives.positive_int_list)}
     has_content = True
 
     def make_title(self):
@@ -38,6 +45,8 @@ class Table(Directive):
             text_nodes, messages = self.state.inline_text(title_text,
                                                           self.lineno)
             title = nodes.title(title_text, '', *text_nodes)
+            (title.source,
+             title.line) = self.state_machine.get_source_and_line(self.lineno)
         else:
             title = None
             messages = []
@@ -85,15 +94,19 @@ class Table(Directive):
                     self.block_text, self.block_text), line=self.lineno)
                 raise SystemMessagePropagation(error)
 
+    @property
+    def widths(self):
+        return self.options.get('widths', '')
+
     def get_column_widths(self, max_cols):
-        if 'widths' in self.options:
-            col_widths = self.options['widths']
-            if len(col_widths) != max_cols:
+        if type(self.widths) == list:
+            if len(self.widths) != max_cols:
                 error = self.state_machine.reporter.error(
                     '"%s" widths do not match the number of columns in table '
                     '(%s).' % (self.name, max_cols), nodes.literal_block(
                     self.block_text, self.block_text), line=self.lineno)
                 raise SystemMessagePropagation(error)
+            col_widths = self.widths
         elif max_cols:
             col_widths = [100 // max_cols] * max_cols
         else:
@@ -130,6 +143,21 @@ class RSTTable(Table):
             return [error]
         table_node = node[0]
         table_node['classes'] += self.options.get('class', [])
+        if 'align' in self.options:
+            table_node['align'] = self.options.get('align')
+        tgroup = table_node[0]
+        if type(self.widths) == list:
+            colspecs = [child for child in tgroup.children
+                        if child.tagname == 'colspec']
+            for colspec, col_width in zip(colspecs, self.widths):
+                colspec['colwidth'] = col_width
+        # @@@ the colwidths argument for <tgroup> is not part of the
+        # XML Exchange Table spec (https://www.oasis-open.org/specs/tm9901.htm)
+        # and hence violates the docutils.dtd.
+        if self.widths == 'auto':
+            table_node['classes'] += ['colwidths-auto']
+        elif self.widths: # "grid" or list of integers
+            table_node['classes'] += ['colwidths-given']
         self.add_name(table_node)
         if title:
             table_node.insert(0, title)
@@ -141,12 +169,14 @@ class CSVTable(Table):
     option_spec = {'header-rows': directives.nonnegative_int,
                    'stub-columns': directives.nonnegative_int,
                    'header': directives.unchanged,
-                   'widths': directives.positive_int_list,
+                   'widths': directives.value_or(('auto', ),
+                                                 directives.positive_int_list),
                    'file': directives.path,
                    'url': directives.uri,
                    'encoding': directives.encoding,
                    'class': directives.class_option,
                    'name': directives.unchanged,
+                   'align': align,
                    # field delimiter char
                    'delim': directives.single_char_or_whitespace_or_unicode,
                    # treat whitespace after delimiter as significant
@@ -235,8 +265,10 @@ class CSVTable(Table):
             return [error]
         table = (col_widths, table_head, table_body)
         table_node = self.state.build_table(table, self.content_offset,
-                                            stub_columns)
+                                            stub_columns, widths=self.widths)
         table_node['classes'] += self.options.get('class', [])
+        if 'align' in self.options:
+            table_node['align'] = self.options.get('align')
         self.add_name(table_node)
         if title:
             table_node.insert(0, title)
@@ -356,13 +388,15 @@ class ListTable(Table):
     Implement tables whose data is encoded as a uniform two-level bullet list.
     For further ideas, see
     http://docutils.sf.net/docs/dev/rst/alternatives.html#list-driven-tables
-    """ 
+    """
 
     option_spec = {'header-rows': directives.nonnegative_int,
                    'stub-columns': directives.nonnegative_int,
-                   'widths': directives.positive_int_list,
+                   'widths': directives.value_or(('auto', ),
+                                                 directives.positive_int_list),
                    'class': directives.class_option,
-                   'name': directives.unchanged}
+                   'name': directives.unchanged,
+                   'align': align}
 
     def run(self):
         if not self.content:
@@ -385,6 +419,8 @@ class ListTable(Table):
             return [detail.args[0]]
         table_node = self.build_table_from_list(table_data, col_widths,
                                                 header_rows, stub_columns)
+        if 'align' in self.options:
+            table_node['align'] = self.options.get('align')
         table_node['classes'] += self.options.get('class', [])
         self.add_name(table_node)
         if title:
@@ -432,10 +468,16 @@ class ListTable(Table):
 
     def build_table_from_list(self, table_data, col_widths, header_rows, stub_columns):
         table = nodes.table()
+        if self.widths == 'auto':
+            table['classes'] += ['colwidths-auto']
+        elif self.widths: # "grid" or list of integers
+            table['classes'] += ['colwidths-given']
         tgroup = nodes.tgroup(cols=len(col_widths))
         table += tgroup
         for col_width in col_widths:
-            colspec = nodes.colspec(colwidth=col_width)
+            colspec = nodes.colspec()
+            if col_width is not None:
+                colspec.attributes['colwidth'] = col_width
             if stub_columns:
                 colspec.attributes['stub'] = 1
                 stub_columns -= 1

@@ -1,4 +1,4 @@
-# $Id: io.py 7596 2013-01-25 13:42:17Z milde $
+# $Id: io.py 8129 2017-06-27 14:55:22Z grubert $
 # Author: David Goodger <goodger@python.org>
 # Copyright: This module has been placed in the public domain.
 
@@ -114,7 +114,7 @@ class Input(TransformSpec):
                 self.successful_encoding = enc
                 # Return decoded, removing BOMs.
                 return decoded.replace(u'\ufeff', u'')
-            except (UnicodeError, LookupError), err:
+            except (UnicodeError, LookupError) as err:
                 error = err # in Python 3, the <exception instance> is
                             # local to the except clause
         raise UnicodeError(
@@ -122,7 +122,7 @@ class Input(TransformSpec):
             '%s.\n(%s)' % (', '.join([repr(enc) for enc in encodings]),
                          ErrorString(error)))
 
-    coding_slug = re.compile(b("coding[:=]\s*([-\w.]+)"))
+    coding_slug = re.compile(b(r"coding[:=]\s*([-\w.]+)"))
     """Encoding declaration pattern."""
 
     byte_order_marks = ((codecs.BOM_UTF8, 'utf-8'), # 'utf-8-sig' new in v2.5
@@ -204,7 +204,7 @@ class FileInput(Input):
     """
     def __init__(self, source=None, source_path=None,
                  encoding=None, error_handler='strict',
-                 autoclose=True, handle_io_errors=None, mode='rU'):
+                 autoclose=True, mode='rU', **kwargs):
         """
         :Parameters:
             - `source`: either a file-like object (which is read directly), or
@@ -214,7 +214,6 @@ class FileInput(Input):
             - `error_handler`: the encoding error handler to use.
             - `autoclose`: close automatically after read (except when
               `sys.stdin` is the source).
-            - `handle_io_errors`: ignored, deprecated, will be removed.
             - `mode`: how the file is to be opened (see standard function
               `open`). The default 'rU' provides universal newline support
               for text files.
@@ -222,6 +221,16 @@ class FileInput(Input):
         Input.__init__(self, source, source_path, encoding, error_handler)
         self.autoclose = autoclose
         self._stderr = ErrorOutput()
+        # deprecation warning
+        for key in kwargs:
+            if key == 'handle_io_errors':
+                sys.stderr.write('deprecation warning: '
+                    'io.FileInput() argument `handle_io_errors` '
+                    'is ignored since "Docutils 0.10 (2012-12-16)" '
+                    'and will soon be removed.')
+            else:
+                raise TypeError('__init__() got an unexpected keyword '
+                                "argument '%s'" % key)
 
         if source is None:
             if source_path:
@@ -234,7 +243,7 @@ class FileInput(Input):
 
                 try:
                     self.source = open(source_path, mode, **kwargs)
-                except IOError, error:
+                except IOError as error:
                     raise InputError(error.errno, error.strerror, source_path)
             else:
                 self.source = sys.stdin
@@ -263,7 +272,7 @@ class FileInput(Input):
                     data = b('\n').join(data.splitlines()) + b('\n')
                 else:
                     data = self.source.read()
-            except (UnicodeError, LookupError), err: # (in Py3k read() decodes)
+            except (UnicodeError, LookupError) as err: # (in Py3k read() decodes)
                 if not self.encoding and self.source_path:
                     # re-read in binary mode and decode with heuristics
                     b_source = open(self.source_path, 'rb')
@@ -353,7 +362,7 @@ class FileOutput(Output):
             kwargs = {}
         try:
             self.destination = open(self.destination_path, self.mode, **kwargs)
-        except IOError, error:
+        except IOError as error:
             raise OutputError(error.errno, error.strerror,
                               self.destination_path)
         self.opened = True
@@ -369,19 +378,19 @@ class FileOutput(Output):
         if ('b' not in self.mode and sys.version_info < (3,0)
             or check_encoding(self.destination, self.encoding) is False
            ):
-            if sys.version_info >= (3,0) and os.linesep != '\n':
-                data = data.replace('\n', os.linesep) # fix endings
             data = self.encode(data)
+            if sys.version_info >= (3,0) and os.linesep != '\n':
+                data = data.replace(b('\n'), b(os.linesep)) # fix endings
 
         try: # In Python < 2.5, try...except has to be nested in try...finally.
             try:
                 self.destination.write(data)
-            except TypeError, e:
+            except TypeError as e:
                 if sys.version_info >= (3,0) and isinstance(data, bytes):
                     try:
                         self.destination.buffer.write(data)
                     except AttributeError:
-                        if check_encoding(self.destination, 
+                        if check_encoding(self.destination,
                                           self.encoding) is False:
                             raise ValueError('Encoding of %s (%s) differs \n'
                                 '  from specified encoding (%s)' %
@@ -389,7 +398,7 @@ class FileOutput(Output):
                                 self.destination.encoding, self.encoding))
                         else:
                             raise e
-            except (UnicodeError, LookupError), err:
+            except (UnicodeError, LookupError) as err:
                 raise UnicodeError(
                     'Unable to encode output data. output-encoding is: '
                     '%s.\n(%s)' % (self.encoding, ErrorString(err)))

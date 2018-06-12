@@ -1,4 +1,4 @@
-# :Id: $Id: __init__.py 7218 2011-11-08 17:42:40Z milde $
+# :Id: $Id: __init__.py 7865 2015-04-12 10:06:43Z milde $
 # :Author: Guenter Milde.
 # :License: Released under the terms of the `2-Clause BSD license`_, in short:
 #
@@ -17,8 +17,9 @@ It contains various modules for conversion between different math formats
 
 :math2html:    LaTeX math -> HTML conversion from eLyXer
 :latex2mathml: LaTeX math -> presentational MathML
-:unichar2tex: Unicode character to LaTeX math translation table
-:tex2unichar: LaTeX math to Unicode character translation dictionaries
+:unichar2tex:  Unicode character to LaTeX math translation table
+:tex2unichar:  LaTeX math to Unicode character translation dictionaries
+:tex2mathml_extern: Wrapper for TeX -> MathML command line converters
 """
 
 # helpers for Docutils math support

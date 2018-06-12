@@ -1,4 +1,4 @@
-# $Id: docutils_xml.py 7497 2012-08-16 15:17:29Z milde $
+# $Id: docutils_xml.py 7966 2016-08-18 13:06:09Z milde $
 # Author: David Goodger, Paul Tremblay, Guenter Milde
 # Maintainer: docutils-develop@lists.sourceforge.net
 # Copyright: This module has been placed in the public domain.
@@ -46,7 +46,7 @@ class Writer(writers.Writer):
           ['--newlines'],
           {'action': 'store_true', 'validator': frontend.validate_boolean}),
          ('Generate XML with indents and newlines.',
-          ['--indents'],
+          ['--indents'], #@ TODO use integer value for number of spaces?
           {'action': 'store_true', 'validator': frontend.validate_boolean}),
          ('Omit the XML declaration.  Use with caution.',
           ['--no-xml-declaration'],
@@ -105,9 +105,10 @@ class XMLTranslator(nodes.GenericNodeVisitor):
             self.newline = '\n'
         if settings.indents:
             self.newline = '\n'
-            self.indent = '    '
+            self.indent = '    ' #@ TODO make this configurable?
         self.level = 0  # indentation level
         self.in_simple = 0 # level of nesting inside mixed-content elements
+        self.fixed_text = 0 # level of nesting inside FixedText elements
 
         # Output
         self.output = []
@@ -125,13 +126,19 @@ class XMLTranslator(nodes.GenericNodeVisitor):
     # generic visit and depart methods
     # --------------------------------
 
+    simple_nodes = (nodes.TextElement,
+                    nodes.image, nodes.colspec, nodes.transition) # empty elements
+
     def default_visit(self, node):
         """Default node visit method."""
         if not self.in_simple:
             self.output.append(self.indent*self.level)
         self.output.append(node.starttag(xml.sax.saxutils.quoteattr))
         self.level += 1
-        if isinstance(node, nodes.TextElement):
+        # @@ make nodes.literal an instance of FixedTextElement?
+        if isinstance(node, (nodes.FixedTextElement, nodes.literal)):
+            self.fixed_text += 1
+        if isinstance(node, self.simple_nodes):
             self.in_simple += 1
         if not self.in_simple:
             self.output.append(self.newline)
@@ -142,7 +149,9 @@ class XMLTranslator(nodes.GenericNodeVisitor):
         if not self.in_simple:
             self.output.append(self.indent*self.level)
         self.output.append(node.endtag())
-        if isinstance(node, nodes.TextElement):
+        if isinstance(node, (nodes.FixedTextElement, nodes.literal)):
+            self.fixed_text -= 1
+        if isinstance(node, self.simple_nodes):
             self.in_simple -= 1
         if not self.in_simple:
             self.output.append(self.newline)
@@ -153,6 +162,9 @@ class XMLTranslator(nodes.GenericNodeVisitor):
 
     def visit_Text(self, node):
         text = xml.sax.saxutils.escape(node.astext())
+        # indent text if we are not in a FixedText element:
+        if not self.fixed_text:
+            text = text.replace('\n', '\n'+self.indent*self.level)
         self.output.append(text)
 
     def depart_Text(self, node):

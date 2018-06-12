@@ -1,5 +1,5 @@
 # coding: utf-8
-# $Id: __init__.py 7668 2013-06-04 12:46:30Z milde $
+# $Id: __init__.py 8141 2017-07-08 17:05:18Z goodger $
 # Author: David Goodger <goodger@python.org>
 # Copyright: This module has been placed in the public domain.
 
@@ -13,9 +13,10 @@ import sys
 import os
 import os.path
 import re
+import itertools
 import warnings
 import unicodedata
-from docutils import ApplicationError, DataError
+from docutils import ApplicationError, DataError, __version_info__
 from docutils import nodes
 import docutils.io
 from docutils.utils.error_reporting import ErrorOutput, SafeString
@@ -325,7 +326,7 @@ def assemble_option_dict(option_list, options_spec):
             raise DuplicateOptionError('duplicate option "%s"' % name)
         try:
             options[name] = convertor(value)
-        except (ValueError, TypeError), detail:
+        except (ValueError, TypeError) as detail:
             raise detail.__class__('(option: "%s"; value: %r)\n%s'
                                    % (name, value, ' '.join(detail.args)))
     return options
@@ -575,7 +576,7 @@ def escape2null(text):
         parts.append('\x00' + text[found+1:found+2])
         start = found + 2               # skip character after escape
 
-def unescape(text, restore_backslashes=False):
+def unescape(text, restore_backslashes=False, respect_whitespace=False):
     """
     Return a string with nulls removed or restored to backslashes.
     Backslash-escaped spaces are also removed.
@@ -587,6 +588,16 @@ def unescape(text, restore_backslashes=False):
             text = ''.join(text.split(sep))
         return text
 
+def split_escaped_whitespace(text):
+    """
+    Split `text` on escaped whitespace (null+space or null+newline).
+    Return a list of strings.
+    """
+    strings = text.split('\x00 ')
+    strings = [string.split('\x00\n') for string in strings]
+    # flatten list of lists of strings to list of strings:
+    return list(itertools.chain(*strings))
+
 def strip_combining_chars(text):
     if isinstance(text, str) and sys.version_info < (3,0):
         return text
@@ -595,8 +606,10 @@ def strip_combining_chars(text):
 def find_combining_chars(text):
     """Return indices of all combining chars in  Unicode string `text`.
 
+    >>> from docutils.utils import find_combining_chars
     >>> find_combining_chars(u'A t̆ab̆lĕ')
     [3, 6, 9]
+
     """
     if isinstance(text, str) and sys.version_info < (3,0):
         return []
@@ -605,8 +618,10 @@ def find_combining_chars(text):
 def column_indices(text):
     """Indices of Unicode string `text` when skipping combining characters.
 
+    >>> from docutils.utils import column_indices
     >>> column_indices(u'A t̆ab̆lĕ')
     [0, 1, 2, 4, 5, 7, 8]
+
     """
     # TODO: account for asian wide chars here instead of using dummy
     # replacements in the tableparser?
@@ -663,17 +678,21 @@ def normalize_language_tag(tag):
 
     Example:
 
+    >>> from docutils.utils import normalize_language_tag
     >>> normalize_language_tag('de_AT-1901')
     ['de-at-1901', 'de-at', 'de-1901', 'de']
+    >>> normalize_language_tag('de-CH-x_altquot')
+    ['de-ch-x-altquot', 'de-ch', 'de-x-altquot', 'de']
+
     """
     # normalize:
-    tag = tag.lower().replace('_','-')
+    tag = tag.lower().replace('-','_')
     # split (except singletons, which mark the following tag as non-standard):
-    tag = re.sub(r'-([a-zA-Z0-9])-', r'-\1_', tag)
-    taglist = []
-    subtags = [subtag.replace('_', '-') for subtag in tag.split('-')]
+    tag = re.sub(r'_([a-zA-Z0-9])_', r'_\1-', tag)
+    subtags = [subtag for subtag in tag.split('_')]
     base_tag = [subtags.pop(0)]
     # find all combinations of subtags
+    taglist = []
     for n in range(len(subtags), 0, -1):
         for tags in unique_combinations(subtags, n):
             taglist.append('-'.join(base_tag+tags))
@@ -747,3 +766,42 @@ class DependencyList(object):
         except AttributeError:
             output_file = None
         return '%s(%r, %s)' % (self.__class__.__name__, output_file, self.list)
+
+
+release_level_abbreviations = {
+    'alpha':     'a',
+    'beta':      'b',
+    'candidate': 'rc',
+    'final':     '',}
+
+def version_identifier(version_info=None):
+    # to add in Docutils 0.15:
+    # version_info is a namedtuple, an instance of Docutils.VersionInfo.
+    """
+    Given a `version_info` tuple (default is docutils.__version_info__),
+    build & return a version identifier string.
+    """
+    if version_info is None:
+        version_info = __version_info__
+    if version_info[2]:                   # version_info.micro
+        micro = '.%s' % version_info[2]
+    else:
+        micro = ''
+    releaselevel = release_level_abbreviations[
+        version_info[3]]                  # version_info.releaselevel
+    if version_info[4]:                   # version_info.serial
+        serial = version_info[4]
+    else:
+        serial = ''
+    if version_info[5]:                   # version_info.release
+        dev = ''
+    else:
+        dev = '.dev'
+    version = '%s.%s%s%s%s%s' % (
+        version_info[0],  # version_info.major
+        version_info[1],  # version_info.minor
+        micro,
+        releaselevel,
+        serial,
+        dev)
+    return version

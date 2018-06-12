@@ -1,4 +1,4 @@
-# $Id: __init__.py 7756 2014-07-06 11:48:05Z grubert $
+# $Id: __init__.py 8147 2017-08-03 09:01:16Z grubert $
 # Author: David Goodger <goodger@python.org>
 # Copyright: This module has been placed in the public domain.
 
@@ -50,22 +50,66 @@ Subpackages:
 - writers: Format-specific output translators.
 """
 
-__docformat__ = 'reStructuredText'
-
-__version__ = '0.12'
-"""``major.minor.micro`` version number.  The micro number is bumped for API
-changes, for new functionality, and for interim project releases.  The minor
-number is bumped whenever there is a significant project release.  The major
-number will be bumped when the project is feature-complete, and perhaps if
-there is a major change in the design."""
-
-__version_details__ = 'release'
-"""Extra version details (e.g. 'snapshot 2005-05-29, r3410', 'repository',
-'release'), modified automatically & manually."""
-
 import sys
 
-class ApplicationError(StandardError):
+
+__docformat__ = 'reStructuredText'
+
+__version__ = '0.14'
+"""Docutils version identifier (complies with PEP 440)::
+
+    major.minor[.micro][releaselevel[serial]][.dev]
+
+* The major number will be bumped when the project is feature-complete, and
+  later if there is a major change in the design or API.
+* The minor number is bumped whenever there are new features.
+* The micro number is bumped for bug-fix releases. Omitted if micro=0.
+* The releaselevel identifier is used for pre-releases, one of 'a' (alpha),
+  'b' (beta), or 'rc' (release candidate). Omitted for final releases.
+* The serial release number identifies prereleases; omitted if 0.
+* The '.dev' suffix indicates active development, not a release, before the
+  version indicated.
+
+For version comparison operations, use `__version_info__`
+rather than parsing the text of `__version__`.
+"""
+
+# workaround for Python < 2.6:
+__version_info__ = (0, 14, 0, 'final', 0, True)
+# To add in Docutils 0.15, replacing the line above:
+"""
+from collections import namedtuple
+VersionInfo = namedtuple(
+    'VersionInfo', 'major minor micro releaselevel serial release')
+__version_info__ = VersionInfo(
+    major=0,
+    minor=15,
+    micro=0,
+    releaselevel='alpha', # development status:
+                          # one of 'alpha', 'beta', 'candidate', 'final'
+    serial=0,             # pre-release number (0 for final releases)
+    release=False         # True for official releases and pre-releases
+    )
+
+Comprehensive version information tuple. Can be used to test for a
+minimally required version, e.g. ::
+
+  if __version_info__ >= (0, 13, 0, 'candidate', 2, True)
+
+or in a self-documenting way like ::
+
+  if __version_info__ >= docutils.VersionInfo(
+      major=0, minor=13, micro=0,
+      releaselevel='candidate', serial=2, release=True)
+"""
+
+__version_details__ = ''
+"""Optional extra version details (e.g. 'snapshot 2005-05-29, r3410').
+(For development and release status see `__version_info__`.)
+"""
+
+
+class ApplicationError(Exception):
     # Workaround:
     # In Python < 2.6, unicode(<exception instance>) calls `str` on the
     # arg and therefore, e.g., unicode(StandardError(u'\u234')) fails
@@ -73,6 +117,7 @@ class ApplicationError(StandardError):
     if sys.version_info < (2,6):
         def __unicode__(self):
             return u', '.join(self.args)
+
 
 class DataError(ApplicationError): pass
 

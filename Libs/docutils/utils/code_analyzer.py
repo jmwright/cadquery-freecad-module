@@ -4,7 +4,7 @@
 """Lexical analysis of formal languages (i.e. code) using Pygments."""
 
 # :Author: Georg Brandl; Felix Wiemann; Günter Milde
-# :Date: $Date: 2011-12-20 15:14:21 +0100 (Die, 20. Dez 2011) $
+# :Date: $Date: 2015-04-20 16:05:27 +0200 (Mo, 20 Apr 2015) $
 # :Copyright: This module has been placed in the public domain.
 
 from docutils import ApplicationError
@@ -13,7 +13,7 @@ try:
     from pygments.lexers import get_lexer_by_name
     from pygments.formatters.html import _get_ttype_class
     with_pygments = True
-except ImportError:
+except (ImportError, SyntaxError): # pygments 2.0.1 fails with Py 3.1 and 3.2
     with_pygments = False
 
 # Filter the following token types from the list of class arguments:

@@ -1,4 +1,4 @@
-# $Id: core.py 7466 2012-06-25 14:56:51Z milde $
+# $Id: core.py 8126 2017-06-23 09:34:28Z milde $
 # Author: David Goodger <goodger@python.org>
 # Copyright: This module has been placed in the public domain.
 
@@ -218,10 +218,10 @@ class Publisher:
             self.apply_transforms()
             output = self.writer.write(self.document, self.destination)
             self.writer.assemble_parts()
-        except SystemExit, error:
+        except SystemExit as error:
             exit = 1
             exit_status = error.code
-        except Exception, error:
+        except Exception as error:
             if not self.settings:       # exception too early to report nicely
                 raise
             if self.settings.traceback: # Propagate exceptions?
@@ -279,9 +279,11 @@ class Publisher:
             print >>self._stderr, ("""\
 Exiting due to error.  Use "--traceback" to diagnose.
 Please report errors to <docutils-users@lists.sf.net>.
-Include "--traceback" output, Docutils version (%s [%s]),
+Include "--traceback" output, Docutils version (%s%s),
 Python version (%s), your OS type & version, and the
-command line used.""" % (__version__, __version_details__,
+command line used.""" % (__version__,
+                         docutils.__version_details__ and
+                         ' [%s]'%docutils.__version_details__ or '',
                          sys.version.split()[0]))
 
     def report_SystemMessage(self, error):

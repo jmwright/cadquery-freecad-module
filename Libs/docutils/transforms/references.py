@@ -1,4 +1,4 @@
-# $Id: references.py 7624 2013-03-07 14:10:26Z milde $
+# $Id: references.py 8067 2017-05-04 20:10:03Z milde $
 # Author: David Goodger <goodger@python.org>
 # Copyright: This module has been placed in the public domain.
 
@@ -710,6 +710,7 @@ class Substitutions(Transform):
                             raise CircularSubstitutionDefinitionError
                         else:
                             nested[nested_name].append(key)
+                            nested_ref['ref-origin'] = ref
                             subreflist.append(nested_ref)
                 except CircularSubstitutionDefinitionError:
                     parent = ref.parent
@@ -721,9 +722,13 @@ class Substitutions(Transform):
                             line=parent.line, base_node=parent)
                         parent.replace_self(msg)
                     else:
+                        # find original ref substitution which cased this error
+                        ref_origin = ref
+                        while ref_origin.hasattr('ref-origin'):
+                            ref_origin = ref_origin['ref-origin']
                         msg = self.document.reporter.error(
-                            'Circular substitution definition referenced: "%s".'
-                            % refname, base_node=ref)
+                            'Circular substitution definition referenced: '
+                            '"%s".' % refname, base_node=ref_origin)
                         msgid = self.document.set_id(msg)
                         prb = nodes.problematic(
                             ref.rawsource, ref.rawsource, refid=msgid)
@@ -893,7 +898,10 @@ class DanglingReferencesVisitor(nodes.SparseNodeVisitor):
                 msgid = self.document.set_id(msg)
                 prb = nodes.problematic(
                       node.rawsource, node.rawsource, refid=msgid)
-                prbid = self.document.set_id(prb)
+                try:
+                    prbid = node['ids'][0]
+                except IndexError:
+                    prbid = self.document.set_id(prb)
                 msg.add_backref(prbid)
                 node.replace_self(prb)
         else:

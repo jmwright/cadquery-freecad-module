@@ -1,4 +1,4 @@
-# $Id: roles.py 7514 2012-09-14 14:27:12Z milde $
+# $Id: roles.py 7937 2016-05-24 10:48:48Z milde $
 # Author: Edward Loper <edloper@gradient.cis.upenn.edu>
 # Copyright: This module has been placed in the public domain.
 
@@ -334,7 +334,7 @@ def code_role(role, rawtext, text, lineno, inliner, options={}, content=[]):
 
     node = nodes.literal(rawtext, '', classes=classes)
 
-    # analyze content and add nodes for every token
+    # analyse content and add nodes for every token
     for classes, value in tokens:
         # print (classes, value)
         if classes:
@@ -351,9 +351,10 @@ code_role.options = {'class': directives.class_option,
 register_canonical_role('code', code_role)
 
 def math_role(role, rawtext, text, lineno, inliner, options={}, content=[]):
+    set_classes(options)
     i = rawtext.find('`')
     text = rawtext.split('`')[1]
-    node = nodes.math(rawtext, text)
+    node = nodes.math(rawtext, text, **options)
     return [node], []
 
 register_canonical_role('math', math_role)

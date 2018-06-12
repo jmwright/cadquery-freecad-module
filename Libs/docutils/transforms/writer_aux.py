@@ -1,4 +1,4 @@
-# $Id: writer_aux.py 7320 2012-01-19 22:33:02Z milde $
+# $Id: writer_aux.py 7808 2015-02-27 17:03:32Z milde $
 # Author: Lea Wiemann <LeWiemann@gmail.com>
 # Copyright: This module has been placed in the public domain.
 

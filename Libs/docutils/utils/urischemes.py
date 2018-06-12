@@ -1,4 +1,4 @@
-# $Id: urischemes.py 7464 2012-06-25 13:16:03Z milde $
+# $Id: urischemes.py 7922 2015-09-22 15:28:09Z milde $
 # Author: David Goodger <goodger@python.org>
 # Copyright: This module has been placed in the public domain.
 
@@ -113,7 +113,7 @@ schemes = {
       'tel': ('a connection to a terminal that handles normal voice '
               'telephone calls, a voice mailbox or another voice messaging '
               'system or a service that can be operated using DTMF tones; '
-              'RFC 2806.'),
+              'RFC 3966.'),
       'telephone': 'telephone',
       'telnet': 'Reference to interactive sessions; RFC 4248',
       'tftp': 'Trivial File Transfer Protocol; RFC 3617',

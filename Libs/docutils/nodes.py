@@ -1,4 +1,4 @@
-# $Id: nodes.py 7595 2013-01-21 17:33:56Z milde $
+# $Id: nodes.py 7788 2015-02-16 22:10:52Z milde $
 # Author: David Goodger <goodger@python.org>
 # Maintainer: docutils-develop@lists.sourceforge.net
 # Copyright: This module has been placed in the public domain.
@@ -304,10 +304,8 @@ if sys.version_info < (3,):
 
         def __repr__(self):
             return unicode.__repr__(self)[1:]
-
-
 else:
-    reprunicode = unicode
+    reprunicode = str
 
 
 def ensure_str(s):
@@ -533,7 +531,7 @@ class Element(Node):
         parts = [self.tagname]
         for name, value in self.attlist():
             if value is None:           # boolean attribute
-                parts.append(name)
+                parts.append('%s="True"' % name)
                 continue
             if isinstance(value, list):
                 values = [serial_escape('%s' % (v,)) for v in value]
@@ -571,7 +569,7 @@ class Element(Node):
             assert key.step in (None, 1), 'cannot handle slice with stride'
             return self.children[key.start:key.stop]
         else:
-            raise TypeError, ('element index must be an integer, a slice, or '
+            raise TypeError('element index must be an integer, a slice, or '
                               'an attribute name string')
 
     def __setitem__(self, key, item):
@@ -586,7 +584,7 @@ class Element(Node):
                 self.setup_child(node)
             self.children[key.start:key.stop] = item
         else:
-            raise TypeError, ('element index must be an integer, a slice, or '
+            raise TypeError('element index must be an integer, a slice, or '
                               'an attribute name string')
 
     def __delitem__(self, key):
@@ -598,7 +596,7 @@ class Element(Node):
             assert key.step in (None, 1), 'cannot handle slice with stride'
             del self.children[key.start:key.stop]
         else:
-            raise TypeError, ('element index must be an integer, a simple '
+            raise TypeError('element index must be an integer, a simple '
                               'slice, or an attribute name string')
 
     def __add__(self, other):
@@ -954,7 +952,7 @@ class Element(Node):
                        'Losing "%s" attribute: %s' % (att, self[att])
         self.parent.replace(self, new)
 
-    def first_child_matching_class(self, childclass, start=0, end=sys.maxint):
+    def first_child_matching_class(self, childclass, start=0, end=sys.maxsize):
         """
         Return the index of the first child whose class exactly matches.
 
@@ -974,7 +972,7 @@ class Element(Node):
         return None
 
     def first_child_not_matching_class(self, childclass, start=0,
-                                       end=sys.maxint):
+                                       end=sys.maxsize):
         """
         Return the index of the first child whose class does *not* match.
 
@@ -1674,7 +1672,7 @@ class system_message(Special, BackLinkable, PreBibliographic, Element):
         try:
             Element.__init__(self, '', *children, **attributes)
         except:
-            print 'system_message: children=%r' % (children,)
+            print('system_message: children=%r' % (children,))
             raise
 
     def astext(self):

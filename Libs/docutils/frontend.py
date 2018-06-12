@@ -1,4 +1,4 @@
-# $Id: frontend.py 7584 2013-01-01 20:00:21Z milde $
+# $Id: frontend.py 8126 2017-06-23 09:34:28Z milde $
 # Author: David Goodger <goodger@python.org>
 # Copyright: This module has been placed in the public domain.
 
@@ -33,14 +33,18 @@ import os
 import os.path
 import sys
 import warnings
-import ConfigParser as CP
+try:
+    import ConfigParser as CP
+except:
+    import configparser as CP
 import codecs
 import optparse
 from optparse import SUPPRESS_HELP
 import docutils
 import docutils.utils
 import docutils.nodes
-from docutils.utils.error_reporting import locale_encoding, ErrorOutput, ErrorString
+from docutils.utils.error_reporting import (locale_encoding, SafeString,
+                                            ErrorOutput, ErrorString)
 
 
 def store_multiple(option, opt, value, parser, *args, **kwargs):
@@ -61,7 +65,7 @@ def read_config_file(option, opt, value, parser):
     """
     try:
         new_settings = parser.get_config_file_settings(value)
-    except ValueError, error:
+    except ValueError as error:
         parser.error(error)
     parser.values.update(new_settings, parser)
 
@@ -205,9 +209,44 @@ def validate_strip_class(setting, value, option_parser,
     for cls in value:
         normalized = docutils.nodes.make_id(cls)
         if cls != normalized:
-            raise ValueError('invalid class value %r (perhaps %r?)'
+            raise ValueError('Invalid class value %r (perhaps %r?)'
                              % (cls, normalized))
     return value
+
+def validate_smartquotes_locales(setting, value, option_parser,
+                         config_parser=None, config_section=None):
+    """Check/normalize a comma separated list of smart quote definitions.
+
+    Return a list of (language-tag, quotes) string tuples."""
+
+    # value is a comma separated string list:
+    value = validate_comma_separated_list(setting, value, option_parser,
+                                          config_parser, config_section)
+    # validate list elements
+    lc_quotes = []
+    for item in value:
+        try:
+            lang, quotes = item.split(':', 1)
+        except AttributeError:
+            # this function is called for every option added to `value`
+            # -> ignore if already a tuple:
+            lc_quotes.append(item)
+            continue
+        except ValueError:
+            raise ValueError(u'Invalid value "%s".'
+                             ' Format is "<language>:<quotes>".'
+                             % item.encode('ascii', 'backslashreplace'))
+        # parse colon separated string list:
+        quotes = quotes.strip()
+        multichar_quotes = quotes.split(':')
+        if len(multichar_quotes) == 4:
+            quotes = multichar_quotes
+        elif len(quotes) != 4:
+            raise ValueError('Invalid value "%s". Please specify 4 quotes\n'
+                '    (primary open/close; secondary open/close).'
+                             % item.encode('ascii', 'backslashreplace'))
+        lc_quotes.append((lang,quotes))
+    return lc_quotes
 
 def make_paths_absolute(pathdict, keys, base_path=None):
     """
@@ -310,7 +349,7 @@ class Option(optparse.Option):
                 value = getattr(values, setting)
                 try:
                     new_value = self.validator(setting, value, parser)
-                except Exception, error:
+                except Exception as error:
                     raise (optparse.OptionValueError(
                         'Error in option "%s":\n    %s'
                         % (opt, ErrorString(error))),
@@ -534,8 +573,10 @@ class OptionParser(optparse.OptionParser, docutils.SettingsSpec):
 
     config_section = 'general'
 
-    version_template = ('%%prog (Docutils %s [%s], Python %s, on %s)'
-                        % (docutils.__version__, docutils.__version_details__,
+    version_template = ('%%prog (Docutils %s%s, Python %s, on %s)'
+                        % (docutils.__version__,
+                           docutils.__version_details__ and
+                           ' [%s]'%docutils.__version_details__ or '',
                            sys.version.split()[0], sys.platform))
     """Default version message."""
 
@@ -567,8 +608,8 @@ class OptionParser(optparse.OptionParser, docutils.SettingsSpec):
         if read_config_files and not self.defaults['_disable_config']:
             try:
                 config_settings = self.get_standard_config_settings()
-            except ValueError, error:
-                self.error(error)
+            except ValueError as error:
+                self.error(SafeString(error))
             self.set_defaults_from_dict(config_settings.__dict__)
 
     def populate_from_components(self, components):
@@ -788,7 +829,7 @@ Skipping "%s" configuration file.
                         new_value = option.validator(
                             setting, value, option_parser,
                             config_parser=self, config_section=section)
-                    except Exception, error:
+                    except Exception as error:
                         raise (ValueError(
                             'Error in config file "%s", section "[%s]":\n'
                             '    %s\n'

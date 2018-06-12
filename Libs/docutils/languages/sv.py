@@ -1,4 +1,5 @@
-# $Id: sv.py 4564 2006-05-21 20:44:42Z wiemann $
+# -*- coding: utf-8 -*-
+# $Id: sv.py 8006 2016-12-22 23:02:44Z milde $
 # Author: Adam Chodorowski <chodorowski@users.sourceforge.net>
 # Copyright: This module has been placed in the public domain.
 
@@ -14,8 +15,8 @@ Swedish language mappings for language-dependent features of Docutils.
 __docformat__ = 'reStructuredText'
 
 labels = {
-    'author':       u'F\u00f6rfattare',
-    'authors':      u'F\u00f6rfattare',
+    'author':       u'Författare',
+    'authors':      u'Författare',
     'organization': u'Organisation',
     'address':      u'Adress',
     'contact':      u'Kontakt',
@@ -27,20 +28,20 @@ labels = {
     'dedication':   u'Dedikation',
     'abstract':     u'Sammanfattning',
     'attention':    u'Observera!',
-    'caution':      u'Varning!',
+    'caution':      u'Akta!', # 'Varning' already used for 'warning'
     'danger':       u'FARA!',
     'error':        u'Fel',
-    'hint':         u'V\u00e4gledning',
+    'hint':         u'Vink',
     'important':    u'Viktigt',
     'note':         u'Notera',
     'tip':          u'Tips',
     'warning':      u'Varning',
-    'contents':     u'Inneh\u00e5ll' }
+    'contents':     u'Innehåll' }
 """Mapping of node class name to label text."""
 
 bibliographic_fields = {
     # 'Author' and 'Authors' identical in Swedish; assume the plural:
-    u'f\u00f6rfattare': 'authors',
+    u'författare': 'authors',
     u' n/a':            'author',
     u'organisation':    'organization',
     u'adress':          'address',

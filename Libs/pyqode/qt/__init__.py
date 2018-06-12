@@ -58,7 +58,7 @@ __version__ = '2.10.0'
 #: Qt API environment variable name
 QT_API = 'QT_API'
 #: names of the expected PyQt5 api
-PYQT5_API = ['pyqt5']
+PYQT5_API = ['pyqt5','pyside2']
 #: names of the expected PyQt4 api
 PYQT4_API = [
     'pyqt',  # name used in IPython.qt

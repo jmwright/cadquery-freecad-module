@@ -2,8 +2,8 @@
 # -*- coding: utf-8 -*-
 
 # :Author: Günter Milde <milde@users.sourceforge.net>
-# :Revision: $Revision: 7668 $
-# :Date: $Date: 2013-06-04 14:46:30 +0200 (Die, 04. Jun 2013) $
+# :Revision: $Revision: 8046 $
+# :Date: $Date: 2017-03-11 13:09:36 +0100 (Sa, 11 Mär 2017) $
 # :Copyright: © 2010 Günter Milde.
 # :License: Released under the terms of the `2-Clause BSD license`_, in short:
 # 
@@ -17,8 +17,9 @@
 """
 XeLaTeX document tree Writer.
 
-A variant of Docutils' standard 'latex2e' writer producing output
-suited for processing with XeLaTeX (http://tug.org/xetex/).
+A variant of Docutils' standard 'latex2e' writer producing LaTeX output
+suited for processing with the Unicode-aware TeX engines
+LuaTeX and XeTeX.
 """
 
 __docformat__ = 'reStructuredText'
@@ -32,9 +33,9 @@ from docutils import frontend, nodes, utils, writers, languages
 from docutils.writers import latex2e
 
 class Writer(latex2e.Writer):
-    """A writer for Unicode-based LaTeX variants (XeTeX, LuaTeX)"""
+    """A writer for Unicode-aware LaTeX variants (XeTeX, LuaTeX)"""
 
-    supported = ('xetex','xelatex','luatex')
+    supported = ('lxtex', 'xetex','xelatex','luatex', 'lualatex')
     """Formats this writer supports."""
 
     default_template = 'xelatex.tex'
@@ -54,7 +55,7 @@ class Writer(latex2e.Writer):
         template=('Template file. Default: "%s".' % default_template,
           ['--template'], {'default': default_template, 'metavar': '<file>'}),
         latex_preamble=('Customization by LaTeX code in the preamble. '
-          'Default: select PDF standard fonts (Times, Helvetica, Courier).',
+          'Default: select "Linux Libertine" fonts.',
           ['--latex-preamble'],
           {'default': default_preamble}),
         )
@@ -98,6 +99,11 @@ class Babel(latex2e.Babel):
     for key in ('af',           # 'afrikaans',
                 'de-AT',        # 'naustrian',
                 'de-AT-1901',   # 'austrian',
+                # TODO: use variant=... for English variants
+                'en-CA',        # 'canadian',
+                'en-GB',        # 'british',
+                'en-NZ',        # 'newzealand',
+                'en-US',        # 'american',
                 'fr-CA',        # 'canadien',
                 'grc-ibycus',   # 'ibycus', (Greek Ibycus encoding)
                 'sr-Latn',      # 'serbian script=latin'
@@ -109,12 +115,12 @@ class Babel(latex2e.Babel):
         self.reporter = reporter
         self.language = self.language_name(language_code)
         self.otherlanguages = {}
-        self.warn_msg = 'Language "%s" not supported by XeTeX (polyglossia).'
+        self.warn_msg = 'Language "%s" not supported by Polyglossia.'
         self.quote_index = 0
         self.quotes = ('"', '"')
         # language dependent configuration:
         # double quotes are "active" in some languages (e.g. German).
-        self.literal_double_quote = u'"' # TODO: use \textquotedbl
+        self.literal_double_quote = u'"' # TODO: use \textquotedbl ?
 
     def __call__(self):
         setup = [r'\usepackage{polyglossia}',
@@ -126,6 +132,12 @@ class Babel(latex2e.Babel):
 
 
 class XeLaTeXTranslator(latex2e.LaTeXTranslator):
+    """
+    Generate code for LaTeX using Unicode fonts (XeLaTex or LuaLaTeX).
+
+    See the docstring of docutils.writers._html_base.HTMLTranslator for
+    notes on and examples of safe subclassing.
+    """
 
     def __init__(self, document):
         self.is_xetex = True  # typeset with XeTeX or LuaTeX engine

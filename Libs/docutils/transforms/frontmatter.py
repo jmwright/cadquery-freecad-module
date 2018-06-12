@@ -1,4 +1,4 @@
-# $Id: frontmatter.py 7595 2013-01-21 17:33:56Z milde $
+# $Id: frontmatter.py 8117 2017-06-18 23:38:18Z milde $
 # Author: David Goodger, Ueli Schlaepfer <goodger@python.org>
 # Copyright: This module has been placed in the public domain.
 
@@ -433,6 +433,10 @@ class DocInfo(Transform):
                        and isinstance(field[-1][0], nodes.paragraph):
                     utils.clean_rcs_keywords(
                         field[-1][0], self.rcs_keyword_substitutions)
+                if normedname not in bibliofields:
+                    classvalue = nodes.make_id(normedname)
+                    if classvalue:
+                        field['classes'].append(classvalue)
                 docinfo.append(field)
         nodelist = []
         if len(docinfo) != 0:

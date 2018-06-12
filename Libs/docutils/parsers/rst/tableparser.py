@@ -1,4 +1,4 @@
-# $Id: tableparser.py 7320 2012-01-19 22:33:02Z milde $
+# $Id: tableparser.py 7898 2015-05-29 20:49:28Z milde $
 # Author: David Goodger <goodger@python.org>
 # Copyright: This module has been placed in the public domain.
 
@@ -511,8 +511,8 @@ class SimpleTableParser(TableParser):
                 if i == lastcol and line[end:].strip():
                     text = line[start:].rstrip()
                     new_end = start + len(text)
-                    columns[i] = (start, new_end)
                     main_start, main_end = self.columns[-1]
+                    columns[i] = (start, max(main_end, new_end))
                     if new_end > main_end:
                         self.columns[-1] = (main_start, new_end)
                 elif line[end:nextstart].strip():

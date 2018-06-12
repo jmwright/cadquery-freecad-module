@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 """Adds all of the commands that are used for the menus of the CadQuery module"""
-# (c) 2014-2016 Jeremy Wright Apache 2.0 License
-
+# (c) 2014-2018 Jeremy Wright Apache 2.0 License
 import imp, os, sys, tempfile
 import FreeCAD, FreeCADGui
 from PySide import QtGui, QtCore
@@ -160,7 +159,7 @@ class CadQueryExecuteScript:
         scriptText = cqCodePane.toPlainText().encode('utf-8')
 
         # Check to see if we are executig a CQGI compliant script
-        if "show_object(" in scriptText or "debug(" in scriptText:
+        if b"show_object(" in scriptText or b"debug(" in scriptText:
             FreeCAD.Console.PrintMessage("Executing CQGI-compliant script.\r\n")
 
             # A repreentation of the CQ script with all the metadata attached
@@ -451,7 +450,7 @@ class CadQueryValidateScript:
 
         scriptText = cqCodePane.toPlainText().encode('utf-8')
 
-        if ("show_object(" not in scriptText and "# show_object(" in scriptText and "#show_boject(" in scriptText) or ("debug(" not in scriptText and "# debug(" in scriptText and "#debug(" in scriptText):
+        if (b"show_object(" not in scriptText) and  (b"debug(" not in scriptText):
             FreeCAD.Console.PrintError("Script did not call show_object or debug, no output available. Script must be CQGI compliant to get build output, variable editing and validation.\r\n")
             return
 

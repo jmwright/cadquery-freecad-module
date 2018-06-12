@@ -1,4 +1,4 @@
-# $Id: __init__.py 7598 2013-01-30 12:39:24Z milde $
+# $Id: __init__.py 8068 2017-05-08 22:10:39Z milde $
 # Author: David Goodger <goodger@python.org>
 # Copyright: This module has been placed in the public domain.
 
@@ -101,9 +101,9 @@ class Parser(docutils.parsers.Parser):
          ('Recognize and link to standalone RFC references (like "RFC 822").',
           ['--rfc-references'],
           {'action': 'store_true', 'validator': frontend.validate_boolean}),
-         ('Base URL for RFC references (default "http://www.faqs.org/rfcs/").',
+         ('Base URL for RFC references (default "http://tools.ietf.org/html/").',
           ['--rfc-base-url'],
-          {'metavar': '<URL>', 'default': 'http://www.faqs.org/rfcs/',
+          {'metavar': '<URL>', 'default': 'http://tools.ietf.org/html/',
            'validator': frontend.validate_url_trailing_slash}),
          ('Set number of spaces for tab expansion (default 8).',
           ['--tab-width'],
@@ -141,7 +141,26 @@ class Parser(docutils.parsers.Parser):
          ('Change straight quotation marks to typographic form: '
           'one of "yes", "no", "alt[ernative]" (default "no").',
           ['--smart-quotes'],
-          {'default': False, 'validator': frontend.validate_ternary}),
+          {'default': False, 'metavar': '<yes/no/alt>',
+           'validator': frontend.validate_ternary}),
+         ('Characters to use as "smart quotes" for <language>. ',
+          ['--smartquotes-locales'],
+          {'metavar': '<language:quotes[,language:quotes,...]>',
+           'action': 'append',
+           'validator': frontend.validate_smartquotes_locales}),
+         ('Inline markup recognized at word boundaries only '
+          '(adjacent to punctuation or whitespace). '
+          'Force character-level inline markup recognition with '
+          '"\\ " (backslash + space). Default.',
+          ['--word-level-inline-markup'],
+          {'action': 'store_false', 'dest': 'character_level_inline_markup'}),
+         ('Inline markup recognized anywhere, regardless of surrounding '
+          'characters. Backslash-escapes must be used to avoid unwanted '
+          'markup recognition. Useful for East Asian languages. '
+          'Experimental.',
+          ['--character-level-inline-markup'],
+          {'action': 'store_true', 'default': False,
+           'dest': 'character_level_inline_markup'}),
         ))
 
     config_section = 'restructuredtext parser'
@@ -248,12 +267,6 @@ class Directive(object):
 
     - ``lineno`` is the absolute line number of the first line
       of the directive.
-
-    - ``src`` is the name (or path) of the rst source of the directive.
-
-    - ``srcline`` is the line number of the first line of the directive
-      in its source. It may differ from ``lineno``, if the main source
-      includes other sources with the ``.. include::`` directive.
 
     - ``content_offset`` is the line offset of the first line of the content from
       the beginning of the current input.  Used when initiating a nested parse.

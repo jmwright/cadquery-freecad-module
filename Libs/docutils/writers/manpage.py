@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# $Id: manpage.py 7628 2013-03-09 10:19:35Z grubert $
+# $Id: manpage.py 8116 2017-06-18 19:09:40Z milde $
 # Author: Engelbert Gruber <grubert@users.sourceforge.net>
 # Copyright: This module is put into the public domain.
 
@@ -368,7 +368,7 @@ class Translator(nodes.NodeVisitor):
         tmpl = (".TH %(title_upper)s %(manual_section)s"
                 " \"%(date)s\" \"%(version)s\" \"%(manual_group)s\"\n"
                 ".SH NAME\n"
-                "%(title)s \- %(subtitle)s\n")
+                "%(title)s \\- %(subtitle)s\n")
         return tmpl % self._docinfo
 
     def append_header(self):
@@ -403,7 +403,7 @@ class Translator(nodes.NodeVisitor):
                 self.defs['strong'][0],
                 self.language.labels.get(name, name).upper(),
                 self.defs['strong'][1],
-                )        
+                )
             self.body.append(name)
         self.visit_block_quote(node)
 
@@ -755,6 +755,12 @@ class Translator(nodes.NodeVisitor):
 
     depart_important = depart_admonition
 
+    def visit_inline(self, node):
+        pass
+
+    def depart_inline(self, node):
+        pass
+
     def visit_label(self, node):
         # footnote and citation
         if (isinstance(node.parent, nodes.footnote)
@@ -818,7 +824,7 @@ class Translator(nodes.NodeVisitor):
         # BUG/HACK: indent alway uses the _last_ indention,
         # thus we need two of them.
         self.indent(LITERAL_BLOCK_INDENT)
-        self.indent(0)        
+        self.indent(0)
         self.body.append(self.defs['literal_block'][0])
         self._in_literal = True
 
