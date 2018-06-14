@@ -340,7 +340,10 @@ class FoldingPanel(Panel):
                         (colorB.blue() * (maxFactor - factor)) / maxFactor)
             return tmp
 
-        pal = QtWidgets.QApplication.instance().palette()
+        try:
+            pal = QtWidgets.QApplication.instance().palette()
+        except:
+            pal = QtGui.QGuiApplication.palette()
         b = pal.window().color()
         h = pal.highlight().color()
         return merged_colors(b, h, 50)

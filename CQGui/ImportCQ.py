@@ -31,13 +31,14 @@ def open(filename):
     ver = hex(sys.hexversion)
     interpreter = "python%s.%s" % (ver[2], ver[4])  # => 'python2.7'
 
+    # CadQuery now supports Python 3
     # If the user doesn't have Python 2.7, warn them
-    if interpreter != 'python2.7':
-        msg = QtGui.QApplication.translate(
-            "cqCodeWidget",
-            "Please install Python 2.7",
-            None)
-        FreeCAD.Console.PrintError(msg + "\r\n")
+    # if interpreter != 'python2.7':
+    #     msg = QtGui.QApplication.translate(
+    #         "cqCodeWidget",
+    #         "Please install Python 2.7",
+    #         None)
+    #     FreeCAD.Console.PrintError(msg + "\r\n")
 
     # The extra version numbers won't work on Windows
     if sys.platform.startswith('win'):
