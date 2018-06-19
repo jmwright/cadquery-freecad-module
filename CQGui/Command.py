@@ -229,7 +229,7 @@ class CadQueryExecuteScript:
 
             # We import this way because using execfile() causes non-standard script execution in some situations
             with revert_sys_modules():
-                imp.load_source('temp_module', tempFile.name)
+                imp.load_source('__cq_freecad_module__', tempFile.name)
 
         msg = QtGui.QApplication.translate(
             "cqCodeWidget",
