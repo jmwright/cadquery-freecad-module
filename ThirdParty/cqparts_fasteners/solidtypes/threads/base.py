@@ -52,11 +52,13 @@ def profile_to_cross_section(profile, lefthand=False, start_count=1, min_vertice
     vertices to set for each wire.
     where: len(min_vertices) == number of edges in profile
 
-    **Example**::
+    **Example**
+
+    .. doctest::
 
         import cadquery
-        from cqparts.solidtypes.threads.base import profile_to_cross_section
-        from Helpers import show
+        from cqparts_fasteners.solidtypes.threads.base import profile_to_cross_section
+        from Helpers import show  # doctest: +SKIP
 
         profile = cadquery.Workplane("XZ") \
             .moveTo(1, 0) \
@@ -64,8 +66,8 @@ def profile_to_cross_section(profile, lefthand=False, start_count=1, min_vertice
             .wire()
         cross_section = profile_to_cross_section(profile)
 
-        show(profile)
-        show(cross_section)
+        show(profile)  # doctest: +SKIP
+        show(cross_section)  # doctest: +SKIP
 
     Will result in:
 

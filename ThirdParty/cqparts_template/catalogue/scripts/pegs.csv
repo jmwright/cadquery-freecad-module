@@ -1,0 +1,4 @@
+ID,length,handle_length,style
+PEG01,90,35,long
+PEG02,75,30,norm
+PEG03,60,20,short

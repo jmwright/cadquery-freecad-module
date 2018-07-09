@@ -102,7 +102,7 @@ class DisplayEnvironment(object):
     def display(self, *args, **kwargs):
         return self.display_callback(*args, **kwargs)
 
-    def display_callback(self, *args, **kwargs):
+    def display_callback(self, component, **kwargs):
         """
         Display given component in this environment.
 

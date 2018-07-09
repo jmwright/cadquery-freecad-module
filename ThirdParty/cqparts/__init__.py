@@ -22,7 +22,7 @@ limitations under the License.
 #   1.x                 - Development Status :: 5 - Production/Stable
 #   <any above>.y       - developments on that version (pre-release)
 #   <any above>*.dev*   - development release (intended purely to test deployment)
-__version__ = '0.2.1'
+__version__ = '0.2.2.dev1'
 
 __title__ = 'cqparts'
 __description__ = 'Hierarchical and deeply parametric models using cadquery'
@@ -31,7 +31,7 @@ __url__ = 'https://github.com/fragmuffin/cqparts'
 __author__ = 'Peter Boin'
 __email__ = 'peter.boin+cqparts@gmail.com'
 
-__license__ = 'GPLv3'
+__license__ = 'Apache Public License 2.0'
 
 __keywords__ = ['cadquery', 'cad', '3d', 'modeling']
 

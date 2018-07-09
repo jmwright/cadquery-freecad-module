@@ -2,12 +2,14 @@
 <html>
   <head>
     <title>CQParts display-o-tron</title>
+    <link rel="stylesheet" href="/static/css/viewer.css">
     <script src="/static/js/three.min.js"></script>
     <script src="/static/js/OrbitControls.js"></script>
     <script src="/static/js/GLTFLoader.js"></script>
   </head>
-  <body>
-    <script src="/static/js/app.js"></script>
+  <body style="margin:0; overflow:hidden;">
+    <button id="autorotate" onclick="ActivateAutorotate()">AutoRotate</button>
+    <script src="/static/js/cqpartsViewer.js"></script>
     <script>
       camera.position.set({{camera_pos}});
       controls.target.set({{camera_target}});

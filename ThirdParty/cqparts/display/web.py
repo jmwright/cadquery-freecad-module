@@ -84,7 +84,7 @@ class WebDisplayEnv(DisplayEnvironment):
     an errorcode 404 (file not found), because the http service has stopped.
     """
 
-    def display_callback(self, component, port=9041, autorotate=False):
+    def display_callback(self, component, **kwargs):
         """
         :param component: the component to render
         :type component: :class:`Component <cqparts.Component>`
@@ -102,6 +102,10 @@ class WebDisplayEnv(DisplayEnvironment):
             raise TypeError("given component must be a %r, not a %r" % (
                 Component, type(component)
             ))
+
+        # Parameter defaults
+        port = kwargs.get('port', 9041)
+        autorotate = kwargs.get('autorotate', False)
 
         # Create temporary file to host files
         temp_dir = tempfile.mkdtemp()
