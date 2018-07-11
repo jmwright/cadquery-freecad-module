@@ -78,7 +78,7 @@ print(file.read())
 
 ### Using an External Code Editor
 
-Oftentimes, users prefer another code editor or IDE over the one that is built in to this workbench. In order to use an external editor, set `use_external_editor` to `True` in `Settings.py`. A restart of FreeCAD will most likely be required to make this change take effect. With this option enabled, a script can be opened in the workbench's internal code editor initially, and then edited from there on witin an external editor. The internal editor will update automatically and the 3D view will automatically be refreshed when the script changes.
+Oftentimes, users prefer another code editor or IDE over the one that is built in to this workbench. In order to use an external editor, set `use_external_editor` to `True` in `Settings.py`. A restart of FreeCAD will most likely be required to make this change take effect. With this option enabled, a script can be opened in the workbench's internal code editor initially, and then edited from there on within an external editor. The internal editor will update automatically and the 3D view will automatically be refreshed when the script changes.
 
 If you are using an external editor that supports type annotations, the [cadqury_stubs](https://github.com/Grawp/cadquery_stubs) can be helpful. This helps with things like auto-completion and argument type hinting.
 
