@@ -10,7 +10,7 @@ v1.2.0
     * Created a script to update third-party libraries to aid in maintenance
     * An option was added to Settings.py which reports script execution time to the Report View
     * Created a Docs directory to lay the ground work for a documentation revamp.
-    
+
 v1.1.0
 -----
     * Updated to the v1.1.0 version of the CadQuery library
@@ -24,7 +24,7 @@ v1.0.0.1
     * Added example (Ex033) using logical operators in a string selector (thanks @adam-urbanczyk)
     * Fixed a bug in Helpers.show() that would clear the 3D view each time it was called
     * Fixed a bug that required there to be an open script window, disallowing the use of macros
-    
+
 v1.0.0
 -----
     * Embedded pyparsing package as a supporting library for new selector syntax
@@ -36,13 +36,13 @@ v0.5.1
 -----
     * Version updates for CadQuery v0.4.0, v0.4.1, v0.5.0-stable and v0.5.1
     * Updated CadQuery license to Apache 2.0
-    
+
 v0.3.0
 -----
     * Converted thickness setting to thickness boolean in the Lego brick example (thanks @galou) #59
-    * Improved parametric encosure (Ex023) example (thanks @galou) #61
+    * Improved parametric enclosure (Ex023) example (thanks @galou) #61
     * Added braille and NumPy examples (thanks @galou) #61
-    * Embedded CadQuery libarary as a git subtree to lessen maintenance issues
+    * Embedded CadQuery library as a git subtree to lessen maintenance issues
     * Embedded Pint library for units handling
     * Fixed version number in InitGui.py
     * Added BoundingBox centerOption example (Ex030) (thanks @huskier) #66
