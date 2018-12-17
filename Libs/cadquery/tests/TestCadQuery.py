@@ -519,6 +519,35 @@ class TestCadQuery(BaseTest):
         self.saveModel(s)
         self.assertEqual(6+NUMX*NUMY*2,s.faces().size()) #6 faces for the box, 2 faces for each cylinder
 
+    def testPolarArray(self):
+        radius = 10
+
+        # Test for proper number of elements
+        s = Workplane("XY").polarArray(radius, 0, 180, 1)
+        self.assertEqual(1, s.size())
+        s = Workplane("XY").polarArray(radius, 0, 180, 6)
+        self.assertEqual(6, s.size())
+
+        # Test for proper placement when fill == True
+        s = Workplane("XY").polarArray(radius, 0, 180, 3)
+        self.assertAlmostEqual(0, s.objects[1].x)
+        self.assertAlmostEqual(radius, s.objects[1].y)
+
+        # Test for proper placement when angle to fill is multiple of 360 deg
+        s = Workplane("XY").polarArray(radius, 0, 360, 4)
+        self.assertAlmostEqual(0, s.objects[1].x)
+        self.assertAlmostEqual(radius, s.objects[1].y)
+
+        # Test for proper placement when fill == False
+        s = Workplane("XY").polarArray(radius, 0, 90, 3, fill=False)
+        self.assertAlmostEqual(0, s.objects[1].x)
+        self.assertAlmostEqual(radius, s.objects[1].y)
+
+        # Test for proper operation of startAngle
+        s = Workplane("XY").polarArray(radius, 90, 180, 3)
+        self.assertAlmostEqual(0, s.objects[0].x)
+        self.assertAlmostEqual(radius, s.objects[0].y)
+
     def testNestedCircle(self):
         s = Workplane("XY").box(40,40,5).pushPoints([(10,0),(0,10)]).circle(4).circle(2).extrude(4)
         self.saveModel(s)
@@ -608,7 +637,7 @@ class TestCadQuery(BaseTest):
         self.assertEqual(0,s.faces().size() ) # the original workplane does not, because it did not have a solid initially
 
         t = r.faces(">Z").workplane().rect(0.25,0.25).extrude(0.5,False)
-        self.assertEqual(6,t.faces().size()) #result has 6 faces, becuase it was not combined with the original
+        self.assertEqual(6,t.faces().size()) #result has 6 faces, because it was not combined with the original
         self.assertEqual(6,r.faces().size()) #original is unmodified as well
         #subseuent opertions use that context solid afterwards
 
@@ -799,7 +828,7 @@ class TestCadQuery(BaseTest):
         s = Workplane(Plane.XY())
 
         #TODO:  extrude() should imply wire() if not done already
-        #most users dont understand what a wire is, they are just drawing
+        #most users don't understand what a wire is, they are just drawing
 
         r = s.lineTo(1.0,0).lineTo(0,1.0).close().wire().extrude(0.25)
         with suppress_stdout_stderr():
@@ -880,6 +909,23 @@ class TestCadQuery(BaseTest):
 
         assert(a1.edges().first().val().Length() == a2.edges().first().val().Length())
         assert(a3.edges().first().val().Length() == a4.edges().first().val().Length())
+
+    def testPolarLines(self):
+        """
+        Draw some polar lines and check expected results
+        """
+
+        # Test the PolarLine* functions
+        s = Workplane(Plane.XY())
+        r = s.polarLine(10, 45) \
+            .polarLineTo(10, -45) \
+            .polarLine(10, -180) \
+            .polarLine(-10, -90) \
+            .close()
+
+        # a single wire, 5 edges
+        self.assertEqual(1, r.wires().size())
+        self.assertEqual(5, r.wires().edges().size())
 
     def testLargestDimension(self):
         """
@@ -1488,7 +1534,7 @@ class TestCadQuery(BaseTest):
                 return cup
         """
 
-        #for some reason shell doesnt work on this simple shape. how disappointing!
+        #for some reason shell doesn't work on this simple shape. how disappointing!
         td = 50.0
         bd = 20.0
         h = 10.0

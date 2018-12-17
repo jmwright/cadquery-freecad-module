@@ -719,7 +719,7 @@ class CQ(object):
         Future Enhancements:
             * A version of this method that returns a transformed copy, rather than modifying
               the originals
-            * This method doesnt expose a very good interface, because the axis of rotation
+            * This method doesn't expose a very good interface, because the axis of rotation
               could be inconsistent between multiple objects.  This is because the beginning
               of the axis is variable, while the end is fixed. This is fine when operating on
               one object, but is not cool for multiple.
@@ -1082,6 +1082,45 @@ class Workplane(CQ):
 
         return self.pushPoints(lpoints)
 
+    def polarArray(self, radius, startAngle, angle, count, fill=True):
+        """
+        Creates an polar array of points and pushes them onto the stack.
+        The 0 degree reference angle is located along the local X-axis.
+
+        :param radius: Radius of the array.
+        :param startAngle: Starting angle (degrees) of array. 0 degrees is
+            situated along local X-axis.
+        :param angle: The angle (degrees) to fill with elements. A positive
+            value will fill in the counter-clockwise direction. If fill is
+            false, angle is the angle between elements.
+        :param count: Number of elements in array. ( > 0 )
+        """
+
+        if count <= 0:
+            raise ValueError("No elements in array")
+
+        # First element at start angle, convert to cartesian coords
+        x = radius * math.cos(math.radians(startAngle))
+        y = radius * math.sin(math.radians(startAngle))
+        points = [(x, y)]
+
+        # Calculate angle between elements
+        if fill:
+            if angle % 360 == 0:
+                angle = angle / count
+            elif count > 1:
+                # Inclusive start and end
+                angle = angle / (count - 1)
+
+        # Add additional elements
+        for i in range(1, count):
+            phi = math.radians(startAngle + (angle * i))
+            x = radius * math.cos(phi)
+            y = radius * math.sin(phi)
+            points.append((x, y))
+
+        return self.pushPoints(points)
+
     def pushPoints(self, pntList):
         """
         Pushes a list of points onto the stack as vertices.
@@ -1219,6 +1258,35 @@ class Workplane(CQ):
         """
         p = self._findFromPoint(True)
         return self.lineTo(xCoord, p.y, forConstruction)
+
+    def polarLine(self, distance, angle, forConstruction=False):
+        """
+        Make a line of the given length, at the given angle from the current point
+
+        :param float distance: distance of the end of the line from the current point
+        :param float angle: angle of the vector to the end of the line with the x-axis
+        :return: the Workplane object with the current point at the end of the new line
+       """
+        x = math.cos(math.radians(angle)) * distance
+        y = math.sin(math.radians(angle)) * distance
+
+        return self.line(x, y, forConstruction)
+
+    def polarLineTo(self, distance, angle, forConstruction=False):
+        """
+        Make a line from the current point to the given polar co-ordinates
+
+        Useful if it is more convenient to specify the end location rather than
+        the distance and angle from the current point
+
+        :param float distance: distance of the end of the line from the origin
+        :param float angle: angle of the vector to the end of the line with the x-axis
+        :return: the Workplane object with the current point at the end of the new line
+        """
+        x = math.cos(math.radians(angle)) * distance
+        y = math.sin(math.radians(angle)) * distance
+
+        return self.lineTo(x, y, forConstruction)
 
     #absolute move in current plane, not drawing
     def moveTo(self, x=0, y=0):
@@ -1443,7 +1511,7 @@ class Workplane(CQ):
         Produces a flat, heart shaped object
 
         Future Enhancements:
-            mirrorX().mirrorY() should work but doesnt, due to some FreeCAD weirdness
+            mirrorX().mirrorY() should work but doesn't, due to some FreeCAD weirdness
         """
         tm = Matrix()
         tm.rotateY(math.pi)
@@ -1461,7 +1529,7 @@ class Workplane(CQ):
         Typically used to make creating wires with symmetry easier.
 
         Future Enhancements:
-            mirrorX().mirrorY() should work but doesnt, due to some FreeCAD weirdness
+            mirrorX().mirrorY() should work but doesn't, due to some FreeCAD weirdness
         """
         tm = Matrix()
         tm.rotateX(math.pi)
@@ -1852,7 +1920,7 @@ class Workplane(CQ):
         ctxSolid.wrapped = s.wrapped
         return self.newObject([s])
 
-    #but parameter list is different so a simple function pointer wont work
+    #but parameter list is different so a simple function pointer won't work
     def cboreHole(self, diameter, cboreDiameter, cboreDepth, depth=None, clean=True):
         """
         Makes a counterbored hole for each item on the stack.
@@ -1904,7 +1972,7 @@ class Workplane(CQ):
         return self.cutEach(_makeCbore, True, clean)
 
     #TODO: almost all code duplicated!
-    #but parameter list is different so a simple function pointer wont work
+    #but parameter list is different so a simple function pointer won't work
     def cskHole(self, diameter, cskDiameter, cskAngle, depth=None, clean=True):
         """
         Makes a countersunk hole for each item on the stack.
@@ -1955,7 +2023,7 @@ class Workplane(CQ):
         return self.cutEach(_makeCsk, True, clean)
 
     #TODO: almost all code duplicated!
-    #but parameter list is different so a simple function pointer wont work
+    #but parameter list is different so a simple function pointer won't work
     def hole(self, diameter, depth=None, clean=True):
         """
         Makes a hole for each item on the stack.
@@ -2146,7 +2214,7 @@ class Workplane(CQ):
 
         :param path: A wire along which the pending wires will be swept
         :param boolean sweepAlongWires:
-            False to create mutliple swept from wires on the chain along path
+            False to create multiple swept from wires on the chain along path
             True to create only one solid swept along path with shape following the list of wires on the chain
         :param boolean combine: True to combine the resulting solid with parent solids if found.
         :param boolean clean: call :py:meth:`clean` afterwards to have a clean shape
@@ -2473,7 +2541,7 @@ class Workplane(CQ):
 
         :param path: A wire along which the pending wires will be swept
         :param boolean sweepAlongWires:
-            False to create mutliple swept from wires on the chain along path
+            False to create multiple swept from wires on the chain along path
             True to create only one solid swept along path with shape following the list of wires on the chain
         :return:a FreeCAD solid, suitable for boolean operations
         """
