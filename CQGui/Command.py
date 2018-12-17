@@ -85,11 +85,11 @@ class CadQueryCloseScript:
         cqCodePane = Shared.getActiveCodePane()
 
         # If there's nothing open in the code pane, we don't need to close it
-        if cqCodePane is None or len(cqCodePane.file.path) == 0:
+        if cqCodePane is None or len(cqCodePane.get_path()) == 0:
             return
 
         # Check to see if we need to save the script
-        if cqCodePane.dirty:
+        if cqCodePane.is_dirty():
             reply = QtGui.QMessageBox.question(cqCodePane, "Save CadQuery Script", "Save script before closing?",
                                                QtGui.QMessageBox.Yes | QtGui.QMessageBox.No | QtGui.QMessageBox.Cancel)
 
@@ -98,11 +98,11 @@ class CadQueryCloseScript:
 
             if reply == QtGui.QMessageBox.Yes:
                 # If we've got a file name already save it there, otherwise give a save-as dialog
-                if len(cqCodePane.file.path) == 0:
+                if len(cqCodePane.get_path()) == 0:
                     filename = QtGui.QFileDialog.getSaveFileName(mw, mw.tr("Save CadQuery Script As"), "/home/",
                                                                  mw.tr("CadQuery Files (*.py)"))
                 else:
-                    filename = cqCodePane.file.path
+                    filename = cqCodePane.get_path()
 
                 # Make sure we got a valid file name
                 if filename is not None:
@@ -224,8 +224,8 @@ class CadQueryExecuteScript:
             tempFile.close()
 
             # Set some environment variables that may help the user
-            os.environ["MYSCRIPT_FULL_PATH"] = cqCodePane.file.path
-            os.environ["MYSCRIPT_DIR"] = os.path.dirname(os.path.abspath(cqCodePane.file.path))
+            os.environ["MYSCRIPT_FULL_PATH"] = cqCodePane.get_path()
+            os.environ["MYSCRIPT_DIR"] = os.path.dirname(os.path.abspath(cqCodePane.get_path()))
 
             # We import this way because using execfile() causes non-standard script execution in some situations
             with revert_sys_modules():
@@ -235,7 +235,7 @@ class CadQueryExecuteScript:
             "cqCodeWidget",
             "Executed ",
             None)
-        FreeCAD.Console.PrintMessage(msg + cqCodePane.file.path + "\r\n")
+        FreeCAD.Console.PrintMessage(msg + cqCodePane.get_path() + "\r\n")
 
 
 class CadQueryNewScript:
@@ -320,8 +320,8 @@ class CadQuerySaveScript:
             return
 
         # If the code pane doesn't have a filename, we need to present the save as dialog
-        if len(cqCodePane.file.path) == 0 or os.path.basename(cqCodePane.file.path) == 'script_template.py' \
-                or os.path.split(cqCodePane.file.path)[0].endswith('FreeCAD'):
+        if len(cqCodePane.get_path()) == 0 or os.path.basename(cqCodePane.get_path()) == 'script_template.py' \
+                or os.path.split(cqCodePane.get_path())[0].endswith('FreeCAD'):
             FreeCAD.Console.PrintError("You cannot save over a blank file, example file or template file.\r\n")
 
             CadQuerySaveAsScript().Activated()
@@ -370,7 +370,7 @@ class CadQuerySaveAsScript:
         if filename[0]:
             # Close the 3D view for the original script if it's open
             try:
-                docname = os.path.splitext(os.path.basename(cqCodePane.file.path))[0]
+                docname = os.path.splitext(os.path.basename(cqCodePane.get_path()))[0]
                 FreeCAD.closeDocument(docname)
             except:
                 # Assume that there was no 3D view to close

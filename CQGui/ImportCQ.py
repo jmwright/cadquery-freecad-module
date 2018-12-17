@@ -5,6 +5,7 @@ import sys
 import FreeCAD, FreeCADGui
 from PySide import QtGui
 import module_locator
+from CodeEditor import CodeEditor
 import Settings
 
 #Distinguish python built-in open function from the one declared here
@@ -31,15 +32,6 @@ def open(filename):
     ver = hex(sys.hexversion)
     interpreter = "python%s.%s" % (ver[2], ver[4])  # => 'python2.7'
 
-    # CadQuery now supports Python 3
-    # If the user doesn't have Python 2.7, warn them
-    # if interpreter != 'python2.7':
-    #     msg = QtGui.QApplication.translate(
-    #         "cqCodeWidget",
-    #         "Please install Python 2.7",
-    #         None)
-    #     FreeCAD.Console.PrintError(msg + "\r\n")
-
     # The extra version numbers won't work on Windows
     if sys.platform.startswith('win'):
         interpreter = 'python'
@@ -47,10 +39,6 @@ def open(filename):
     # Set up so that we can import from our embedded packages
     module_base_path = module_locator.module_path()
     libs_dir_path = os.path.join(module_base_path, 'Libs')
-
-    from pyqode.core.modes import FileWatcherMode
-    from pyqode.core.modes import RightMarginMode
-    from pyqode.python.widgets import PyCodeEdit
 
     # Make sure we get the right libs under the FreeCAD installation
     fc_base_path = os.path.dirname(os.path.dirname(module_base_path))
@@ -65,25 +53,7 @@ def open(filename):
     # Set up the text area for our CQ code
     server_path = os.path.join(module_base_path, 'cq_server.py')
 
-    # Windows needs some extra help with paths
-    if sys.platform.startswith('win'):
-        codePane = PyCodeEdit(server_script=server_path, interpreter=interpreter
-                              , args=['-s', fc_lib_path, libs_dir_path])
-    else:
-        codePane = PyCodeEdit(server_script=server_path, interpreter=interpreter
-                              , args=['-s', libs_dir_path])
-
-    # Allow easy use of an external editor
-    if Settings.use_external_editor:
-        codePane.modes.append(FileWatcherMode())
-        codePane.modes.get(FileWatcherMode).file_reloaded.connect(AutoExecute)
-        codePane.modes.get(FileWatcherMode).auto_reload = True
-
-    # Set the margin to be at 119 characters instead of 79
-    codePane.modes.get(RightMarginMode).position = Settings.max_line_length
-
-    # Set the font size of the Python editor
-    codePane.font_size = Settings.font_size
+    codePane = CodeEditor()
 
     codePane.setObjectName("cqCodePane_" + os.path.splitext(os.path.basename(filename))[0])
 
@@ -96,7 +66,7 @@ def open(filename):
     mw.update()
 
     #Pull the text of the CQ script file into our code pane
-    codePane.file.open(filename)
+    codePane.open(filename)
 
     msg = QtGui.QApplication.translate(
             "cqCodeWidget",
