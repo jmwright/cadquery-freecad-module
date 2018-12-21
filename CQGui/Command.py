@@ -13,7 +13,6 @@ try:
 except:
     from . import ImportCQ
 import module_locator
-import Settings
 import Shared
 from random import random
 from contextlib import contextmanager
@@ -142,7 +141,7 @@ class CadQueryExecuteScript:
 
     def GetResources(self):
         return {"MenuText": "Execute Script",
-                "Accel": Settings.execute_keybinding,
+                "Accel": FreeCAD.ParamGet("User parameter:BaseApp/Preferences/Mod/cadquery-freecad-module").GetString("executeKeybinding"),
                 "ToolTip": "Executes the CadQuery script",
                 "Pixmap": ":/icons/media-playback-start.svg"}
 
@@ -193,8 +192,8 @@ class CadQueryExecuteScript:
 
             build_result = cqModel.build(build_parameters=build_parameters)
 
-            if Settings.report_execute_time:
-                FreeCAD.Console.PrintMessage("Script executed in " + str(build_result.buildTime) + " seconds\r\n")
+            # if Settings.report_execute_time:
+            #     FreeCAD.Console.PrintMessage("Script executed in " + str(build_result.buildTime) + " seconds\r\n")
 
             # Make sure that the build was successful
             if build_result.success:
@@ -332,7 +331,7 @@ class CadQuerySaveScript:
         ExportCQ.save()
 
         # Execute the script if the user has asked for it
-        if Settings.execute_on_save:
+        if FreeCAD.ParamGet("User parameter:BaseApp/Preferences/Mod/cadquery-freecad-module").GetBool("executeOnSave"):
             CadQueryExecuteScript().Activated()
 
 class CadQuerySaveAsScript:

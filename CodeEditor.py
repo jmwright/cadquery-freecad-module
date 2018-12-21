@@ -1,5 +1,6 @@
+import FreeCAD
 from PySide import QtCore
-from PySide.QtCore import QSize, QSettings, QRect, Qt, QRegExp
+from PySide.QtCore import QSize, QRect, Qt, QRegExp
 from PySide.QtGui import QPainter, QSyntaxHighlighter, QTextCharFormat, QFont, QColor, QTextCursor, QPlainTextEdit, QTextEdit, QWidget
 
 class LineNumberArea(QWidget):
@@ -14,8 +15,6 @@ class LineNumberArea(QWidget):
         self.codeEditor.lineNumberAreaPaintEvent(event)
 
 class CodeEditor(QPlainTextEdit):
-    settings = QSettings('cqcad', 'settings')
-
     def __init__(self):
         # super(CodeEditor, self).__init__()
         QPlainTextEdit.__init__(self)
@@ -30,7 +29,7 @@ class CodeEditor(QPlainTextEdit):
         self.dirty = False
 
         # Determine if the line number area needs to be shown or not
-        lineNumbersCheckedState = self.settings.value('editor_line_numbers_visible', type=bool)
+        lineNumbersCheckedState = FreeCAD.ParamGet("User parameter:BaseApp/Preferences/Mod/cadquery-freecad-module").GetBool("showLineNumbers")
         if lineNumbersCheckedState:
             self.showLineNumberArea()
         else:

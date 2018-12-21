@@ -6,7 +6,6 @@ import FreeCAD, FreeCADGui
 from PySide import QtGui
 import module_locator
 from CodeEditor import CodeEditor
-import Settings
 
 #Distinguish python built-in open function from the one declared here
 if open.__module__ == '__builtin__':
@@ -51,22 +50,32 @@ def open(filename):
     docname = os.path.basename(filename)
 
     # Set up the text area for our CQ code
-    server_path = os.path.join(module_base_path, 'cq_server.py')
+    # server_path = os.path.join(module_base_path, 'cq_server.py')
 
-    codePane = CodeEditor()
+    use_external_editor = FreeCAD.ParamGet("User parameter:BaseApp/Preferences/Mod/cadquery-freecad-module").GetBool("useExternalEditor")
 
-    codePane.setObjectName("cqCodePane_" + os.path.splitext(os.path.basename(filename))[0])
+    # If the user wants to use an external editor, don't bother with the built-in editor
+    if use_external_editor:
+        pass
+    else:
+        # Pull the font size from the FreeCAD-stored settings
+        fontSize = FreeCAD.ParamGet("User parameter:BaseApp/Preferences/Mod/cadquery-freecad-module").GetInt("fontSize")
 
-    mdi = mw.findChild(QtGui.QMdiArea)
-    # add a widget to the mdi area
-    sub = mdi.addSubWindow(codePane)
-    sub.setWindowTitle(docname)
-    sub.setWindowIcon(QtGui.QIcon(':/icons/applications-python.svg'))
-    sub.show()
-    mw.update()
+        # Set up the code editor
+        codePane = CodeEditor()
+        codePane.setFont(QtGui.QFont('SansSerif', fontSize))
+        codePane.setObjectName("cqCodePane_" + os.path.splitext(os.path.basename(filename))[0])
 
-    #Pull the text of the CQ script file into our code pane
-    codePane.open(filename)
+        mdi = mw.findChild(QtGui.QMdiArea)
+        # add a code editor widget to the mdi area
+        sub = mdi.addSubWindow(codePane)
+        sub.setWindowTitle(docname)
+        sub.setWindowIcon(QtGui.QIcon(':/icons/applications-python.svg'))
+        sub.show()
+        mw.update()
+
+        #Pull the text of the CQ script file into our code pane
+        codePane.open(filename)
 
     msg = QtGui.QApplication.translate(
             "cqCodeWidget",
