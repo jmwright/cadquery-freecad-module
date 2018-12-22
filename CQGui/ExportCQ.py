@@ -17,11 +17,7 @@ def save(filename=None):
     #Grab our code editor so we can interact with it
     cqCodePane = Shared.getActiveCodePane()
 
-    #If we weren't provided a file name, we need to find it from the text field
-    if filename is None:
-        cqCodePane.save()
-    else:
-        cqCodePane.save(filename)
+    cqCodePane.save(filename)
 
     msg = QtGui.QApplication.translate(
             "cqCodeWidget",

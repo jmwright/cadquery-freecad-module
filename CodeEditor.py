@@ -1,3 +1,4 @@
+import os.path
 import FreeCAD
 from PySide import QtCore
 from PySide.QtCore import QSize, QRect, Qt, QRegExp
@@ -95,8 +96,33 @@ class CodeEditor(QPlainTextEdit):
 
         self.setPlainText(self.file_contents)
 
+        self.parent_dir = os.path.abspath(os.path.join(self.file_path, os.pardir))
+
+        # Watch the file we've opened
+        self.fileSysWatcher = QtCore.QFileSystemWatcher()
+        self.fileSysWatcher.addPath(self.parent_dir)
+        QtCore.QObject.connect(self.fileSysWatcher, QtCore.SIGNAL("directoryChanged(QString)"), self, QtCore.SLOT("slotDirChanged(QString)"))
+
+    # Reloads the content of the open file if the contents on disk change
+    def reload(self):
+        with open(self.file_path) as f: self.file_contents = f.read()
+
+        self.setPlainText(self.file_contents)
+
+    # Tells whether or not the contents of the file we're working with has changed
+    def changedOnDisk(self):
+        with open(self.file_path) as f: file_contents = f.read()
+
+        if file_contents != self.file_contents:
+            return True
+        else:
+            return False
+
     # Saves the text in the code editor to a file
     def save(self, filename):
+        if filename == None:
+            filename = self.file_path
+
         with open(filename, "w") as code_file:
             code_file.write(self.toPlainText())
 
@@ -134,6 +160,14 @@ class CodeEditor(QPlainTextEdit):
             selection.cursor.clearSelection()
             extraSelections.append(selection)
         self.setExtraSelections(extraSelections)
+
+    @QtCore.Slot("QString")
+    def slotDirChanged(self, path):
+        # Make sure that the contents of our file actually changed
+        if self.changedOnDisk():
+            FreeCAD.Console.PrintMessage("Contents of " + self.file_path + " changed, reloading \r\n")
+
+            self.reload()
 
     def keyPressEvent(self,event):
         self.dirty = True
