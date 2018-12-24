@@ -214,16 +214,40 @@ class CodeEditor(QPlainTextEdit):
 
         if event.key() == Qt.Key_Backtab and self.textCursor().hasSelection():
             customKey = True
-            selStart=self.textCursor().selectionStart()
-            selEnd=self.textCursor().selectionEnd()
-            cur=self.textCursor()
-            endBlock=self.document().findBlock(selEnd)
-            currBlock=self.document().findBlock(selStart)
+            selStart = self.textCursor().selectionStart()
+            selEnd = self.textCursor().selectionEnd()
+            cur = self.textCursor()
+            endBlock = self.document().findBlock(selEnd)
+            currBlock = self.document().findBlock(selStart)
             while currBlock.position() <= endBlock.position():
                 cur.setPosition(currBlock.position())
                 if currBlock.text().left(1) == "\t":
                     cur.deleteChar()
                 currBlock=currBlock.next()
+
+        # Allow commenting and uncommenting of blocks of code
+        if event.key() == Qt.Key_Slash and event.modifiers() == Qt.ControlModifier:
+            customKey = True
+            selStart = self.textCursor().selectionStart()
+            selEnd = self.textCursor().selectionEnd()
+            cur = self.textCursor()
+            endBlock = self.document().findBlock(selEnd)
+            currBlock = self.document().findBlock(selStart)
+
+            while currBlock.position() <= endBlock.position():
+                cur.setPosition(currBlock.position())
+
+                if currBlock.text()[0] == "#":
+                   cur.deleteChar()
+
+                   # Make sure we remove extra spaces
+                   while currBlock.text()[0] == " ":
+                        cur.deleteChar()
+                else:
+                    cur.insertText("# ")
+
+                currBlock = currBlock.next()
+
         if not customKey:
             QPlainTextEdit.keyPressEvent(self, event)
 
