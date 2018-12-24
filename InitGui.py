@@ -36,6 +36,7 @@ class CadQueryWorkbench (Workbench):
                                      'CadQuerySaveAsScript', 'CadQueryCloseScript'])
         self.appendMenu(['CadQuery', 'Examples'], submenu)
         self.appendMenu('CadQuery', ['Separator', 'CadQueryExecuteScript', 'CadQueryValidateScript', 'ToggleVariablesEditor', 'CadQueryClearOutput'])
+        self.appendMenu('CadQuery', ['Separator', 'CadQuerySettings'])
 
     def Activated(self):
         import os
@@ -121,6 +122,7 @@ FreeCADGui.addCommand('CadQueryValidateScript', CadQueryValidateScript())
 FreeCADGui.addCommand('CadQueryCloseScript', CadQueryCloseScript())
 FreeCADGui.addCommand('ToggleVariablesEditor', ToggleParametersEditor())
 FreeCADGui.addCommand('CadQueryClearOutput', CadQueryClearOutput())
+FreeCADGui.addCommand('CadQuerySettings', CadQuerySettings())
 
 # Step through and add an Examples submenu item for each example
 dirs = CadQueryWorkbench.ListExamples()

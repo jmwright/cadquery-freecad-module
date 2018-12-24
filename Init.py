@@ -40,7 +40,7 @@ if not has_run_before:
 	FreeCAD.ParamGet("User parameter:BaseApp/Preferences/Mod/cadquery-freecad-module").SetString("executeKeybinding", "F9")
 	FreeCAD.ParamGet("User parameter:BaseApp/Preferences/Mod/cadquery-freecad-module").SetBool("executeOnSave", True)
 	FreeCAD.ParamGet("User parameter:BaseApp/Preferences/Mod/cadquery-freecad-module").SetBool("showLineNumbers", True)
-	# FreeCAD.ParamGet("User parameter:BaseApp/Preferences/Mod/cadquery-freecad-module").SetBool("useExternalEditor", False)
+	FreeCAD.ParamGet("User parameter:BaseApp/Preferences/Mod/cadquery-freecad-module").SetBool("allowReload", True)
 
 	# Make sure we don't overwrite someone's existing settings
 	FreeCAD.ParamGet("User parameter:BaseApp/Preferences/Mod/cadquery-freecad-module").SetBool("runBefore", True)

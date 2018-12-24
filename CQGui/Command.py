@@ -16,6 +16,7 @@ import module_locator
 import Shared
 from random import random
 from contextlib import contextmanager
+from SettingsDialog import SettingsDialog
 from cadquery import cqgi
 from Helpers import show
 
@@ -460,3 +461,23 @@ class CadQueryValidateScript:
         parameters = cqModel.metadata.parameters
 
         Shared.populateParameterEditor(parameters)
+
+class CadQuerySettings:
+    """Opens a settings dialog, allowing the user to change the settings for this workbench"""
+
+    def GetResources(self):
+        return {"MenuText": "Settings",
+                "Accel": "",
+                "ToolTip": "Opens the settings dialog",
+                "Pixmap": ":/icons/preferences-general.svg"}
+
+    def IsActive(self):
+        return True
+
+    def Activated(self):
+        win = SettingsDialog()
+
+        win.exec_()
+
+        # if win.exec_() == QtGui.QDialog.Accepted:
+        #     print("Settings finished")
