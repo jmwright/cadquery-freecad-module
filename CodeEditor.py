@@ -3,6 +3,7 @@ import FreeCAD
 from PySide import QtCore
 from PySide.QtCore import QSize, QRect, Qt, QRegExp
 from PySide.QtGui import QPainter, QSyntaxHighlighter, QTextCharFormat, QFont, QColor, QTextCursor, QPlainTextEdit, QTextEdit, QWidget
+from FinderOverlay import FinderOverlay
 
 class LineNumberArea(QWidget):
     def __init__(self, parent):
@@ -35,6 +36,9 @@ class CodeEditor(QPlainTextEdit):
             self.showLineNumberArea()
         else:
             self.hideLineNumberArea()
+
+        # self.overlay = FinderOverlay(self)
+        # self.overlay.hide()
 
         self.initUI()
 
@@ -247,6 +251,11 @@ class CodeEditor(QPlainTextEdit):
                     cur.insertText("# ")
 
                 currBlock = currBlock.next()
+
+        # Open the text finder
+        if event.key() == Qt.Key_F and event.modifiers() == Qt.ControlModifier:
+            customKey = True
+            print("Opening finder...")
 
         if not customKey:
             QPlainTextEdit.keyPressEvent(self, event)
