@@ -46,6 +46,10 @@ def show(cqObject, rgba=(204, 204, 204, 0.0)):
 
     ad = FreeCAD.activeDocument()
 
+    if ad == None:
+        FreeCAD.newDocument("untitled" + str(random()))
+        ad = FreeCAD.activeDocument()
+
     # If we've got a blank shape name, we have to create a random ID
     if not cqObject.val().label:
         #Generate a random name for this shape in case we are doing multiple shapes
