@@ -4,6 +4,7 @@ from PySide import QtCore
 from PySide.QtCore import QSize, QRect, Qt, QRegExp
 from PySide.QtGui import QPainter, QSyntaxHighlighter, QTextCharFormat, QFont, QColor, QTextCursor, QPlainTextEdit, QTextEdit, QWidget
 from FinderOverlay import FinderOverlay
+import CQGui.Command
 
 class LineNumberArea(QWidget):
     def __init__(self, parent):
@@ -112,6 +113,8 @@ class CodeEditor(QPlainTextEdit):
         with open(self.file_path) as f: self.file_contents = f.read()
 
         self.setPlainText(self.file_contents)
+
+        CQGui.Command.CadQueryExecuteScript().Activated()
 
     # Tells whether or not the contents of the file we're working with has changed
     def changedOnDisk(self):
