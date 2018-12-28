@@ -13,6 +13,8 @@ class FinderOverlay(QWidget):
         # container.setStyleSheet("background-color:black;")
 
         font_size = QLabel('Font Size')
+        font_size.fillColor = QColor(30, 30, 30, 120)
+        font_size.penColor = QColor("#333333")
 
         grid = QGridLayout()
         grid.setContentsMargins(50, 10, 10, 10)
