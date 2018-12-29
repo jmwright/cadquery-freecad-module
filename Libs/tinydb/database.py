@@ -2,6 +2,11 @@
 Contains the :class:`database <tinydb.database.TinyDB>` and
 :class:`tables <tinydb.database.Table>` implementation.
 """
+# Python 2/3 independent Mapping import
+try:
+    from collections.abc import Mapping
+except ImportError:
+    from collections import Mapping
 import warnings
 
 from . import JSONStorage
@@ -37,7 +42,7 @@ def _get_doc_id(doc_id, eid):
         if doc_id is not None:
             raise TypeError('cannot pass both eid and doc_id')
 
-        warnings.warn('eid has been renamed to doc_ids', DeprecationWarning)
+        warnings.warn('eid has been renamed to doc_id', DeprecationWarning)
         return eid
     else:
         return doc_id
@@ -77,6 +82,10 @@ class StorageProxy(object):
         self._storage = storage
         self._table_name = table_name
 
+    def _new_document(self, key, val):
+        doc_id = int(key)
+        return Document(val, doc_id)
+
     def read(self):
         raw_data = self._storage.read() or {}
 
@@ -90,8 +99,8 @@ class StorageProxy(object):
 
         docs = {}
         for key, val in iteritems(table):
-            doc_id = int(key)
-            docs[doc_id] = Document(val, doc_id)
+            doc = self._new_document(key, val)
+            docs[doc.doc_id] = doc
 
         return DataProxy(docs, raw_data)
 
@@ -140,6 +149,9 @@ class TinyDB(object):
 
         storage = kwargs.pop('storage', self.DEFAULT_STORAGE)
         default_table = kwargs.pop('default_table', self.DEFAULT_TABLE)
+        self._cls_table = kwargs.pop('table_class', self.table_class)
+        self._cls_storage_proxy = kwargs.pop('storage_proxy_class',
+                                             self.storage_proxy_class)
 
         # Prepare the storage
         #: :type: Storage
@@ -151,6 +163,17 @@ class TinyDB(object):
 
         self._table_cache = {}
         self._table = self.table(default_table)
+
+    def __repr__(self):
+        args = [
+            'tables={}'.format(list(self.tables())),
+            'tables_count={}'.format(len(self.tables())),
+            'default_table_documents_count={}'.format(self.__len__()),
+            'all_tables_documents_count={}'.format(
+                ['{}={}'.format(table, len(self.table(table))) for table in self.tables()]),
+        ]
+
+        return '<{} {}>'.format(type(self).__name__, ', '.join(args))
 
     def table(self, name=DEFAULT_TABLE, **options):
         """
@@ -168,8 +191,8 @@ class TinyDB(object):
         if name in self._table_cache:
             return self._table_cache[name]
 
-        table_class = options.pop('table_class', self.table_class)
-        table = table_class(StorageProxy(self._storage, name), name, **options)
+        table_class = options.pop('table_class', self._cls_table)
+        table = table_class(self._cls_storage_proxy(self._storage, name), name, **options)
 
         self._table_cache[name] = table
 
@@ -267,6 +290,18 @@ class Table(object):
         self._query_cache = LRUCache(capacity=cache_size)
 
         data = self._read()
+        self._init_last_id(data)
+
+    def __repr__(self):
+        args = [
+            'name={!r}'.format(self.name),
+            'total={}'.format(self.__len__()),
+            'storage={}'.format(self._storage),
+        ]
+
+        return '<{} {}>'.format(type(self).__name__, ', '.join(args))
+
+    def _init_last_id(self, data):
         if data:
             self._last_id = max(i for i in data)
         else:
@@ -348,6 +383,11 @@ class Table(object):
 
         return current_id
 
+    def _get_doc_id(self, document):
+        if not isinstance(document, Mapping):
+            raise ValueError('Document is not a Mapping')
+        return self._get_next_id()
+
     def _read(self):
         """
         Reading access to the DB.
@@ -404,13 +444,9 @@ class Table(object):
         :returns: the inserted document's ID
         """
 
-        doc_id = self._get_next_id()
-
-        if not isinstance(document, dict):
-            raise ValueError('Document is not a dictionary')
-
+        doc_id = self._get_doc_id(document)
         data = self._read()
-        data[doc_id] = document
+        data[doc_id] = dict(document)
         self._write(data)
 
         return doc_id
@@ -427,10 +463,10 @@ class Table(object):
         data = self._read()
 
         for doc in documents:
-            doc_id = self._get_next_id()
+            doc_id = self._get_doc_id(doc)
             doc_ids.append(doc_id)
 
-            data[doc_id] = doc
+            data[doc_id] = dict(doc)
 
         self._write(data)
 
@@ -487,8 +523,8 @@ class Table(object):
         Write back documents by doc_id
 
         :param documents: a list of document to write back
-        :param doc_ids: a list of documents' ID which need to be wrote back
-        :returns: a list of documents' ID that have been written
+        :param doc_ids: a list of document IDs which need to be written back
+        :returns: a list of document IDs that have been written
         """
         doc_ids = _get_doc_ids(doc_ids, eids)
 
@@ -511,7 +547,7 @@ class Table(object):
         # Document specified by ID
         documents.reverse()
         for doc_id in doc_ids:
-            data[doc_id] = documents.pop()
+            data[doc_id] = dict(documents.pop())
 
         self._write(data)
 
@@ -532,7 +568,7 @@ class Table(object):
         if updated_docs:
             return updated_docs
         else:
-            return self.insert(document)
+            return [self.insert(document)]
 
     def purge(self):
         """
@@ -554,7 +590,7 @@ class Table(object):
         """
 
         if cond in self._query_cache:
-            return self._query_cache[cond][:]
+            return self._query_cache.get(cond, [])[:]
 
         docs = [doc for doc in self.all() if cond(doc)]
         self._query_cache[cond] = docs
@@ -623,3 +659,6 @@ class Table(object):
 
 # Set the default table class
 TinyDB.table_class = Table
+
+# Set the default storage proxy class
+TinyDB.storage_proxy_class = StorageProxy

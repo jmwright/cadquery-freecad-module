@@ -1,6 +1,0 @@
-# Ignore scrapers' intermediate files
-*.csv
-*.json
-
-# libreoffice lock file (when opening generated csv files)
-.~lock.*

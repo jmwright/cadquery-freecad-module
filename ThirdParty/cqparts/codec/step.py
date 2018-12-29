@@ -47,23 +47,8 @@ class STEPPartImporter(Importer):
     Abstraction layer to avoid duplicate code for :meth:`_mangled_filename`.
     """
     @classmethod
-    def _mangled_filename(cls, name):
-        # ignore sub-directories
-        name = os.path.basename(name)
-
-        # encode to ascii (for a clean class name)
-        name = name.encode('ascii', 'ignore')
-        if type(name).__name__ == 'bytes':  # a python3 thing
-            name = name.decode()  # type: bytes -> str
-
-        # if begins with a number, inject a '_' at the beginning
-        if re.search(r'^\d', name):
-            name = '_' + name
-
-        # replace non alpha-numeric characters with a '_'
-        name = re.sub(r'[^a-z0-9_]', '_', name, flags=re.I)
-
-        return name
+    def _mangled_filename(cls, filename):
+        return re.sub(r'(^\d|[^a-z0-9_\-+])', '_', filename, flags=re.I)
 
 
 @register_importer('step', Part)
