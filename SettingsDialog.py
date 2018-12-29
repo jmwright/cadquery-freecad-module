@@ -64,7 +64,7 @@ class SettingsDialog(QtGui.QDialog):
         FreeCAD.ParamGet("User parameter:BaseApp/Preferences/Mod/cadquery-freecad-module").SetString("executeKeybinding", self.ui_key_binding.text())
         FreeCAD.ParamGet("User parameter:BaseApp/Preferences/Mod/cadquery-freecad-module").SetBool("executeOnSave", self.execute_on_save.checkState())
         FreeCAD.ParamGet("User parameter:BaseApp/Preferences/Mod/cadquery-freecad-module").SetBool("showLineNumbers", self.show_line_numbers.checkState())
-        FreeCAD.ParamGet("User parameter:BaseApp/Preferences/Mod/cadquery-freecad-module").SetBool("allowReload", self.show_line_numbers.checkState())
+        FreeCAD.ParamGet("User parameter:BaseApp/Preferences/Mod/cadquery-freecad-module").SetBool("allowReload", self.allow_reload.checkState())
 
         self.accept()
 

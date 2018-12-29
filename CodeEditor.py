@@ -170,8 +170,10 @@ class CodeEditor(QPlainTextEdit):
 
     @QtCore.Slot("QString")
     def slotDirChanged(self, path):
+        allowReload = FreeCAD.ParamGet("User parameter:BaseApp/Preferences/Mod/cadquery-freecad-module").GetBool("allowReload")
+
         # Make sure that the contents of our file actually changed
-        if self.changedOnDisk():
+        if self.changedOnDisk() and allowReload:
             FreeCAD.Console.PrintMessage("Contents of " + self.file_path + " changed, reloading \r\n")
 
             self.reload()
