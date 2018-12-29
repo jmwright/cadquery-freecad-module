@@ -17,14 +17,10 @@ def save(filename=None):
     #Grab our code editor so we can interact with it
     cqCodePane = Shared.getActiveCodePane()
 
-    #If we weren't provided a file name, we need to find it from the text field
-    if filename is None:
-        cqCodePane.file.save()
-    else:
-        cqCodePane.file.save(filename)
+    cqCodePane.save(filename)
 
     msg = QtGui.QApplication.translate(
             "cqCodeWidget",
             "Saved ",
             None)
-    FreeCAD.Console.PrintMessage(msg + cqCodePane.file.path + "\r\n")
+    FreeCAD.Console.PrintMessage(msg + cqCodePane.get_path() + "\r\n")

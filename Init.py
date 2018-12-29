@@ -32,5 +32,15 @@ if os.path.exists(fc_lib_path):
 if os.path.exists(fc_bin_path):
     sys.path.insert(1, fc_bin_path)
 
-# Need to set this for PyQode
-os.environ['QT_API'] = 'pyside'
+# Set sane defaults for FreeCAD-stored settings if they haven't been set yet
+has_run_before = FreeCAD.ParamGet("User parameter:BaseApp/Preferences/Mod/cadquery-freecad-module").GetBool("runBefore")
+
+if not has_run_before:
+	FreeCAD.ParamGet("User parameter:BaseApp/Preferences/Mod/cadquery-freecad-module").SetInt("fontSize", 12)
+	FreeCAD.ParamGet("User parameter:BaseApp/Preferences/Mod/cadquery-freecad-module").SetString("executeKeybinding", "F9")
+	FreeCAD.ParamGet("User parameter:BaseApp/Preferences/Mod/cadquery-freecad-module").SetBool("executeOnSave", True)
+	FreeCAD.ParamGet("User parameter:BaseApp/Preferences/Mod/cadquery-freecad-module").SetBool("showLineNumbers", True)
+	FreeCAD.ParamGet("User parameter:BaseApp/Preferences/Mod/cadquery-freecad-module").SetBool("allowReload", True)
+
+	# Make sure we don't overwrite someone's existing settings
+	FreeCAD.ParamGet("User parameter:BaseApp/Preferences/Mod/cadquery-freecad-module").SetBool("runBefore", True)

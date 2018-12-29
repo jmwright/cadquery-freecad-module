@@ -25,7 +25,7 @@ def show(cqObject, rgba=(204, 204, 204, 0.0)):
         tempFile.write(cqCodePane.toPlainText().encode('utf-8'))
         tempFile.close()
 
-        docname = os.path.splitext(os.path.basename(cqCodePane.file.path))[0]
+        docname = os.path.splitext(os.path.basename(cqCodePane.get_path()))[0]
 
         # Make sure we replace any troublesome characters
         for ch in ['&', '#', '.', '$', '%', ',', ' ']:
@@ -45,6 +45,10 @@ def show(cqObject, rgba=(204, 204, 204, 0.0)):
             FreeCAD.newDocument(docname)
 
     ad = FreeCAD.activeDocument()
+
+    if ad == None:
+        FreeCAD.newDocument("untitled" + str(random()))
+        ad = FreeCAD.activeDocument()
 
     # If we've got a blank shape name, we have to create a random ID
     if not cqObject.val().label:
