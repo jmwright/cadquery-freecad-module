@@ -1,10 +1,11 @@
 Changes
 =======
 
-v1.3.0
+v1.3.0 (unreleased)
 -----
-    * PyQode editor has been replaced by a custom editor due to compatibility problems with Qt5/PySide 2
+    * PyQode editor has been replaced by a custom editor due to compatibility problems with Qt5/PySide2
     * Settings have now been moved into FreeCAD user parameters
+    * Settings dialog has been added under CadQuery->Settings
     * Execute-on-save setting is now on by default
     * Execute-script key has been changed to F9 to avoid conflicts with FreeCAD's F2, but key is still configurable
     * New code editor automatically reloads contents of script file if changed on disk, enabling use of external editor by default
