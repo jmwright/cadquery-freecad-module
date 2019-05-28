@@ -162,6 +162,10 @@ class CadQueryExecuteScript:
         if b"show_object(" in scriptText or b"debug(" in scriptText:
             FreeCAD.Console.PrintMessage("Executing CQGI-compliant script.\r\n")
 
+            # Set some environment variables that may help the user
+            os.environ["MYSCRIPT_FULL_PATH"] = cqCodePane.get_path()
+            os.environ["MYSCRIPT_DIR"] = os.path.dirname(os.path.abspath(cqCodePane.get_path()))
+
             # A repreentation of the CQ script with all the metadata attached
             cqModel = cqgi.parse(scriptText)
 
