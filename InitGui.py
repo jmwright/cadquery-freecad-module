@@ -11,9 +11,14 @@ import CadQuery_rc
 class CadQueryWorkbench (Workbench):
     """CadQuery workbench for FreeCAD"""
     """CadQuery workbench for FreeCAD"""
+    import os
+    try:
+        from . import module_locator
+    except:
+        import module_locator        
     MenuText = "CadQuery"
     ToolTip = "CadQuery workbench"
-    Icon = ":/icons/CQ_Logo.svg"
+    Icon = module_locator.module_path()+"/CQGui/Resources/icons/CQ_Logo.svg"
 
     #Keeps track of which workbenches we have hidden so we can reshow them
     closedWidgets = []
