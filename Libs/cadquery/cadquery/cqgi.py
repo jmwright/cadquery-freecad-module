@@ -94,7 +94,7 @@ class CQModel(object):
         if not build_parameters:
             build_parameters = {}
 
-        start = time.clock()
+        start = time.perf_counter()
         result = BuildResult()
 
         try:
@@ -119,7 +119,7 @@ class CQModel(object):
             #print "Full Text of Script:"
             #print self.script_source
 
-        end = time.clock()
+        end = time.perf_counter()
         result.buildTime = end - start
         return result
 
