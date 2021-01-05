@@ -11,9 +11,4 @@ thickness = 10.0    # Thickness of the block
 # positive Z direction is "up", and the negative Z direction is "down".
 result = cq.Workplane("XY").box(length, height, thickness)
 
-# The following method is now outdated, but can still be used to display the
-# results of the script if you want
-# from Helpers import show
-# show(result)  # Render the result of this script
-
 show_object(result)
