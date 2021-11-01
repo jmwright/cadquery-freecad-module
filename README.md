@@ -5,7 +5,7 @@ The CadQuery Module for FreeCAD
 
 ## Introduction
 
-**NOTE** This workbench is not compatible with [CadQuery 2.x](https://github.com/CadQuery/cadquery). If you are looking for a CadQuery 2.x GUI, please use [CQ-editor](https://github.com/CadQuery/CQ-editor).
+**NOTE** This workbench repo is not compatible with [CadQuery 2.x](https://github.com/CadQuery/cadquery). However, there is a fork provided by @jpmlt [here](https://github.com/jpmlt/freecad-cadquery2-workbench) that supports CadQuery 2.x, although you have to install CadQuery separately. If you are looking for a self-contained CadQuery 2.x IDE, please use [CQ-editor](https://github.com/CadQuery/CQ-editor).
 
 This is a FreeCAD module (aka workbench) that adds elements like a CadQuery code editor. All of the required libraries are embedded with the workbench, and so it is probably the fastest way to get up and running with CadQuery on a local computer. For users who just want to try CadQuery without installing anything, the [CadQuery Jupyter Notebook](https://mybinder.org/v2/gh/RustyVermeer/tryCQ/master) might be a better choice.
 
