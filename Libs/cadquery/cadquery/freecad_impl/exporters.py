@@ -3,7 +3,7 @@ from __future__ import unicode_literals
 import cadquery
 
 import FreeCAD
-import Drawing
+import TechDraw
 
 import tempfile, os, io
 
@@ -256,9 +256,9 @@ def getSVG(shape, opts=None, view_vector=(-1.75, 1.1, 5.0)):
 
     #TODO:  provide option to give 3 views
     viewVector = FreeCAD.Base.Vector(view_vector)
-    (visibleG0,visibleG1,hiddenG0,hiddenG1) = Drawing.project(shape,viewVector)
+    (visibleG0,visibleG1,hiddenG0,hiddenG1) = TechDraw.project(shape,viewVector)
 
-    (hiddenPaths,visiblePaths) = getPaths(Drawing.projectToSVG(shape,viewVector,"ShowHiddenLines")) #this param is totally undocumented!
+    (hiddenPaths,visiblePaths) = getPaths(TechDraw.projectToSVG(shape,viewVector,"ShowHiddenLines")) #this param is totally undocumented!
 
     #get bounding box -- these are all in 2-d space
     bb = visibleG0.BoundBox
