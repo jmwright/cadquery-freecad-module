@@ -18,4 +18,4 @@ __all__ = [
     'TypeSelector','DirectionMinMaxSelector','StringSyntaxSelector','Selector','plugins',
 ]
 
-__version__ = "1.2.0"
+__version__ = "1.2.1"
