@@ -722,7 +722,13 @@ class ParseResults(object):
     def __dir__(self):
         return (dir(type(self)) + list(self.keys()))
 
-collections.MutableMapping.register(ParseResults)
+
+import sys
+if sys.version_info.major == 3 and sys.version_info.minor >= 10:
+    collections.abc.MutableMapping.register(ParseResults)
+else:
+    collections.MutableMapping.register(ParseResults)
+
 
 def col (loc,strg):
     """Returns current column within a string, counting newlines as line separators.
@@ -2433,7 +2439,7 @@ class ParseExpression(ParserElement):
 
         if isinstance( exprs, basestring ):
             self.exprs = [ ParserElement._literalStringClass( exprs ) ]
-        elif isinstance( exprs, collections.Sequence ):
+        elif isinstance( exprs, collections.abc.Sequence ):
             # if sequence of strings provided, wrap with Literal
             if all(isinstance(expr, basestring) for expr in exprs):
                 exprs = map(ParserElement._literalStringClass, exprs)
@@ -3468,7 +3474,7 @@ def oneOf( strs, caseless=False, useRegex=True ):
     symbols = []
     if isinstance(strs,basestring):
         symbols = strs.split()
-    elif isinstance(strs, collections.Sequence):
+    elif isinstance(strs, collections.abc.Sequence):
         symbols = list(strs[:])
     elif isinstance(strs, _generatorType):
         symbols = list(strs)
