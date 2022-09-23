@@ -14,7 +14,13 @@ from __future__ import absolute_import
 
 import subprocess
 from math import ceil as oldceil
-from collections import Mapping, MutableMapping
+import sys
+if sys.version_info.major == 3 and sys.version_info.minor >= 10:
+    from collections.abc import Mapping, MutableMapping
+else:
+    from collections import Mapping, MutableMapping
+
+# from collections import Mapping, MutableMapping
 
 from operator import itemgetter as _itemgetter, eq as _eq
 import sys

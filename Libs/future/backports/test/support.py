@@ -1046,6 +1046,12 @@ class CleanImport(object):
         sys.modules.update(self.original_modules)
 
 ### Added for python-future:
+import sys
+if sys.version_info.major == 3 and sys.version_info.minor >= 10:
+    import collections.abc
+else:
+    import collections
+
 if utils.PY3:
     import collections.abc
     mybase = collections.abc.MutableMapping
