@@ -1,24 +1,24 @@
 """CadQuery GUI init module for FreeCAD
    This adds a workbench with a scripting editor to FreeCAD's GUI."""
-# (c) 2014-2018 Jeremy Wright Apache 2.0 License
+# (c) 2014-2023 Jeremy Wright LGPL 3.0 License
 import FreeCAD, FreeCADGui
-try:
-    from CadQuery.CQGui.Command import *
-except:
-    from CQGui.Command import *
-import CadQuery_rc
+# try:
+#     from CadQuery.CQGui.Command import *
+# except:
+#     from CQGui.Command import *
+# import CadQuery_rc
 
 class CadQueryWorkbench (Workbench):
     """CadQuery workbench for FreeCAD"""
     """CadQuery workbench for FreeCAD"""
     import os
-    try:
-        from . import module_locator
-    except:
-        import module_locator        
+
+    # The the current version of CadQuery that the user wants to run
+    cq_version = FreeCAD.ParamGet("User parameter:BaseApp/Preferences/Mod/cadquery-freecad-module").GetInt("cqMajorVersion")
+    
     MenuText = "CadQuery"
     ToolTip = "CadQuery workbench"
-    Icon = module_locator.module_path()+"/CQGui/Resources/icons/CQ_Logo.svg"
+    Icon = FreeCAD.getUserAppDataDir() + "Mod/cadquery-freecad-module/CQGui/Resources/icons/CQ_Logo.svg"
 
     #Keeps track of which workbenches we have hidden so we can reshow them
     closedWidgets = []
@@ -28,6 +28,36 @@ class CadQueryWorkbench (Workbench):
         #import logging
         #logging.basicConfig(filename='C:\\Users\\Jeremy\\Documents\\', level=logging.DEBUG)
         #logging.basicConfig(filename='/home/jwright/Documents/log.txt', level=logging.DEBUG)
+
+        # See if CadQuery needs to be installed
+        try:
+            import cadquery
+        except:
+            from PySide import QtGui
+            msg_box = QtGui.QMessageBox()
+            msg_box.setText("The cadquery Python module is not installed. Without it this workbench will not work correctly.")
+            msg_box.setInformativeText("Would you like to install it?")
+            msg_box.addButton(QtGui.QMessageBox.Yes)
+            msg_box.addButton(QtGui.QMessageBox.No)
+            msg_box.addButton(QtGui.QMessageBox.Cancel)
+            msg_box.setDefaultButton(QtGui.QMessageBox.Yes)
+            ret = msg_box.exec_()
+
+            # See how the user responded
+            if ret == msg_box.Yes:
+                FreeCAD.Console.PrintMessage("Installing cadquery module.\r\n")
+                import subprocess as subp
+                # proc = subp.Popen(["/snap/freecad/517/bin/python", "-m", "pip", "uninstall", "-y", "cadquery"], stdout=subp.PIPE, stderr=subp.PIPE)
+                # proc = subp.Popen(["/snap/freecad/517/bin/python", "-m", "pip", "install", "--upgrade", "pip"], stdout=subp.PIPE, stderr=subp.PIPE)
+                # proc = subp.Popen(["/snap/freecad/517/bin/python", "-m", "pip", "install", "--upgrade", "numpy"], stdout=subp.PIPE, stderr=subp.PIPE)
+                proc = subp.Popen(["/snap/freecad/517/bin/python", "-m", "pip", "install", "--no-deps", "cadquery", "--user"], stdout=subp.PIPE, stderr=subp.PIPE)
+                out, err = proc.communicate()
+                FreeCAD.Console.PrintMessage(out.decode("utf8"))
+                if err != None:
+                    FreeCAD.Console.PrintMessage("CadQuery install error: " + err.decode("utf8"))
+
+            return
+
         submenu = []
 
         dirs = self.ListExamples()
@@ -45,18 +75,25 @@ class CadQueryWorkbench (Workbench):
 
     def Activated(self):
         import os
-        try:
-            from . import module_locator
-        except:
-            import module_locator
-        try:
-            from CadQuery.CQGui import ImportCQ
-        except:
-            from CQGui import ImportCQ
+        # try:
+        #     from . import module_locator
+        # except:
+        #     import module_locator
+        # try:
+        #     from CadQuery.CQGui import ImportCQ
+        # except:
+        #     from CQGui import ImportCQ
 
-        module_base_path = module_locator.module_path()
+        # module_base_path = module_locator.module_path()
+
+        # See if CadQuery needs to be installed
+        try:
+            import cadquery
+        except:
+            return
 
         import cadquery
+        from CQGui import ImportCQ
         from PySide import QtGui, QtCore
 
         msg = QtGui.QApplication.translate(
@@ -118,20 +155,20 @@ class CadQueryWorkbench (Workbench):
 
         return dirs
 
-FreeCADGui.addCommand('CadQueryNewScript', CadQueryNewScript())
-FreeCADGui.addCommand('CadQueryOpenScript', CadQueryOpenScript())
-FreeCADGui.addCommand('CadQuerySaveScript', CadQuerySaveScript())
-FreeCADGui.addCommand('CadQuerySaveAsScript', CadQuerySaveAsScript())
-FreeCADGui.addCommand('CadQueryExecuteScript', CadQueryExecuteScript())
-FreeCADGui.addCommand('CadQueryValidateScript', CadQueryValidateScript())
-FreeCADGui.addCommand('CadQueryCloseScript', CadQueryCloseScript())
-FreeCADGui.addCommand('ToggleVariablesEditor', ToggleParametersEditor())
-FreeCADGui.addCommand('CadQueryClearOutput', CadQueryClearOutput())
-FreeCADGui.addCommand('CadQuerySettings', CadQuerySettings())
+# FreeCADGui.addCommand('CadQueryNewScript', CadQueryNewScript())
+# FreeCADGui.addCommand('CadQueryOpenScript', CadQueryOpenScript())
+# FreeCADGui.addCommand('CadQuerySaveScript', CadQuerySaveScript())
+# FreeCADGui.addCommand('CadQuerySaveAsScript', CadQuerySaveAsScript())
+# FreeCADGui.addCommand('CadQueryExecuteScript', CadQueryExecuteScript())
+# FreeCADGui.addCommand('CadQueryValidateScript', CadQueryValidateScript())
+# FreeCADGui.addCommand('CadQueryCloseScript', CadQueryCloseScript())
+# FreeCADGui.addCommand('ToggleVariablesEditor', ToggleParametersEditor())
+# FreeCADGui.addCommand('CadQueryClearOutput', CadQueryClearOutput())
+# FreeCADGui.addCommand('CadQuerySettings', CadQuerySettings())
 
 # Step through and add an Examples submenu item for each example
-dirs = CadQueryWorkbench.ListExamples()
-for curFile in dirs:
-    FreeCADGui.addCommand(curFile, CadQueryOpenExample(curFile))
+# dirs = CadQueryWorkbench.ListExamples()
+# for curFile in dirs:
+#     FreeCADGui.addCommand(curFile, CadQueryOpenExample(curFile))
 
 FreeCADGui.addWorkbench(CadQueryWorkbench())

@@ -35,7 +35,7 @@ class SettingsDialog(QtGui.QDialog):
         self.allow_reload = QtGui.QCheckBox()
         self.allow_reload.setChecked(allowReload)
 
-        self.buttons = QtGui.QDialogButtonBox();
+        self.buttons = QtGui.QDialogButtonBox()
         self.buttons.setOrientation(QtCore.Qt.Horizontal)
         self.buttons.setStandardButtons(QtGui.QDialogButtonBox.Ok|QtGui.QDialogButtonBox.Cancel)
         self.buttons.layout().setDirection(QtGui.QBoxLayout.LeftToRight)
