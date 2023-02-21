@@ -47,10 +47,15 @@ class CadQueryWorkbench (Workbench):
             if ret == msg_box.Yes:
                 FreeCAD.Console.PrintMessage("Installing cadquery module.\r\n")
                 import subprocess as subp
-                # proc = subp.Popen(["/snap/freecad/517/bin/python", "-m", "pip", "uninstall", "-y", "cadquery"], stdout=subp.PIPE, stderr=subp.PIPE)
-                # proc = subp.Popen(["/snap/freecad/517/bin/python", "-m", "pip", "install", "--upgrade", "pip"], stdout=subp.PIPE, stderr=subp.PIPE)
-                # proc = subp.Popen(["/snap/freecad/517/bin/python", "-m", "pip", "install", "--upgrade", "numpy"], stdout=subp.PIPE, stderr=subp.PIPE)
-                proc = subp.Popen(["/snap/freecad/517/bin/python", "-m", "pip", "install", "--no-deps", "cadquery", "--user"], stdout=subp.PIPE, stderr=subp.PIPE)
+                import shutil
+
+                # Get the currently used Python binary
+                python_bin = shutil.which('python')
+
+                # proc = subp.Popen([python_bin, "-m", "pip", "uninstall", "-y", "cadquery"], stdout=subp.PIPE, stderr=subp.PIPE)
+                # proc = subp.Popen([python_bin, "-m", "pip", "install", "--upgrade", "pip"], stdout=subp.PIPE, stderr=subp.PIPE)
+                # proc = subp.Popen([python_bin, "-m", "pip", "install", "--upgrade", "numpy"], stdout=subp.PIPE, stderr=subp.PIPE)
+                proc = subp.Popen([python_bin, "-m", "pip", "install", "cadquery", "--user"], stdout=subp.PIPE, stderr=subp.PIPE)
                 out, err = proc.communicate()
                 FreeCAD.Console.PrintMessage(out.decode("utf8"))
                 if err != None:
