@@ -52,14 +52,17 @@ class CadQueryWorkbench (Workbench):
                 # Get the currently used Python binary
                 python_bin = shutil.which('python')
 
+                venv_dir = FreeCAD.getUserAppDataDir() + "Mod/cadquery-freecad-module/venv"
+                proc = subp.Popen([python_bin, "-m", "venv", venv_dir], stdout=subp.PIPE, stderr=subp.PIPE)
+                proc = subp.Popen(["sh", venv_dir + "/bin/activate"], stdout=subp.PIPE, stderr=subp.PIPE)
                 # proc = subp.Popen([python_bin, "-m", "pip", "uninstall", "-y", "cadquery"], stdout=subp.PIPE, stderr=subp.PIPE)
                 # proc = subp.Popen([python_bin, "-m", "pip", "install", "--upgrade", "pip"], stdout=subp.PIPE, stderr=subp.PIPE)
                 # proc = subp.Popen([python_bin, "-m", "pip", "install", "--upgrade", "numpy"], stdout=subp.PIPE, stderr=subp.PIPE)
                 proc = subp.Popen([python_bin, "-m", "pip", "install", "cadquery", "--user"], stdout=subp.PIPE, stderr=subp.PIPE)
                 out, err = proc.communicate()
                 FreeCAD.Console.PrintMessage(out.decode("utf8"))
-                if err != None:
-                    FreeCAD.Console.PrintMessage("CadQuery install error: " + err.decode("utf8"))
+                # if err != None:
+                FreeCAD.Console.PrintMessage("CadQuery install error: " + err.decode("utf8"))
 
             return
 
