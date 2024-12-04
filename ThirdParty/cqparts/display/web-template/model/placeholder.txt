@@ -1,3 +1,0 @@
-This file makes the `model` folder *not* empty, which alows the folder to be
-added to the build...
-It's a clumsy solution, but it works ;)

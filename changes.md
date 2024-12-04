@@ -1,6 +1,17 @@
 Changes
 =======
 
+v2.0.0 (upcoming)
+-----
+
+    * Completely reworked the Workbench to that it would work with CadQuery 2.x
+    * Reworked to fit in with the FreeCAD workflow and toolset as much as possible
+    * CadQuery is now available from the Macro Editor screen
+    * Removed `libs` directory and code that messed with PYTHONPATH
+    * Cleaned up repository to remove items that were only technical debt
+    * Removed Settings dialog since those settings were mostly tied to the custom code editor
+    * Added Help dialog to make it easier to find documentation
+
 v1.3.0 (unreleased)
 -----
     * PyQode editor has been replaced by a custom editor due to compatibility problems with Qt5/PySide2
