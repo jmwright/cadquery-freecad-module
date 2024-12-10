@@ -29,18 +29,4 @@ subprocess.run(["python", "-m", "pip", "install", "--upgrade", "git+https://gith
 
 The `master` version of CadQuery must currently be used to avoid version conflicts with the embedded FreeCAD packages. If you are reading this after CadQuery's 2.5.0 release, the stable version can be installed.
 
-### Compiling the Qt Resource File
-**NOTE:** It is unclear whether this is still needed with FreeCAD 1.0 or not. You can most likely skip this for now.
-
-This is done to update the CadQuery logo.
-1. Install the PySide development tools: `sudo apt-get install pyside-tools`
-2. `cd` into the root directory of this module/workbench.
-3. Run the following command: `pyside-rcc ./CQGui/Resources/CadQuery.qrc -o CadQuery_rc.py`
-
-Newer versions of FreeCAD use Pyside2, and so `pyside2-rcc` is needed instead:
-```bash
-sudo add-apt-repository ppa:thopiekar/pyside-git
-sudo apt-get update
-```
-
 [<Back to Main](index.md)
