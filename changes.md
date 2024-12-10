@@ -5,7 +5,7 @@ v2.0.0 (upcoming)
 -----
 
     * Completely reworked the Workbench to that it would work with CadQuery 2.x
-    * Reworked to fit in with the FreeCAD workflow and toolset as much as possible
+    * Functionality was changed to fit in with the FreeCAD workflow and toolset as much as possible
     * CadQuery is now available from the Macro Editor screen
     * Removed `libs` directory and code that messed with PYTHONPATH
     * Cleaned up repository to remove items that were only technical debt

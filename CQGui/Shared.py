@@ -28,27 +28,3 @@ def clearActiveDocument():
                 doc.removeObject(obj.Name)
     except:
         pass
-
-
-def setActiveWindowTitle(title):
-    """Sets the title of the currently active MDI window, as long as it is a scripting window"""
-
-    mw = FreeCADGui.getMainWindow()
-    mdi = mw.findChild(QtGui.QMdiArea)
-
-    # We cannot trust the current subwindow to be a script window, it may be the associated 3D view
-    mdiWin = mdi.currentSubWindow()
-
-    if mdiWin == 0 or ".py" not in mdiWin.windowTitle():
-        subList = mdi.subWindowList()
-
-        for sub in subList:
-            if sub.windowTitle() == mdiWin.windowTitle() + ".py":
-                mdiWin = sub
-
-    # Change the window title if there is something there to change
-    if (mdiWin != 0):
-        mdiWin.setWindowTitle(title)
-
-        cqCodePane = mdiWin.findChild(QtGui.QPlainTextEdit)
-        cqCodePane.setObjectName("cqCodePane_" + title.split('.')[0])
