@@ -11,7 +11,7 @@ If you would like to contribute to this project, below is some information to he
 
 ### Contribution Guidelines
 
-Contribution guidelines can be found [here](https://github.com/jmwright/cadquery-freecad-module/blob/master/CONTRIBUTING.md). Please familiarize yourself with them as part of the process of getting involved.
+Contribution guidelines can be found [here](https://github.com/CadQuery/cadquery-freecad-workbench/blob/master/CONTRIBUTING.md). Please familiarize yourself with them as part of the process of getting involved.
 
 ### Manual Installation
 

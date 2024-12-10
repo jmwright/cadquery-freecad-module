@@ -21,7 +21,7 @@ This process can be repeated to update the module every time changes are pushed 
 
 ### Manual
 Sometimes a different version or branch of the workbench may be needed, other than what is installed using the addon manager. The steps below outline the steps to manually install the workbench.
-1. Download the [latest released version](https://github.com/jmwright/cadquery-freecad-module/releases)
+1. Download the [latest released version](https://github.com/CadQuery/cadquery-freecad-workbench/releases)
 2. Extract the archive file
 3. Copy the entire extracted directory to FreeCAD's `Mod` directory on your system. Typical `Mod` directory locations are listed below.
 

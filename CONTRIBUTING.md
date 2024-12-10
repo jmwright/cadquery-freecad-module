@@ -26,10 +26,10 @@ Beyond being good to one another, there are technical guidelines for contributin
 * Be welcoming and encouraging to new contributors. Again, see the [Python Community Code of Conduct](https://www.python.org/psf/codeofconduct/).
 
 # First Time Contributors
-There is no need to be nervous about making your first contribution. Everybody is a beginner at some point, and there is no better way to learn than just jumping in. If you are not sure what to do, open an [issue](https://github.com/jmwright/cadquery-freecad-module/issues) so that a community member can help you through it.
+There is no need to be nervous about making your first contribution. Everybody is a beginner at some point, and there is no better way to learn than just jumping in. If you are not sure what to do, open an [issue](https://github.com/CadQuery/cadquery-freecad-workbench/issues) so that a community member can help you through it.
 
 # How to Report a Bug
-When filing an bug report [issue](https://github.com/jmwright/cadquery-freecad-module/issues), make sure to answer these questions:
+When filing an bug report [issue](https://github.com/CadQuery/cadquery-freecad-workbench/issues), make sure to answer these questions:
 
 1. What version of the software are you running?
 2. What operating system are you running the software on?
@@ -37,4 +37,4 @@ When filing an bug report [issue](https://github.com/jmwright/cadquery-freecad-m
 
 # How to Suggest a Feature or Enhancement
 
-If you find yourself wishing for a feature that does not exist in this module, you are probably not alone. There are bound to be others out there with similar needs. Open a [issue](https://github.com/jmwright/cadquery-freecad-module/issues) which describes the feature you would like to see, why you need it, and how it should work.
+If you find yourself wishing for a feature that does not exist in this module, you are probably not alone. There are bound to be others out there with similar needs. Open a [issue](https://github.com/CadQuery/cadquery-freecad-workbench/issues) which describes the feature you would like to see, why you need it, and how it should work.

@@ -79,7 +79,7 @@ This feature is not currently implemented, but is planned for the future.
 
 ### Getting Help
 
-- Found a bug while using this workbench? You can open an issue [here](https://github.com/jmwright/cadquery-freecad-module/issues)
+- Found a bug while using this workbench? You can open an issue [here](https://github.com/CadQuery/cadquery-freecad-workbench/issues)
 - Need help using this workbench? Join the [CadQuery Google Group](https://groups.google.com/forum/#!forum/cadquery) and ask your question there. Alternatively, you can join CadQuery's [Discord community](https://discord.com/invite/Bj9AQPsCfx) and ask your question in the `#other-guis` channel.
 
 [<Back to Main](index.md) | [Developers>](developers.md)
