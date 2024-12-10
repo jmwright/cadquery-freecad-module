@@ -11,6 +11,7 @@ v2.0.0 (upcoming)
     * Cleaned up repository to remove items that were only technical debt
     * Removed Settings dialog since those settings were mostly tied to the custom code editor
     * Added Help dialog to make it easier to find documentation
+    * Updated documentation to reflect CadQuery 2.x and FreeCAD 1.0 changes
 
 v1.3.0 (unreleased)
 -----

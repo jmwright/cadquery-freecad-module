@@ -78,10 +78,8 @@ class CadQueryWorkbench (Workbench):
             if options:
                 # Handle a transparency change, if requested
                 if "alpha" in options:
-                    alpha = 0
                     # Make sure that the alpha is scaled between 0 and 255
-                    if options["alpha"] < 0:
-                        alpha = int(options["alpha"] * 255)
+                    alpha = int(options["alpha"] * 100)
                     cur_feature.ViewObject.Transparency = alpha
 
                 # Handle a color change, if requested
