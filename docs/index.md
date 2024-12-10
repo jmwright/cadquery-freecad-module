@@ -7,15 +7,11 @@
 - [Developers](developers.md)
 
 ### Introduction
-This project adds a workbench to FreeCAD that makes it easy to get started using the [CadQuery API](http://dcowden.github.io/cadquery/).
+
+This project adds a workbench to FreeCAD that makes it possible to execute and use [CadQuery](https://github.com/CadQuery/cadquery) models with other FreeCAD workbenches.
 
 ![User Interface](cqfm_user_interface.png)
 
-There are two philosophies that are probably the most influential in the design of this project.
+This workbench was re-written to work with FreeCAD 1.0 and newer, and has not been tested with earlier versions.
 
-1. _"Batteries Included"_ - A user should not have to install a lot of requirements to get started.
-2. _Flexibility_ - A user should be able to customize this workbench for their workflow. Being able to use an external code editor is an example.
-
-A stock code editor is included, along with examples showing everything from basic to advanced CadQuery scripting. This workbench also includes [cqparts](https://github.com/fragmuffin/cqparts), which is a library that adds support for parts and assemblies with constraints on top of CadQuery.
-
-Customizable settings are available, including settings that allow the use of an external code editor, if desired.
+[Installation>](installation.md)

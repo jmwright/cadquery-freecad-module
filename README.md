@@ -1,17 +1,14 @@
 The CadQuery Module for FreeCAD
 =======================
 [![GitHub version](https://d25lcipzij17d.cloudfront.net/badge.svg?id=gh&type=6&v=1.2.0&x2=0)](https://github.com/jmwright/cadquery-freecad-module/releases/tag/v1.2.0)
-[![License](https://img.shields.io/badge/license-LGPL-lightgrey.svg)](https://github.com/jmwright/cadquery-freecad-module/blob/master/LICENSE)
 
 ## Introduction
 
-**NOTE** This workbench repo is not compatible with [CadQuery 2.x](https://github.com/CadQuery/cadquery). However, there is a fork provided by @jpmlt [here](https://github.com/jpmlt/freecad-cadquery2-workbench) that supports CadQuery 2.x, although you have to install CadQuery separately. If you are looking for a self-contained CadQuery 2.x IDE, please use [CQ-editor](https://github.com/CadQuery/CQ-editor).
+This is a FreeCAD workbench that allows the Macro Editor to execute and display CadQuery models.
 
-This is a FreeCAD module (aka workbench) that adds elements like a CadQuery code editor. All of the required libraries are embedded with the workbench, and so it is probably the fastest way to get up and running with CadQuery on a local computer. For users who just want to try CadQuery without installing anything, the [CadQuery Jupyter Notebook](https://mybinder.org/v2/gh/RustyVermeer/tryCQ/master) might be a better choice.
+![User Interface](docs/cqfm_user_interface.png)
 
-![User Interface](https://github.com/jmwright/cadquery-freecad-module/blob/master/docs/cqfm_user_interface.png)
-
-The documentation for this module/workbench has been rewritten and restructured, and can be found [here](docs/index.md). Below are the main entry points into the documentation.
+The documentation for this workbench can be found [here](docs/index.md). Below are the main entry points into the documentation.
 
 ### Documentation
 - [Introduction](docs/index.md#introduction)

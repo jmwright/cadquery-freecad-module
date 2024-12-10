@@ -1,2 +1,0 @@
-This is a flag file marking a folder we can delete.
-It's just as a double-check to make sure we're not deleting a random folder.

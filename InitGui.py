@@ -1,137 +1,103 @@
-"""CadQuery GUI init module for FreeCAD
-   This adds a workbench with a scripting editor to FreeCAD's GUI."""
-# (c) 2014-2018 Jeremy Wright Apache 2.0 License
-import FreeCAD, FreeCADGui
-try:
-    from CadQuery.CQGui.Command import *
-except:
-    from CQGui.Command import *
-import CadQuery_rc
+# (c) 2014-2024 CadQuery Developers Apache 2.0 License
+
+"""
+CadQuery GUI init module for FreeCAD
+This adds a workbench with a scripting editor to FreeCAD's GUI.
+"""
+
+import Part, FreeCAD, FreeCADGui
+from CQGui.Command import CadQueryHelp, CadQueryClearOutput
+
 
 class CadQueryWorkbench (Workbench):
     """CadQuery workbench for FreeCAD"""
     """CadQuery workbench for FreeCAD"""
-    import os
-    try:
-        from . import module_locator
-    except:
-        import module_locator        
+      
     MenuText = "CadQuery"
     ToolTip = "CadQuery workbench"
-    Icon = module_locator.module_path()+"/CQGui/Resources/icons/CQ_Logo.svg"
-
-    #Keeps track of which workbenches we have hidden so we can reshow them
-    closedWidgets = []
 
     def Initialize(self):
-        #Turn off logging for now
-        #import logging
-        #logging.basicConfig(filename='C:\\Users\\Jeremy\\Documents\\', level=logging.DEBUG)
-        #logging.basicConfig(filename='/home/jwright/Documents/log.txt', level=logging.DEBUG)
-        submenu = []
-
-        dirs = self.ListExamples()
-
-        # Step through and add an Examples submenu item for each example
-        for curFile in dirs:
-            submenu.append(str(curFile))
-
-        #We have our own CQ menu that's added when the user chooses our workbench
-        self.appendMenu('CadQuery', ['CadQueryNewScript', 'CadQueryOpenScript', 'CadQuerySaveScript',
-                                     'CadQuerySaveAsScript', 'CadQueryCloseScript'])
-        self.appendMenu(['CadQuery', 'Examples'], submenu)
-        self.appendMenu('CadQuery', ['Separator', 'CadQueryExecuteScript', 'CadQueryValidateScript', 'ToggleVariablesEditor', 'CadQueryClearOutput'])
-        self.appendMenu('CadQuery', ['Separator', 'CadQuerySettings'])
+        self.appendMenu('CadQuery', ['CadQueryClearOutput', 'CadQueryHelp'])
 
     def Activated(self):
-        import os
-        try:
-            from . import module_locator
-        except:
-            import module_locator
-        try:
-            from CadQuery.CQGui import ImportCQ
-        except:
-            from CQGui import ImportCQ
+        # Define the show_object function which CadQuery execution environments need to provide
+        def show_object(cq_object, options=None):
+            from PySide import QtGui
 
-        module_base_path = module_locator.module_path()
+            # Create the object that the BRep data will be read into
+            from io import BytesIO
+            brep_stream = BytesIO()
 
-        import cadquery
-        from PySide import QtGui, QtCore
+            # Get the title of the current document so that we can create/find the FreeCAD part window
+            doc_name = "untitled"
+            mw = FreeCADGui.getMainWindow()
+            mdi_area = mw.findChild(QtGui.QMdiArea)
+            active_subwindow = mdi_area.activeSubWindow()
+            if active_subwindow:
+                doc_name = active_subwindow.windowTitle().split(".py")[0]
 
-        msg = QtGui.QApplication.translate(
-            "cqCodeWidget",
-            "CadQuery " + cadquery.__version__ + "\r\n"
-            "CadQuery is a parametric scripting API "
-            "for creating and traversing CAD models\r\n"
-            "Author: David Cowden\r\n"
-            "License: Apache-2.0\r\n"
-            "Website: https://github.com/dcowden/cadquery\r\n",
-            None)
-        FreeCAD.Console.PrintMessage(msg)
+            # Create or find the document that corresponds to this code pane
+            # If the matching 3D view has been closed, we need to open a new one
+            try:
+                FreeCAD.getDocument(doc_name)
+            except NameError:
+                FreeCAD.newDocument(doc_name)
+            ad = FreeCAD.activeDocument()
 
-        #Getting the main window will allow us to start setting things up the way we want
-        mw = FreeCADGui.getMainWindow()
+            # Convert the CadQuery object to a BRep string and then into a FreeCAD part shape
+            rv = cq_object.val().exportBrep(brep_stream)
+            brep_string = brep_stream.getvalue().decode('utf-8')
+            part_shape = Part.Shape()
+            part_shape.importBrepFromString(brep_string)
 
-        dockWidgets = mw.findChildren(QtGui.QDockWidget)
+            # options={"alpha":0.5, "color": (64, 164, 223)}
 
-        for widget in dockWidgets:
-            if widget.objectName() == "Report view":
-                widget.setVisible(True)
+            # If the user wanted to use a specific name in the tree, use it
+            feature_name = doc_name
+            if cq_object.val().label:
+                feature_name = cq_object.val().label
 
-        # Set up the paths to allow us to open the template
-        # template_path = os.path.join(module_base_path, 'Templates')
-        # template_path = os.path.join(template_path, 'script_template.py')
-        #
-        # ImportCQ.open(template_path)
+            # Find the feature in the document, if it exists
+            cur_feature = None
+            for feat in ad.Objects:
+                if feat.Name == feature_name or feat.Label == feature_name:
+                    cur_feature = feat
+                    break
 
-    def AutoExecute(self):
-        """We should be able to pass the CQGui.Commands.CadQueryExecuteScript function directly to the file_reloaded
-           connect function, but that causes a segfault in FreeCAD. This function is a work-around for that. This
-           function is passed to file_reloaded signal and in turn calls the CadQueryExecuteScript.Activated function."""
-        try:
-            import CadQuery.CQGui.Command
-            CadQuery.CQGui.Command.CadQueryExecuteScript().Activated()
-        except:
-            from CQGui import ImportCQ
-            CQGui.Command.CadQueryExecuteScript().Activated()
+            # Decide whether to create a new object or update an existing one
+            if cur_feature:
+                # Update the existing object
+                cur_feature = ad.getObject(feature_name)
+                cur_feature.Shape = part_shape
+            else:
+                cur_feature = ad.addObject("Part::Feature", feature_name)
+                cur_feature.Label = feature_name
+                cur_feature.Shape = part_shape
+
+            # Apply any options to the imported shape
+            if options:
+                # Handle a transparency change, if requested
+                if "alpha" in options:
+                    # Make sure that the alpha is scaled between 0 and 255
+                    alpha = int(options["alpha"] * 100)
+                    cur_feature.ViewObject.Transparency = alpha
+
+                # Handle a color change, if requested
+                if "color" in options:
+                    cur_feature.ViewObject.ShapeColor = options["color"]
+
+            # Make sure the document updates
+            ad.recompute()
+
+        # Register the show_object function as a global function
+        globals()['show_object'] = show_object
 
 
     def Deactivated(self):
         pass
 
-    @staticmethod
-    def ListExamples():
-        import os
-        try:
-            from . import module_locator
-        except:
-            import module_locator
 
-        dirs = []
-
-        # List all of the example files in an order that makes sense
-        module_base_path = module_locator.module_path()
-        exs_dir_path = os.path.join(module_base_path, 'Libs/cadquery/examples/FreeCAD')
-        dirs = os.listdir(exs_dir_path)
-        dirs.sort()
-
-        return dirs
-
-FreeCADGui.addCommand('CadQueryNewScript', CadQueryNewScript())
-FreeCADGui.addCommand('CadQueryOpenScript', CadQueryOpenScript())
-FreeCADGui.addCommand('CadQuerySaveScript', CadQuerySaveScript())
-FreeCADGui.addCommand('CadQuerySaveAsScript', CadQuerySaveAsScript())
-FreeCADGui.addCommand('CadQueryExecuteScript', CadQueryExecuteScript())
-FreeCADGui.addCommand('CadQueryValidateScript', CadQueryValidateScript())
-FreeCADGui.addCommand('CadQueryCloseScript', CadQueryCloseScript())
-FreeCADGui.addCommand('ToggleVariablesEditor', ToggleParametersEditor())
 FreeCADGui.addCommand('CadQueryClearOutput', CadQueryClearOutput())
-FreeCADGui.addCommand('CadQuerySettings', CadQuerySettings())
-
-# Step through and add an Examples submenu item for each example
-dirs = CadQueryWorkbench.ListExamples()
-for curFile in dirs:
-    FreeCADGui.addCommand(curFile, CadQueryOpenExample(curFile))
+FreeCADGui.addCommand('CadQueryHelp', CadQueryHelp())
 
 FreeCADGui.addWorkbench(CadQueryWorkbench())

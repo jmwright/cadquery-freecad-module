@@ -1,0 +1,20 @@
+<package format="1" xmlns="https://wiki.freecad.org/Package_Metadata">
+    <name>CadQuery</name>
+    <description>Workbench which makes CadQuery models executable within FreeCAD</description>
+    <version>2.0.0</version>
+    <date>2024-12-10</date>
+    <license file="LICENSE">Apache-2.0</license>
+    <url type="repository" branch="main">https://github.com/CadQuery/cadquery-freecad-module</url>
+    <icon>/CQGui/Resources/icons/CQ_Logo.svg</icon>
+
+    <content>
+        <workbench>
+            <name>CadQuery</name>
+            <description>Workbench which makes CadQuery models executable within FreeCAD</description>
+            <classname>CadQueryWorkbench</classname>
+            <subdirectory>./</subdirectory>
+            <icon>/CQGui/Resources/icons/CQ_Logo.svg</icon>
+            <depend type="python">https://github.com/CadQuery/cadquery.git</depend>
+        </workbench>
+    </content>
+</package>
